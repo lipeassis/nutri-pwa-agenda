@@ -22,3 +22,35 @@ export interface Agendamento {
   observacoes?: string;
   criadoEm: string;
 }
+
+export interface MedidasAntropometricas {
+  peso: number;
+  altura: number;
+  circunferenciaBraco: number;
+  circunferenciaAbdomen: number;
+  circunferenciaQuadril: number;
+  circunferenciaPescoco: number;
+  percentualGordura: number;
+  massaMuscular: number;
+}
+
+export interface ConsultaProntuario {
+  id: string;
+  clienteId: string;
+  data: string;
+  medidas: MedidasAntropometricas;
+  relatoPaciente: string;
+  observacoesNutricionista: string;
+  criadoEm: string;
+}
+
+export interface ObjetivosCliente {
+  id: string;
+  clienteId: string;
+  pesoMeta: number;
+  medidasMeta: Partial<MedidasAntropometricas>;
+  prazoMeses: number;
+  observacoes: string;
+  criadoEm: string;
+  ativo: boolean;
+}
