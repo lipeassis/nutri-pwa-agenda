@@ -1,0 +1,42 @@
+{
+  "name": "NutriApp - Gestão Nutricional",
+  "short_name": "NutriApp",
+  "description": "Aplicativo PWA para nutricionistas gerenciarem clientes e agendamentos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "orientation": "portrait-primary",
+  "categories": ["health", "medical", "productivity"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Novo Cliente",
+      "short_name": "Cliente",
+      "description": "Cadastrar novo cliente",
+      "url": "/clientes/novo",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Nova Consulta",
+      "short_name": "Consulta",
+      "description": "Agendar nova consulta",
+      "url": "/agenda/novo",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
