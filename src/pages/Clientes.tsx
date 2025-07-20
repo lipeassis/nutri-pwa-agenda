@@ -52,13 +52,13 @@ export function Clientes() {
       </div>
 
       {/* Search */}
-      <div className="relative">
+      <div className="relative ">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
           placeholder="Buscar clientes por nome, email ou telefone..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          className="pl-10"
+          className="pl-10 bg-card"
         />
       </div>
 
@@ -188,7 +188,7 @@ export function Clientes() {
 
                   <div className="flex gap-2 pt-2">
                     <Button asChild size="sm" variant="outline" className="flex-1">
-                      <Link to={`/clientes/${cliente.id}`}>Ver Detalhes</Link>
+                      <Link to={`/clientes/${cliente.id}`}>Prontuário</Link>
                     </Button>
                     <Button asChild size="sm" className="flex-1">
                       <Link to={`/agenda/novo?clienteId=${cliente.id}`}>Agendar</Link>

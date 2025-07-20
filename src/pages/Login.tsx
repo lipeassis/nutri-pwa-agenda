@@ -49,7 +49,7 @@ export function Login() {
             <Stethoscope className="w-8 h-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Sistema Nutrição
+            Acesso Restrito
           </CardTitle>
         </CardHeader>
         <CardContent>

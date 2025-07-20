@@ -12,6 +12,7 @@ import { ConfiguracaoAgenda } from "@/components/usuarios/ConfiguracaoAgenda";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const USERS_KEY = 'system_users';
 const TIPOS_KEY = 'tipos_profissionais';
@@ -155,7 +156,10 @@ export function Usuarios() {
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
               </DialogTitle>
             </DialogHeader>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
+              <ScrollArea className="h-80 mb-4 flex gap-2">
+                <div className="space-y-2">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome</Label>
                 <Input
@@ -238,6 +242,8 @@ export function Usuarios() {
                   />
                 </>
               )}
+              </div>
+            </ScrollArea>
               <div className="flex gap-2 pt-4">
                 <Button type="submit" className="flex-1">
                   {editingUser ? 'Atualizar' : 'Criar'} Usuário
