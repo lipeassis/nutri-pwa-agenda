@@ -54,3 +54,15 @@ export interface ObjetivosCliente {
   criadoEm: string;
   ativo: boolean;
 }
+
+export type UserRole = 'secretaria' | 'profissional' | 'administrador';
+
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+  senha: string;
+  role: UserRole;
+  ativo: boolean;
+  criadoEm: string;
+}

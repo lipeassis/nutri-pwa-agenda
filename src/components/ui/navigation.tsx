@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Calendar, Users, Home, Menu } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavigationProps {
   className?: string;
@@ -10,12 +11,14 @@ interface NavigationProps {
 
 export function Navigation({ className }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout, hasPermission } = useAuth();
 
   const navItems = [
-    { href: "/", icon: Home, label: "Dashboard" },
-    { href: "/clientes", icon: Users, label: "Clientes" },
-    { href: "/agenda", icon: Calendar, label: "Agenda" },
-  ];
+    { href: "/", icon: Home, label: "Dashboard", roles: ['secretaria', 'profissional', 'administrador'] },
+    { href: "/clientes", icon: Users, label: "Clientes", roles: ['secretaria', 'profissional', 'administrador'] },
+    { href: "/agenda", icon: Calendar, label: "Agenda", roles: ['secretaria', 'profissional', 'administrador'] },
+    { href: "/usuarios", icon: UserCog, label: "Usuários", roles: ['administrador'] },
+  ].filter(item => hasPermission(item.roles as any));
 
   return (
     <nav className={cn("bg-card border-b border-border shadow-soft", className)}>
@@ -50,6 +53,22 @@ export function Navigation({ className }: NavigationProps) {
             ))}
           </div>
 
+          {/* User info and logout */}
+          <div className="hidden md:flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">
+              {user?.nome} ({user?.role})
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair
+            </Button>
+          </div>
+
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
@@ -57,7 +76,7 @@ export function Navigation({ className }: NavigationProps) {
             className="md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <Menu className="w-5 h-5" />
+            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
@@ -83,6 +102,22 @@ export function Navigation({ className }: NavigationProps) {
                   <span>{item.label}</span>
                 </NavLink>
               ))}
+            </div>
+            
+            {/* Mobile user info and logout */}
+            <div className="border-t pt-4 mt-4 space-y-2">
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                {user?.nome} ({user?.role})
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="w-full justify-start gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
             </div>
           </div>
         )}
