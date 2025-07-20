@@ -14,6 +14,7 @@ import { NovoAgendamento } from "./pages/NovoAgendamento";
 import { Prontuario } from "./pages/Prontuario";
 import { Login } from "./pages/Login";
 import { Usuarios } from "./pages/Usuarios";
+import { TiposProfissionais } from "./pages/TiposProfissionais";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,11 @@ const App = () => (
                   <Route path="/usuarios" element={
                     <ProtectedRoute requiredRole="administrador">
                       <Usuarios />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/tipos-profissionais" element={
+                    <ProtectedRoute requiredRole="administrador">
+                      <TiposProfissionais />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />

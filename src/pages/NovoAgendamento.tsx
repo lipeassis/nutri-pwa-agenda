@@ -6,22 +6,30 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, Agendamento } from "@/types";
+import { Cliente, Agendamento, Usuario, TipoProfissional } from "@/types";
 import { ArrowLeft, Save, Calendar } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function NovoAgendamento() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const clienteIdParam = searchParams.get('clienteId');
   
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [agendamentos, setAgendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
+  const [usuarios] = useLocalStorage<Usuario[]>('system_users', []);
+  const [tiposProfissionais] = useLocalStorage<TipoProfissional[]>('tipos_profissionais', []);
+  
+  // Filtrar apenas profissionais ativos
+  const profissionais = usuarios.filter(u => u.role === 'profissional' && u.ativo);
   
   const [formData, setFormData] = useState({
     clienteId: clienteIdParam || "",
+    profissionalId: user?.role === 'profissional' ? user.id : "",
     data: "",
     hora: "",
     tipo: "",
@@ -37,6 +45,11 @@ export function NovoAgendamento() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const getProfissionalNome = (profissionalId: string) => {
+    const profissional = usuarios.find(u => u.id === profissionalId);
+    return profissional?.nome || "";
+  };
+
   const getClienteNome = (clienteId: string) => {
     const cliente = clientes.find(c => c.id === clienteId);
     return cliente?.nome || "";
@@ -45,7 +58,7 @@ export function NovoAgendamento() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clienteId || !formData.data || !formData.hora || !formData.tipo) {
+    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || !formData.tipo) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -54,8 +67,9 @@ export function NovoAgendamento() {
       return;
     }
 
-    // Verificar conflito de horário
+    // Verificar conflito de horário para o mesmo profissional
     const conflito = agendamentos.find(ag => 
+      ag.profissionalId === formData.profissionalId &&
       ag.data === formData.data && 
       ag.hora === formData.hora && 
       ag.status !== 'cancelado'
@@ -74,6 +88,8 @@ export function NovoAgendamento() {
       id: Date.now().toString(),
       clienteId: formData.clienteId,
       clienteNome: getClienteNome(formData.clienteId),
+      profissionalId: formData.profissionalId,
+      profissionalNome: getProfissionalNome(formData.profissionalId),
       data: formData.data,
       hora: formData.hora,
       tipo: formData.tipo as 'consulta' | 'retorno' | 'avaliacao',
@@ -86,7 +102,7 @@ export function NovoAgendamento() {
     
     toast({
       title: "Agendamento criado!",
-      description: `Agendamento para ${getClienteNome(formData.clienteId)} foi criado com sucesso.`,
+      description: `Agendamento para ${getClienteNome(formData.clienteId)} com ${getProfissionalNome(formData.profissionalId)} foi criado com sucesso.`,
     });
 
     navigate("/agenda");
@@ -132,6 +148,36 @@ export function NovoAgendamento() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Seleção do Profissional */}
+            {user?.role !== 'profissional' && (
+              <div className="space-y-2">
+                <Label htmlFor="profissionalId">Profissional *</Label>
+                <Select value={formData.profissionalId} onValueChange={(value) => handleSelectChange('profissionalId', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um profissional" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profissionais.map((profissional) => {
+                      const tipoProfissional = profissional.tipoProfissionalId 
+                        ? tiposProfissionais.find(tipo => tipo.id === profissional.tipoProfissionalId)
+                        : null;
+                      
+                      return (
+                        <SelectItem key={profissional.id} value={profissional.id}>
+                          {profissional.nome} {tipoProfissional ? `(${tipoProfissional.nome})` : ''}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {profissionais.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Nenhum profissional cadastrado.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Seleção do Cliente */}
             <div className="space-y-2">
               <Label htmlFor="clienteId">Cliente *</Label>
@@ -179,8 +225,9 @@ export function NovoAgendamento() {
                   </SelectTrigger>
                   <SelectContent>
                     {horariosDisponiveis.map((horario) => {
-                      // Verificar se o horário está ocupado na data selecionada
-                      const ocupado = formData.data && agendamentos.some(ag => 
+                      // Verificar se o horário está ocupado na data selecionada para o profissional selecionado
+                      const ocupado = formData.data && formData.profissionalId && agendamentos.some(ag => 
+                        ag.profissionalId === formData.profissionalId &&
                         ag.data === formData.data && 
                         ag.hora === horario && 
                         ag.status !== 'cancelado'
@@ -231,7 +278,7 @@ export function NovoAgendamento() {
 
             {/* Actions */}
             <div className="flex gap-3 pt-6 border-t">
-              <Button type="submit" className="flex-1" disabled={clientes.length === 0}>
+              <Button type="submit" className="flex-1" disabled={clientes.length === 0 || (user?.role !== 'profissional' && profissionais.length === 0)}>
                 <Save className="w-4 h-4 mr-2" />
                 Criar Agendamento
               </Button>

@@ -15,6 +15,8 @@ export interface Agendamento {
   id: string;
   clienteId: string;
   clienteNome: string;
+  profissionalId: string; // Novo campo
+  profissionalNome: string; // Novo campo
   data: string;
   hora: string;
   tipo: 'consulta' | 'retorno' | 'avaliacao';
@@ -57,12 +59,37 @@ export interface ObjetivosCliente {
 
 export type UserRole = 'secretaria' | 'profissional' | 'administrador';
 
+export interface TipoProfissional {
+  id: string;
+  nome: string;
+  descricao: string;
+  ativo: boolean;
+  criadoEm: string;
+}
+
+export interface HorarioDisponivel {
+  inicio: string; // HH:mm
+  fim: string; // HH:mm
+}
+
+export interface DisponibilidadeAgenda {
+  domingo: HorarioDisponivel[];
+  segunda: HorarioDisponivel[];
+  terca: HorarioDisponivel[];
+  quarta: HorarioDisponivel[];
+  quinta: HorarioDisponivel[];
+  sexta: HorarioDisponivel[];
+  sabado: HorarioDisponivel[];
+}
+
 export interface Usuario {
   id: string;
   nome: string;
   email: string;
   senha: string;
   role: UserRole;
+  tipoProfissionalId?: string; // Apenas para role 'profissional'
+  disponibilidade?: DisponibilidadeAgenda; // Apenas para role 'profissional'
   ativo: boolean;
   criadoEm: string;
 }

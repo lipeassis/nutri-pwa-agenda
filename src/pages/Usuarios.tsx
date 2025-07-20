@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Usuario, UserRole } from "@/types";
+import { Usuario, UserRole, TipoProfissional, DisponibilidadeAgenda } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ConfiguracaoAgenda } from "@/components/usuarios/ConfiguracaoAgenda";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const USERS_KEY = 'system_users';
+const TIPOS_KEY = 'tipos_profissionais';
 
 const roleLabels: Record<UserRole, string> = {
   'secretaria': 'Secretária',
@@ -30,13 +32,18 @@ export function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>(() => {
     return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
   });
+  const [tiposProfissionais, setTiposProfissionais] = useState<TipoProfissional[]>(() => {
+    return JSON.parse(localStorage.getItem(TIPOS_KEY) || '[]');
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     senha: '',
-    role: 'secretaria' as UserRole
+    role: 'secretaria' as UserRole,
+    tipoProfissionalId: '',
+    disponibilidade: undefined as DisponibilidadeAgenda | undefined
   });
   const { toast } = useToast();
 
@@ -75,6 +82,8 @@ export function Usuarios() {
       const newUser: Usuario = {
         id: Date.now().toString(),
         ...formData,
+        tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
+        disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
         ativo: true,
         criadoEm: new Date().toISOString()
       };
@@ -89,7 +98,7 @@ export function Usuarios() {
 
     setIsDialogOpen(false);
     setEditingUser(null);
-    setFormData({ nome: '', email: '', senha: '', role: 'secretaria' });
+    setFormData({ nome: '', email: '', senha: '', role: 'secretaria', tipoProfissionalId: '', disponibilidade: undefined });
   };
 
   const handleEdit = (user: Usuario) => {
@@ -98,7 +107,9 @@ export function Usuarios() {
       nome: user.nome,
       email: user.email,
       senha: user.senha,
-      role: user.role
+      role: user.role,
+      tipoProfissionalId: user.tipoProfissionalId || '',
+      disponibilidade: user.disponibilidade
     });
     setIsDialogOpen(true);
   };
@@ -114,7 +125,7 @@ export function Usuarios() {
 
   const openNewUserDialog = () => {
     setEditingUser(null);
-    setFormData({ nome: '', email: '', senha: '', role: 'secretaria' });
+    setFormData({ nome: '', email: '', senha: '', role: 'secretaria', tipoProfissionalId: '', disponibilidade: undefined });
     setIsDialogOpen(true);
   };
 
@@ -178,7 +189,14 @@ export function Usuarios() {
                 <Label htmlFor="role">Tipo de Usuário</Label>
                 <Select 
                   value={formData.role} 
-                  onValueChange={(value: UserRole) => setFormData({ ...formData, role: value })}
+                  onValueChange={(value: UserRole) => {
+                    setFormData({ 
+                      ...formData, 
+                      role: value,
+                      tipoProfissionalId: value !== 'profissional' ? '' : formData.tipoProfissionalId,
+                      disponibilidade: value !== 'profissional' ? undefined : formData.disponibilidade
+                    });
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -190,6 +208,36 @@ export function Usuarios() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {formData.role === 'profissional' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="tipoProfissionalId">Tipo de Profissional</Label>
+                    <Select 
+                      value={formData.tipoProfissionalId} 
+                      onValueChange={(value) => setFormData({ ...formData, tipoProfissionalId: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tiposProfissionais.filter(tipo => tipo.ativo).map((tipo) => (
+                          <SelectItem key={tipo.id} value={tipo.id}>
+                            {tipo.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <ConfiguracaoAgenda
+                    disponibilidade={formData.disponibilidade}
+                    onDisponibilidadeChange={(disponibilidade) => 
+                      setFormData({ ...formData, disponibilidade })
+                    }
+                  />
+                </>
+              )}
               <div className="flex gap-2 pt-4">
                 <Button type="submit" className="flex-1">
                   {editingUser ? 'Atualizar' : 'Criar'} Usuário
@@ -218,25 +266,38 @@ export function Usuarios() {
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Tipo</TableHead>
+                <TableHead>Especialidade</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {usuarios.map((usuario) => (
-                <TableRow key={usuario.id}>
-                  <TableCell className="font-medium">{usuario.nome}</TableCell>
-                  <TableCell>{usuario.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={roleColors[usuario.role] as any}>
-                      {roleLabels[usuario.role]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={usuario.ativo ? "default" : "secondary"}>
-                      {usuario.ativo ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
+              {usuarios.map((usuario) => {
+                const tipoProfissional = usuario.tipoProfissionalId 
+                  ? tiposProfissionais.find(tipo => tipo.id === usuario.tipoProfissionalId)
+                  : null;
+                
+                return (
+                  <TableRow key={usuario.id}>
+                    <TableCell className="font-medium">{usuario.nome}</TableCell>
+                    <TableCell>{usuario.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={roleColors[usuario.role] as any}>
+                        {roleLabels[usuario.role]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {tipoProfissional ? (
+                        <Badge variant="outline">{tipoProfissional.nome}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={usuario.ativo ? "default" : "secondary"}>
+                        {usuario.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
@@ -273,7 +334,8 @@ export function Usuarios() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
