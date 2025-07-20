@@ -85,13 +85,7 @@ export function Login() {
             </Button>
           </form>
           
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground text-center">
-              <strong>Usuário padrão:</strong><br />
-              Email: admin@admin.com<br />
-              Senha: 123Mudar
-            </p>
-          </div>
+          
         </CardContent>
       </Card>
     </div>
