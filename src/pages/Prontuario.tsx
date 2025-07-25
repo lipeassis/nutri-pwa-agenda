@@ -302,7 +302,7 @@ export function Prontuario() {
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
-          <TabsTrigger value="receitas">Receitas</TabsTrigger>
+          <TabsTrigger value="receitas">Medicamentos</TabsTrigger>
           <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
