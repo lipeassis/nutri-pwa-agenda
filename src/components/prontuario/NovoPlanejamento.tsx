@@ -68,6 +68,10 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
   const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
   const [metaKcal, setMetaKcal] = useState<number>(0);
+  const [metaProteina, setMetaProteina] = useState<number>(0);
+  const [metaCarboidratos, setMetaCarboidratos] = useState<number>(0);
+  const [metaLipideos, setMetaLipideos] = useState<number>(0);
+  const [tipoMetaMacros, setTipoMetaMacros] = useState<'absoluto' | 'por-kg'>('por-kg');
   const [peso, setPeso] = useState<number>(0);
   const [altura, setAltura] = useState<number>(0);
   const [idade, setIdade] = useState<number>(0);
@@ -489,6 +493,89 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
             </CardContent>
           </Card>
 
+          {/* Metas de Macronutrientes */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Metas de Macronutrientes</CardTitle>
+              <CardDescription>
+                Defina as metas individuais para cada macronutriente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Tipo de Meta</Label>
+                <Select value={tipoMetaMacros} onValueChange={(value: any) => setTipoMetaMacros(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="por-kg">Gramas por kg de peso</SelectItem>
+                    <SelectItem value="absoluto">Valores absolutos (gramas)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="meta-proteina">
+                    Meta de Proteína {tipoMetaMacros === 'por-kg' ? '(g/kg)' : '(g)'}
+                  </Label>
+                  <Input
+                    id="meta-proteina"
+                    type="number"
+                    step="0.1"
+                    value={metaProteina || ''}
+                    onChange={(e) => setMetaProteina(parseFloat(e.target.value) || 0)}
+                    placeholder={tipoMetaMacros === 'por-kg' ? "Ex: 1.2" : "Ex: 84"}
+                  />
+                  {tipoMetaMacros === 'por-kg' && peso > 0 && metaProteina > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      = {(metaProteina * peso).toFixed(1)}g absolutos
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="meta-carboidratos">
+                    Meta de Carboidratos {tipoMetaMacros === 'por-kg' ? '(g/kg)' : '(g)'}
+                  </Label>
+                  <Input
+                    id="meta-carboidratos"
+                    type="number"
+                    step="0.1"
+                    value={metaCarboidratos || ''}
+                    onChange={(e) => setMetaCarboidratos(parseFloat(e.target.value) || 0)}
+                    placeholder={tipoMetaMacros === 'por-kg' ? "Ex: 5.0" : "Ex: 350"}
+                  />
+                  {tipoMetaMacros === 'por-kg' && peso > 0 && metaCarboidratos > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      = {(metaCarboidratos * peso).toFixed(1)}g absolutos
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="meta-lipideos">
+                    Meta de Lipídeos {tipoMetaMacros === 'por-kg' ? '(g/kg)' : '(g)'}
+                  </Label>
+                  <Input
+                    id="meta-lipideos"
+                    type="number"
+                    step="0.1"
+                    value={metaLipideos || ''}
+                    onChange={(e) => setMetaLipideos(parseFloat(e.target.value) || 0)}
+                    placeholder={tipoMetaMacros === 'por-kg' ? "Ex: 1.0" : "Ex: 70"}
+                  />
+                  {tipoMetaMacros === 'por-kg' && peso > 0 && metaLipideos > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      = {(metaLipideos * peso).toFixed(1)}g absolutos
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Resumo Nutricional do Dia */}
           <Card>
             <CardHeader>
@@ -509,6 +596,24 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                         {((totaisDia.proteina * 4 / totaisDia.kcal) * 100).toFixed(1)}%
                       </div>
                     )}
+                    {/* Meta de Proteína */}
+                    {metaProteina > 0 && (
+                      <div className="text-xs mt-1">
+                        <span className="text-muted-foreground">Meta: </span>
+                        <span className={
+                          (() => {
+                            const metaAbsoluta = tipoMetaMacros === 'por-kg' ? metaProteina * peso : metaProteina;
+                            const percentual = metaAbsoluta > 0 ? (totaisDia.proteina / metaAbsoluta) * 100 : 0;
+                            return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
+                          })()
+                        }>
+                          {(() => {
+                            const metaAbsoluta = tipoMetaMacros === 'por-kg' ? metaProteina * peso : metaProteina;
+                            return `${(metaAbsoluta > 0 ? (totaisDia.proteina / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
+                          })()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-muted rounded-lg">
@@ -520,6 +625,24 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                         {((totaisDia.carboidratos * 4 / totaisDia.kcal) * 100).toFixed(1)}%
                       </div>
                     )}
+                    {/* Meta de Carboidratos */}
+                    {metaCarboidratos > 0 && (
+                      <div className="text-xs mt-1">
+                        <span className="text-muted-foreground">Meta: </span>
+                        <span className={
+                          (() => {
+                            const metaAbsoluta = tipoMetaMacros === 'por-kg' ? metaCarboidratos * peso : metaCarboidratos;
+                            const percentual = metaAbsoluta > 0 ? (totaisDia.carboidratos / metaAbsoluta) * 100 : 0;
+                            return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
+                          })()
+                        }>
+                          {(() => {
+                            const metaAbsoluta = tipoMetaMacros === 'por-kg' ? metaCarboidratos * peso : metaCarboidratos;
+                            return `${(metaAbsoluta > 0 ? (totaisDia.carboidratos / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
+                          })()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-muted rounded-lg">
@@ -529,6 +652,24 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                     {totaisDia.kcal > 0 && (
                       <div className="text-xs text-purple-600 font-medium">
                         {((totaisDia.lipideos * 9 / totaisDia.kcal) * 100).toFixed(1)}%
+                      </div>
+                    )}
+                    {/* Meta de Lipídeos */}
+                    {metaLipideos > 0 && (
+                      <div className="text-xs mt-1">
+                        <span className="text-muted-foreground">Meta: </span>
+                        <span className={
+                          (() => {
+                            const metaAbsoluta = tipoMetaMacros === 'por-kg' ? metaLipideos * peso : metaLipideos;
+                            const percentual = metaAbsoluta > 0 ? (totaisDia.lipideos / metaAbsoluta) * 100 : 0;
+                            return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
+                          })()
+                        }>
+                          {(() => {
+                            const metaAbsoluta = tipoMetaMacros === 'por-kg' ? metaLipideos * peso : metaLipideos;
+                            return `${(metaAbsoluta > 0 ? (totaisDia.lipideos / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
+                          })()}
+                        </span>
                       </div>
                     )}
                   </div>
