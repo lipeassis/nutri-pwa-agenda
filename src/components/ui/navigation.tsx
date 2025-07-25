@@ -20,6 +20,7 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/tipos-profissionais", icon: UserCog, label: "Tipos Prof.", roles: ['administrador'] },
     { href: "/usuarios", icon: UserCog, label: "Usuários", roles: ['administrador'] },
     { href: "/doencas", icon: UserCog, label: "Doenças", roles: ['administrador'] },
+    { href: "/convenios", icon: UserCog, label: "Convênios", roles: ['administrador'] },
   ].filter(item => hasPermission(item.roles as any));
 
   return (

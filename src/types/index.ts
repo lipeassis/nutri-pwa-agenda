@@ -18,6 +18,16 @@ export interface Alergia {
   criadoEm: string;
 }
 
+export interface Convenio {
+  id: string;
+  nome: string;
+  descricao: string;
+  percentualDesconto: number;
+  valorConsulta: number;
+  ativo: boolean;
+  criadoEm: string;
+}
+
 export interface Cliente {
   id: string;
   nome: string;
