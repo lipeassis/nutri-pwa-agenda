@@ -23,7 +23,7 @@ export function Agenda() {
                         agendamento.observacoes?.toLowerCase().includes(busca.toLowerCase());
       
       const matchStatus = filtroStatus === "todos" || agendamento.status === filtroStatus;
-      const matchTipo = filtroTipo === "todos" || agendamento.tipo === filtroTipo;
+      const matchTipo = filtroTipo === "todos" || agendamento.servicoNome.toLowerCase().includes(filtroTipo.toLowerCase());
       
       return matchBusca && matchStatus && matchTipo;
     })
@@ -167,13 +167,10 @@ export function Agenda() {
             </Select>
             <Select value={filtroTipo} onValueChange={setFiltroTipo}>
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Tipo" />
+                <SelectValue placeholder="Serviço" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Todos os tipos</SelectItem>
-                <SelectItem value="consulta">Consulta</SelectItem>
-                <SelectItem value="retorno">Retorno</SelectItem>
-                <SelectItem value="avaliacao">Avaliação</SelectItem>
+                <SelectItem value="todos">Todos os serviços</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -220,8 +217,8 @@ export function Agenda() {
                         <Badge variant={getStatusVariant(agendamento.status)}>
                           {getStatusText(agendamento.status)}
                         </Badge>
-                        <Badge variant={getTipoVariant(agendamento.tipo)}>
-                          {getTipoText(agendamento.tipo)}
+                        <Badge variant="outline">
+                          {agendamento.servicoNome}
                         </Badge>
                         {isVencido && (
                           <Badge variant="destructive">Vencido</Badge>

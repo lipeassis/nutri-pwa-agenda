@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, Agendamento, Usuario, TipoProfissional } from "@/types";
+import { Cliente, Agendamento, Usuario, TipoProfissional, Servico } from "@/types";
 import { ArrowLeft, Save, Calendar } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -23,16 +23,18 @@ export function NovoAgendamento() {
   const [agendamentos, setAgendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
   const [usuarios] = useLocalStorage<Usuario[]>('system_users', []);
   const [tiposProfissionais] = useLocalStorage<TipoProfissional[]>('tipos_profissionais', []);
+  const [servicos] = useLocalStorage<Servico[]>('nutriapp-servicos', []);
   
   // Filtrar apenas profissionais ativos
   const profissionais = usuarios.filter(u => u.role === 'profissional' && u.ativo);
+  const servicosAtivos = servicos.filter(s => s.ativo);
   
   const [formData, setFormData] = useState({
     clienteId: clienteIdParam || "",
     profissionalId: user?.role === 'profissional' ? user.id : "",
     data: "",
     hora: "",
-    tipo: "",
+    servicoId: "",
     observacoes: ""
   });
 
@@ -50,6 +52,11 @@ export function NovoAgendamento() {
     return profissional?.nome || "";
   };
 
+  const getServicoNome = (servicoId: string) => {
+    const servico = servicos.find(s => s.id === servicoId);
+    return servico?.nome || "";
+  };
+
   const getClienteNome = (clienteId: string) => {
     const cliente = clientes.find(c => c.id === clienteId);
     return cliente?.nome || "";
@@ -58,7 +65,7 @@ export function NovoAgendamento() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || !formData.tipo) {
+    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || !formData.servicoId) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -92,7 +99,8 @@ export function NovoAgendamento() {
       profissionalNome: getProfissionalNome(formData.profissionalId),
       data: formData.data,
       hora: formData.hora,
-      tipo: formData.tipo as 'consulta' | 'retorno' | 'avaliacao',
+      servicoId: formData.servicoId,
+      servicoNome: getServicoNome(formData.servicoId),
       status: 'agendado',
       observacoes: formData.observacoes,
       criadoEm: new Date().toISOString()
@@ -248,19 +256,26 @@ export function NovoAgendamento() {
               </div>
             </div>
 
-            {/* Tipo de Consulta */}
+            {/* Serviço */}
             <div className="space-y-2">
-              <Label htmlFor="tipo">Tipo de Consulta *</Label>
-              <Select value={formData.tipo} onValueChange={(value) => handleSelectChange('tipo', value)}>
+              <Label htmlFor="servicoId">Serviço *</Label>
+              <Select value={formData.servicoId} onValueChange={(value) => handleSelectChange('servicoId', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
+                  <SelectValue placeholder="Selecione o serviço" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="consulta">Consulta</SelectItem>
-                  <SelectItem value="retorno">Retorno</SelectItem>
-                  <SelectItem value="avaliacao">Avaliação</SelectItem>
+                  {servicosAtivos.map((servico) => (
+                    <SelectItem key={servico.id} value={servico.id}>
+                      {servico.nome} - {servico.tempoMinutos}min - R$ {servico.valorParticular.toFixed(2)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {servicosAtivos.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum serviço cadastrado. Entre em contato com o administrador.
+                </p>
+              )}
             </div>
 
             {/* Observações */}
@@ -278,7 +293,7 @@ export function NovoAgendamento() {
 
             {/* Actions */}
             <div className="flex gap-3 pt-6 border-t">
-              <Button type="submit" className="flex-1" disabled={clientes.length === 0 || (user?.role !== 'profissional' && profissionais.length === 0)}>
+              <Button type="submit" className="flex-1" disabled={clientes.length === 0 || servicosAtivos.length === 0 || (user?.role !== 'profissional' && profissionais.length === 0)}>
                 <Save className="w-4 h-4 mr-2" />
                 Criar Agendamento
               </Button>

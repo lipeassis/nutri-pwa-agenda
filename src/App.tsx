@@ -17,6 +17,7 @@ import { Usuarios } from "./pages/Usuarios";
 import { TiposProfissionais } from "./pages/TiposProfissionais";
 import { Doencas } from "./pages/Doencas";
 import { Convenios } from "./pages/Convenios";
+import { Servicos } from "./pages/Servicos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,11 @@ const App = () => (
                   <Route path="/convenios" element={
                     <ProtectedRoute requiredRole="administrador">
                       <Convenios />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/servicos" element={
+                    <ProtectedRoute requiredRole="administrador">
+                      <Servicos />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />

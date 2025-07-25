@@ -117,7 +117,7 @@ export function Dashboard() {
                     </div>
                     <div className="text-right">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                        {agendamento.tipo}
+                        {agendamento.servicoNome}
                       </span>
                     </div>
                   </div>

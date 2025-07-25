@@ -28,6 +28,17 @@ export interface Convenio {
   criadoEm: string;
 }
 
+export interface Servico {
+  id: string;
+  nome: string;
+  descricao: string;
+  tempoMinutos: number;
+  valorParticular: number;
+  valoresConvenios: { [convenioId: string]: number }; // convenioId -> valor
+  ativo: boolean;
+  criadoEm: string;
+}
+
 export interface Cliente {
   id: string;
   nome: string;
@@ -45,11 +56,12 @@ export interface Agendamento {
   id: string;
   clienteId: string;
   clienteNome: string;
-  profissionalId: string; // Novo campo
-  profissionalNome: string; // Novo campo
+  profissionalId: string;
+  profissionalNome: string;
+  servicoId: string; // Alterado de tipo para servicoId
+  servicoNome: string; // Nome do serviço
   data: string;
   hora: string;
-  tipo: 'consulta' | 'retorno' | 'avaliacao';
   status: 'agendado' | 'realizado' | 'cancelado';
   observacoes?: string;
   criadoEm: string;
