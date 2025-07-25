@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente } from "@/types";
+import { Cliente, Doenca, Alergia } from "@/types";
 import { ArrowLeft, Save, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,8 @@ export function NovoCliente() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [clientes, setClientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
+  const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
+  const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
   
   const [formData, setFormData] = useState({
     nome: "",
@@ -25,6 +28,9 @@ export function NovoCliente() {
     objetivos: "",
     observacoes: ""
   });
+
+  const [selectedDoencas, setSelectedDoencas] = useState<string[]>([]);
+  const [selectedAlergias, setSelectedAlergias] = useState<string[]>([]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -53,6 +59,8 @@ export function NovoCliente() {
       altura: parseFloat(formData.altura),
       objetivos: formData.objetivos,
       observacoes: formData.observacoes,
+      doencasIds: selectedDoencas,
+      alergiasIds: selectedAlergias,
       criadoEm: new Date().toISOString()
     };
 
@@ -181,6 +189,63 @@ export function NovoCliente() {
               </div>
             </div>
 
+            {/* Doenças e Alergias */}
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-lg font-semibold">Doenças e Alergias</h3>
+              
+              {doencas.filter(d => d.ativo).length > 0 && (
+                <div className="space-y-3">
+                  <Label>Doenças</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-40 overflow-y-auto border rounded-md p-3">
+                    {doencas.filter(d => d.ativo).map((doenca) => (
+                      <div key={doenca.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`doenca-${doenca.id}`}
+                          checked={selectedDoencas.includes(doenca.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedDoencas(prev => [...prev, doenca.id]);
+                            } else {
+                              setSelectedDoencas(prev => prev.filter(id => id !== doenca.id));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`doenca-${doenca.id}`} className="text-sm">
+                          {doenca.nome}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {alergias.filter(a => a.ativo).length > 0 && (
+                <div className="space-y-3">
+                  <Label>Alergias</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-40 overflow-y-auto border rounded-md p-3">
+                    {alergias.filter(a => a.ativo).map((alergia) => (
+                      <div key={alergia.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`alergia-${alergia.id}`}
+                          checked={selectedAlergias.includes(alergia.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedAlergias(prev => [...prev, alergia.id]);
+                            } else {
+                              setSelectedAlergias(prev => prev.filter(id => id !== alergia.id));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`alergia-${alergia.id}`} className="text-sm">
+                          {alergia.nome}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Objetivos e Observações */}
             <div className="border-t pt-6 space-y-4">
               <h3 className="text-lg font-semibold">Objetivos e Observações</h3>
@@ -204,7 +269,7 @@ export function NovoCliente() {
                   name="observacoes"
                   value={formData.observacoes}
                   onChange={handleInputChange}
-                  placeholder="Restrições alimentares, alergias, medicamentos, etc."
+                  placeholder="Restrições alimentares, medicamentos, etc."
                   rows={3}
                 />
               </div>

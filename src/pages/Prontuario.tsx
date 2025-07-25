@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity } from "lucide-react";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia } from "@/types";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -18,6 +19,8 @@ export function Prontuario() {
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   const [objetivos] = useLocalStorage<ObjetivosCliente[]>('nutriapp-objetivos', []);
+  const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
+  const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
 
@@ -32,6 +35,9 @@ export function Prontuario() {
 
   const objetivoAtivo = objetivosCliente.find(o => o.ativo);
   const ultimaConsulta = consultasCliente[0];
+
+  const doencasCliente = doencas.filter(d => cliente?.doencasIds?.includes(d.id) && d.ativo);
+  const alergiasCliente = alergias.filter(a => cliente?.alergiasIds?.includes(a.id) && a.ativo);
 
   if (!cliente) {
     return (
@@ -168,10 +174,11 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="historico">Histórico de Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
+          <TabsTrigger value="doencas">Doenças e Alergias</TabsTrigger>
         </TabsList>
 
         <TabsContent value="historico" className="space-y-4">
@@ -352,6 +359,107 @@ export function Prontuario() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="doencas" className="space-y-4">
+          <h3 className="text-lg font-semibold">Doenças e Alergias do Paciente</h3>
+          
+          {/* Doenças */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Doenças
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {doencasCliente.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">Nenhuma doença registrada</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome da Doença</TableHead>
+                      <TableHead>Resumo</TableHead>
+                      <TableHead>Protocolo Nutricional</TableHead>
+                      <TableHead>Referência</TableHead>
+                      <TableHead>Links Úteis</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {doencasCliente.map((doenca) => (
+                      <TableRow key={doenca.id}>
+                        <TableCell className="font-medium">{doenca.nome}</TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="text-sm">{doenca.resumo}</div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="text-sm whitespace-pre-wrap">
+                            {doenca.protocoloNutricional || "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="text-sm">{doenca.referencia || "-"}</div>
+                        </TableCell>
+                        <TableCell>
+                          {doenca.linksUteis.length > 0 ? (
+                            <div className="space-y-1">
+                              {doenca.linksUteis.map((link, index) => (
+                                <div key={index}>
+                                  <a 
+                                    href={link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline flex items-center gap-1 text-sm"
+                                  >
+                                    <LinkIcon className="w-3 h-3" />
+                                    Link {index + 1}
+                                  </a>
+                                </div>
+                              ))}
+                            </div>
+                          ) : "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Alergias */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Alergias</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {alergiasCliente.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">Nenhuma alergia registrada</p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {alergiasCliente.map((alergia) => (
+                    <Card key={alergia.id}>
+                      <CardContent className="pt-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium">{alergia.nome}</h4>
+                            <Badge variant={
+                              alergia.severidade === 'grave' ? 'destructive' :
+                              alergia.severidade === 'moderada' ? 'default' : 'secondary'
+                            }>
+                              {alergia.severidade}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{alergia.descricao}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 

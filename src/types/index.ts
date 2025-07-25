@@ -1,3 +1,23 @@
+export interface Doenca {
+  id: string;
+  nome: string;
+  resumo: string;
+  protocoloNutricional: string;
+  referencia: string;
+  linksUteis: string[];
+  ativo: boolean;
+  criadoEm: string;
+}
+
+export interface Alergia {
+  id: string;
+  nome: string;
+  descricao: string;
+  severidade: 'leve' | 'moderada' | 'grave';
+  ativo: boolean;
+  criadoEm: string;
+}
+
 export interface Cliente {
   id: string;
   nome: string;
@@ -8,6 +28,8 @@ export interface Cliente {
   altura: number;
   objetivos: string;
   observacoes?: string;
+  doencasIds: string[];
+  alergiasIds: string[];
   criadoEm: string;
 }
 
