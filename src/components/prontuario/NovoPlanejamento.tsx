@@ -48,6 +48,20 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
     unidade: 'g'
   });
 
+  const alimentoSelecionado = alimentos.find(a => a.id === novoAlimento.alimentoId);
+
+  // Calcular valores nutricionais do alimento selecionado baseado na quantidade
+  const valoresNutricionais = alimentoSelecionado && novoAlimento.quantidade ? (() => {
+    const quantidade = parseFloat(novoAlimento.quantidade) || 0;
+    const fator = quantidade / alimentoSelecionado.porcaoReferencia;
+    return {
+      kcal: alimentoSelecionado.informacaoNutricional.kcal * fator,
+      proteina: alimentoSelecionado.informacaoNutricional.proteina * fator,
+      carboidratos: alimentoSelecionado.informacaoNutricional.carboidratos * fator,
+      lipideos: alimentoSelecionado.informacaoNutricional.lipideos * fator,
+    };
+  })() : null;
+
   const handleSave = () => {
     if (!formData.nome.trim()) {
       toast.error('Nome do plano é obrigatório');
@@ -93,6 +107,15 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
     setRefeicoes(refeicoes.map(r => 
       r.id === id ? { ...r, [campo]: valor } : r
     ));
+  };
+
+  const handleAlimentoChange = (alimentoId: string) => {
+    const alimento = alimentos.find(a => a.id === alimentoId);
+    setNovoAlimento({
+      alimentoId,
+      quantidade: alimento ? alimento.porcaoReferencia.toString() : '',
+      unidade: alimento ? alimento.unidadeMedida : 'g'
+    });
   };
 
   const adicionarAlimento = () => {
@@ -315,7 +338,7 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
                         <div>
                           <Label>Alimento</Label>
-                          <Select value={novoAlimento.alimentoId} onValueChange={(value) => setNovoAlimento({ ...novoAlimento, alimentoId: value })}>
+                          <Select value={novoAlimento.alimentoId} onValueChange={handleAlimentoChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione um alimento" />
                             </SelectTrigger>
@@ -366,6 +389,31 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
                           </Button>
                         </div>
                       </div>
+
+                      {/* Resumo Nutricional do Alimento Selecionado */}
+                      {valoresNutricionais && (
+                        <div className="p-3 bg-muted rounded-lg">
+                          <div className="text-sm font-medium mb-2">Resumo Nutricional:</div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                            <div className="text-center">
+                              <div className="font-semibold text-green-600">{valoresNutricionais.kcal.toFixed(0)}</div>
+                              <div className="text-muted-foreground">kcal</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-semibold text-blue-600">{valoresNutricionais.proteina.toFixed(1)}g</div>
+                              <div className="text-muted-foreground">Proteína</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-semibold text-yellow-600">{valoresNutricionais.carboidratos.toFixed(1)}g</div>
+                              <div className="text-muted-foreground">Carboidratos</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-semibold text-purple-600">{valoresNutricionais.lipideos.toFixed(1)}g</div>
+                              <div className="text-muted-foreground">Lipídeos</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Lista de Alimentos */}
                       {refeicao.alimentos.length > 0 ? (
