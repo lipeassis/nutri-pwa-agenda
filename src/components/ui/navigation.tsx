@@ -71,14 +71,14 @@ export function Navigation({ className }: NavigationProps) {
                       Ajustes
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <ul className="grid w-[200px] gap-1 p-2">
+                      <ul className="grid w-[240px] gap-1 p-4 bg-white border border-border rounded-md shadow-lg">
                         {adminItems.map((item) => (
                           <li key={item.href}>
                             <Link to={item.href}>
                               <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                                 <div className="flex items-center gap-2">
-                                  <item.icon className="w-4 h-4" />
-                                  <div className="text-sm font-medium leading-none">{item.label}</div>
+                                  <item.icon className="w-4 h-4 text-muted-foreground" />
+                                  <div className="text-sm font-medium leading-none text-foreground">{item.label}</div>
                                 </div>
                               </NavigationMenuLink>
                             </Link>
