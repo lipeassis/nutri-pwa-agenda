@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento } from "@/types";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario } from "@/types";
 import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -16,6 +16,7 @@ import { GraficoEvolucao } from "@/components/prontuario/GraficoEvolucao";
 import { EditarCliente } from "@/components/prontuario/EditarCliente";
 import { AdicionarDoencasAlergias } from "@/components/prontuario/AdicionarDoencasAlergias";
 import { NovoPlanejamento } from "@/components/prontuario/NovoPlanejamento";
+import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
 
 export function Prontuario() {
   const { clienteId } = useParams<{ clienteId: string }>();
@@ -27,6 +28,7 @@ export function Prontuario() {
   const [documentos, setDocumentos] = useLocalStorage<DocumentoCliente[]>('nutriapp-documentos', []);
   const [planejamentos, setPlanejamentos] = useLocalStorage<PlanejamentoAlimentar[]>('nutriapp-planejamentos', []);
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
+  const [atualizacoes, setAtualizacoes] = useLocalStorage<AtualizacaoQuestionario[]>('nutriapp-atualizacoes', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
   const [showEditarCliente, setShowEditarCliente] = useState(false);
@@ -168,6 +170,10 @@ export function Prontuario() {
     }, { kcal: 0, proteina: 0, carboidratos: 0, lipideos: 0 });
   };
 
+  const handleAddSampleAtualizacoes = (sampleData: AtualizacaoQuestionario[]) => {
+    setAtualizacoes([...atualizacoes, ...sampleData]);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -285,12 +291,13 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
+          <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
         </TabsList>
@@ -650,6 +657,14 @@ export function Prontuario() {
                 ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="atualizacoes" className="space-y-4">
+          <AtualizacoesQuestionario 
+            clienteId={cliente.id} 
+            atualizacoes={atualizacoes.filter(a => a.clienteId === cliente.id)} 
+            onAddSampleData={handleAddSampleAtualizacoes}
+          />
         </TabsContent>
 
         <TabsContent value="documentos" className="space-y-4">

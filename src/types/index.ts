@@ -246,6 +246,22 @@ export interface PlanejamentoAlimentar {
   criadoPor: string;
 }
 
+export interface AtualizacaoQuestionario {
+  id: string;
+  clienteId: string;
+  dataResposta: string;
+  adesaoAlimentar: number; // 1-5
+  fomeSaciedade: number; // 1-5
+  energia: number; // 1-5
+  sono: number; // 1-5
+  atividadeFisica: number; // 1-5
+  hidratacao: number; // 1-5
+  comportamentoEmocional: number; // 1-5
+  motivacaoProgresso: number; // 1-5
+  observacoes?: string;
+  criadoEm: string;
+}
+
 export interface Usuario {
   id: string;
   nome: string;
