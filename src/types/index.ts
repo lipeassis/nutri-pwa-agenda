@@ -269,7 +269,7 @@ export interface AtualizacaoQuestionario {
   hidratacao: number; // 1-5 (média das 5 respostas)
   comportamentoEmocional: number; // 1-5 (média das 5 respostas)
   motivacaoProgresso: number; // 1-5 (média das 5 respostas)
-  respostasDetalhadas: RespostasDetalhadas;
+  respostasDetalhadas?: RespostasDetalhadas;
   observacoes?: string;
   criadoEm: string;
 }

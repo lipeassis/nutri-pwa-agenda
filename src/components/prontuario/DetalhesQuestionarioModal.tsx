@@ -7,7 +7,7 @@ interface DetalhesQuestionarioModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   data: string;
-  respostasDetalhadas: RespostasDetalhadas;
+  respostasDetalhadas: RespostasDetalhadas | undefined;
 }
 
 const perguntasPorCategoria = {
@@ -81,6 +81,7 @@ const categoriasLabels = {
 };
 
 export function DetalhesQuestionarioModal({ open, onOpenChange, data, respostasDetalhadas }: DetalhesQuestionarioModalProps) {
+  console.log('DetalhesQuestionarioModal - respostasDetalhadas:', respostasDetalhadas);
   const getScoreColor = (valor: number) => {
     if (valor >= 4) return 'bg-green-100 text-green-800';
     if (valor >= 3) return 'bg-yellow-100 text-yellow-800';
@@ -101,7 +102,7 @@ export function DetalhesQuestionarioModal({ open, onOpenChange, data, respostasD
         </DialogHeader>
         
         <div className="space-y-6">
-          {Object.entries(respostasDetalhadas).map(([categoria, respostas]) => {
+          {respostasDetalhadas && Object.entries(respostasDetalhadas).map(([categoria, respostas]) => {
             const categoriaKey = categoria as keyof RespostasDetalhadas;
             const perguntas = perguntasPorCategoria[categoriaKey];
             const media = Math.round(respostas.reduce((acc, val) => acc + val, 0) / respostas.length);
@@ -128,6 +129,15 @@ export function DetalhesQuestionarioModal({ open, onOpenChange, data, respostasD
               </div>
             );
           })}
+          
+          {!respostasDetalhadas && (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>Detalhes das respostas não disponíveis para esta atualização.</p>
+              <p className="text-sm mt-2">
+                Esta funcionalidade está disponível apenas para questionários respondidos após a última atualização do sistema.
+              </p>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
