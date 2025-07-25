@@ -470,15 +470,36 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                 </div>
                 <div className="text-center p-3 bg-muted rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{totaisDia.proteina.toFixed(1)}g</div>
-                  <div className="text-sm text-muted-foreground">Proteína</div>
+                  <div className="text-sm text-muted-foreground">
+                    Proteína
+                    {totaisDia.kcal > 0 && (
+                      <div className="text-xs text-blue-600 font-medium">
+                        {((totaisDia.proteina * 4 / totaisDia.kcal) * 100).toFixed(1)}%
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="text-center p-3 bg-muted rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">{totaisDia.carboidratos.toFixed(1)}g</div>
-                  <div className="text-sm text-muted-foreground">Carboidratos</div>
+                  <div className="text-sm text-muted-foreground">
+                    Carboidratos
+                    {totaisDia.kcal > 0 && (
+                      <div className="text-xs text-yellow-600 font-medium">
+                        {((totaisDia.carboidratos * 4 / totaisDia.kcal) * 100).toFixed(1)}%
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="text-center p-3 bg-muted rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">{totaisDia.lipideos.toFixed(1)}g</div>
-                  <div className="text-sm text-muted-foreground">Lipídeos</div>
+                  <div className="text-sm text-muted-foreground">
+                    Lipídeos
+                    {totaisDia.kcal > 0 && (
+                      <div className="text-xs text-purple-600 font-medium">
+                        {((totaisDia.lipideos * 9 / totaisDia.kcal) * 100).toFixed(1)}%
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
