@@ -246,18 +246,30 @@ export interface PlanejamentoAlimentar {
   criadoPor: string;
 }
 
+export interface RespostasDetalhadas {
+  adesaoAlimentar: number[]; // 5 respostas (1-5 cada)
+  fomeSaciedade: number[]; // 5 respostas (1-5 cada)
+  energia: number[]; // 5 respostas (1-5 cada)
+  sono: number[]; // 5 respostas (1-5 cada)
+  atividadeFisica: number[]; // 5 respostas (1-5 cada)
+  hidratacao: number[]; // 5 respostas (1-5 cada)
+  comportamentoEmocional: number[]; // 5 respostas (1-5 cada)
+  motivacaoProgresso: number[]; // 5 respostas (1-5 cada)
+}
+
 export interface AtualizacaoQuestionario {
   id: string;
   clienteId: string;
   dataResposta: string;
-  adesaoAlimentar: number; // 1-5
-  fomeSaciedade: number; // 1-5
-  energia: number; // 1-5
-  sono: number; // 1-5
-  atividadeFisica: number; // 1-5
-  hidratacao: number; // 1-5
-  comportamentoEmocional: number; // 1-5
-  motivacaoProgresso: number; // 1-5
+  adesaoAlimentar: number; // 1-5 (média das 5 respostas)
+  fomeSaciedade: number; // 1-5 (média das 5 respostas)
+  energia: number; // 1-5 (média das 5 respostas)
+  sono: number; // 1-5 (média das 5 respostas)
+  atividadeFisica: number; // 1-5 (média das 5 respostas)
+  hidratacao: number; // 1-5 (média das 5 respostas)
+  comportamentoEmocional: number; // 1-5 (média das 5 respostas)
+  motivacaoProgresso: number; // 1-5 (média das 5 respostas)
+  respostasDetalhadas: RespostasDetalhadas;
   observacoes?: string;
   criadoEm: string;
 }

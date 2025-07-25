@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AtualizacaoQuestionario } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { generateSampleAtualizacoes } from '@/utils/sampleData';
+import { DetalhesQuestionarioModal } from './DetalhesQuestionarioModal';
+import { Eye } from 'lucide-react';
 
 interface AtualizacoesQuestionarioProps {
   clienteId: string;
@@ -15,6 +17,8 @@ interface AtualizacoesQuestionarioProps {
 }
 
 export function AtualizacoesQuestionario({ clienteId, atualizacoes, onAddSampleData }: AtualizacoesQuestionarioProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [atualizacaoSelecionada, setAtualizacaoSelecionada] = useState<AtualizacaoQuestionario | null>(null);
   const getScoreColor = (valor: number) => {
     if (valor >= 4) return 'text-green-600';
     if (valor >= 3) return 'text-yellow-600';
@@ -101,6 +105,7 @@ export function AtualizacoesQuestionario({ clienteId, atualizacoes, onAddSampleD
                 <TableHead className="text-center">Motivação/Progresso</TableHead>
                 <TableHead className="text-center">Alerta</TableHead>
                 <TableHead className="text-center">Score</TableHead>
+                <TableHead className="text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -176,6 +181,20 @@ export function AtualizacoesQuestionario({ clienteId, atualizacoes, onAddSampleD
                         </div>
                       </div>
                     </TableCell>
+                    
+                    <TableCell className="text-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setAtualizacaoSelecionada(atualizacao);
+                          setModalOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -189,6 +208,15 @@ export function AtualizacoesQuestionario({ clienteId, atualizacoes, onAddSampleD
           </div>
         )}
       </CardContent>
+      
+      {atualizacaoSelecionada && (
+        <DetalhesQuestionarioModal 
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          data={format(new Date(atualizacaoSelecionada.dataResposta), 'dd/MM/yyyy', { locale: ptBR })}
+          respostasDetalhadas={atualizacaoSelecionada.respostasDetalhadas}
+        />
+      )}
     </Card>
   );
 }
