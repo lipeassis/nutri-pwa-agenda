@@ -23,8 +23,6 @@ export function NovoCliente() {
     email: "",
     telefone: "",
     dataNascimento: "",
-    peso: "",
-    altura: "",
     objetivos: "",
     observacoes: ""
   });
@@ -40,7 +38,7 @@ export function NovoCliente() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.email || !formData.telefone || !formData.peso || !formData.altura) {
+    if (!formData.nome || !formData.email || !formData.telefone) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -55,8 +53,6 @@ export function NovoCliente() {
       email: formData.email,
       telefone: formData.telefone,
       dataNascimento: formData.dataNascimento,
-      peso: parseFloat(formData.peso),
-      altura: parseFloat(formData.altura),
       objetivos: formData.objetivos,
       observacoes: formData.observacoes,
       doencasIds: selectedDoencas,
@@ -152,38 +148,6 @@ export function NovoCliente() {
                     type="date"
                     value={formData.dataNascimento}
                     onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Dados Físicos */}
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4">Dados Físicos</h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="peso">Peso (kg) *</Label>
-                  <Input
-                    id="peso"
-                    name="peso"
-                    type="number"
-                    step="0.1"
-                    value={formData.peso}
-                    onChange={handleInputChange}
-                    placeholder="70.5"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="altura">Altura (cm) *</Label>
-                  <Input
-                    id="altura"
-                    name="altura"
-                    type="number"
-                    value={formData.altura}
-                    onChange={handleInputChange}
-                    placeholder="170"
-                    required
                   />
                 </div>
               </div>

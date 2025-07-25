@@ -4,14 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente } from "@/types";
-import { Search, Plus, User, Phone, Mail, Calendar, Weight, Ruler } from "lucide-react";
+import { Cliente, ConsultaProntuario } from "@/types";
+import { Search, Plus, User, Phone, Mail, Calendar, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function Clientes() {
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
+  const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   const [busca, setBusca] = useState("");
 
   const clientesFiltrados = clientes.filter(cliente =>
@@ -20,7 +21,14 @@ export function Clientes() {
     cliente.telefone.includes(busca)
   );
 
+  const getUltimaConsulta = (clienteId: string) => {
+    return consultas
+      .filter(c => c.clienteId === clienteId)
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())[0];
+  };
+
   const calcularIMC = (peso: number, altura: number) => {
+    if (!peso || !altura) return "0.0";
     const alturaMetros = altura / 100;
     const imc = peso / (alturaMetros * alturaMetros);
     return imc.toFixed(1);
@@ -97,15 +105,10 @@ export function Clientes() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2">
-              <Weight className="w-5 h-5 text-info" />
+              <FileText className="w-5 h-5 text-info" />
               <div>
-                <p className="text-2xl font-bold">
-                  {clientes.length > 0 ? 
-                    (clientes.reduce((acc, c) => acc + parseFloat(calcularIMC(c.peso, c.altura)), 0) / clientes.length).toFixed(1)
-                    : "0"
-                  }
-                </p>
-                <p className="text-sm text-muted-foreground">IMC médio</p>
+                <p className="text-2xl font-bold">{consultas.length}</p>
+                <p className="text-sm text-muted-foreground">Total de consultas</p>
               </div>
             </div>
           </CardContent>
@@ -139,8 +142,9 @@ export function Clientes() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {clientesFiltrados.map((cliente) => {
-            const imc = parseFloat(calcularIMC(cliente.peso, cliente.altura));
-            const imcStatus = getIMCStatus(imc);
+            const ultimaConsulta = getUltimaConsulta(cliente.id);
+            const peso = ultimaConsulta?.medidas.peso;
+            const altura = ultimaConsulta?.medidas.altura;
             
             return (
               <Card key={cliente.id} className="hover:shadow-medium transition-all duration-300">
@@ -152,9 +156,11 @@ export function Clientes() {
                         Cadastrado em {format(new Date(cliente.criadoEm), "dd/MM/yyyy", { locale: ptBR })}
                       </CardDescription>
                     </div>
-                    <Badge variant={imcStatus.variant}>
-                      IMC {calcularIMC(cliente.peso, cliente.altura)}
-                    </Badge>
+                    {peso && altura && (
+                      <Badge variant="secondary">
+                        IMC {calcularIMC(peso, altura)}
+                      </Badge>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -167,14 +173,23 @@ export function Clientes() {
                       <Phone className="w-4 h-4 mr-2" />
                       {cliente.telefone}
                     </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Weight className="w-4 h-4 mr-2" />
-                      {cliente.peso}kg
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Ruler className="w-4 h-4 mr-2" />
-                      {cliente.altura}cm
-                    </div>
+                    {ultimaConsulta && (
+                      <>
+                        <div className="flex items-center text-muted-foreground">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Peso atual: {ultimaConsulta.medidas.peso}kg
+                        </div>
+                        <div className="flex items-center text-muted-foreground">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Última consulta: {format(new Date(ultimaConsulta.data), "dd/MM/yyyy", { locale: ptBR })}
+                        </div>
+                      </>
+                    )}
+                    {!ultimaConsulta && (
+                      <div className="text-muted-foreground text-xs">
+                        Nenhuma consulta registrada
+                      </div>
+                    )}
                   </div>
                   
                   {cliente.objetivos && (

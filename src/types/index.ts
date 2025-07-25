@@ -24,8 +24,6 @@ export interface Cliente {
   email: string;
   telefone: string;
   dataNascimento: string;
-  peso: number;
-  altura: number;
   objetivos: string;
   observacoes?: string;
   doencasIds: string[];

@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
 import { NovoObjetivo } from "@/components/prontuario/NovoObjetivo";
 import { GraficoEvolucao } from "@/components/prontuario/GraficoEvolucao";
+import { EditarCliente } from "@/components/prontuario/EditarCliente";
+import { AdicionarDoencasAlergias } from "@/components/prontuario/AdicionarDoencasAlergias";
 
 export function Prontuario() {
   const { clienteId } = useParams<{ clienteId: string }>();
@@ -23,6 +25,8 @@ export function Prontuario() {
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
+  const [showEditarCliente, setShowEditarCliente] = useState(false);
+  const [showAdicionarDoencasAlergias, setShowAdicionarDoencasAlergias] = useState(false);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -93,7 +97,19 @@ export function Prontuario() {
       {/* Informações do Cliente */}
       <Card>
         <CardHeader>
-          <CardTitle>Informações Básicas</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Informações Básicas</CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowEditarCliente(true)}>
+                <Edit className="w-4 h-4 mr-2" />
+                Editar Dados
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowAdicionarDoencasAlergias(true)}>
+                <Settings className="w-4 h-4 mr-2" />
+                Doenças/Alergias
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -108,7 +124,7 @@ export function Prontuario() {
             <div>
               <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
               <p className="text-base">
-                {format(new Date(cliente.dataNascimento), "dd/MM/yyyy", { locale: ptBR })}
+                {cliente.dataNascimento ? format(new Date(cliente.dataNascimento), "dd/MM/yyyy", { locale: ptBR }) : "Não informado"}
               </p>
             </div>
             <div>
@@ -475,6 +491,22 @@ export function Prontuario() {
         <NovoObjetivo
           cliente={cliente}
           onClose={() => setShowNovoObjetivo(false)}
+        />
+      )}
+
+      {showEditarCliente && (
+        <EditarCliente
+          cliente={cliente}
+          open={showEditarCliente}
+          onClose={() => setShowEditarCliente(false)}
+        />
+      )}
+
+      {showAdicionarDoencasAlergias && (
+        <AdicionarDoencasAlergias
+          cliente={cliente}
+          open={showAdicionarDoencasAlergias}
+          onClose={() => setShowAdicionarDoencasAlergias(false)}
         />
       )}
     </div>

@@ -21,8 +21,8 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
   const [formData, setFormData] = useState({
     data: new Date().toISOString().split('T')[0],
     medidas: {
-      peso: cliente.peso,
-      altura: cliente.altura,
+      peso: 0,
+      altura: 0,
       circunferenciaBraco: 0,
       circunferenciaAbdomen: 0,
       circunferenciaQuadril: 0,

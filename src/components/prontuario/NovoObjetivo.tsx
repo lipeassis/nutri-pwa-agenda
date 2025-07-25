@@ -20,7 +20,7 @@ export function NovoObjetivo({ cliente, onClose }: NovoObjetivoProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    pesoMeta: cliente.peso,
+    pesoMeta: 0,
     medidasMeta: {
       circunferenciaBraco: 0,
       circunferenciaAbdomen: 0,
