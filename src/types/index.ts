@@ -208,6 +208,25 @@ export interface InformacaoNutricional {
   selenio: number;
 }
 
+export interface ReceitaMedica {
+  id: string;
+  clienteId: string;
+  tipo: 'medicamento' | 'suplemento';
+  nome: string;
+  dosagem: string;
+  frequencia: string;
+  duracao: string;
+  instrucoes: string;
+  observacoes?: string;
+  medico?: string;
+  dataEmissao: string;
+  dataInicio: string;
+  dataFim?: string;
+  ativo: boolean;
+  criadoEm: string;
+  criadoPor: string;
+}
+
 export interface Alimento {
   id: string;
   nome: string;

@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock } from "lucide-react";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica } from "@/types";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -16,6 +16,7 @@ import { GraficoEvolucao } from "@/components/prontuario/GraficoEvolucao";
 import { EditarCliente } from "@/components/prontuario/EditarCliente";
 import { AdicionarDoencasAlergias } from "@/components/prontuario/AdicionarDoencasAlergias";
 import { NovoPlanejamento } from "@/components/prontuario/NovoPlanejamento";
+import { NovaReceita } from "@/components/prontuario/NovaReceita";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
 
 export function Prontuario() {
@@ -27,6 +28,7 @@ export function Prontuario() {
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
   const [documentos, setDocumentos] = useLocalStorage<DocumentoCliente[]>('nutriapp-documentos', []);
   const [planejamentos, setPlanejamentos] = useLocalStorage<PlanejamentoAlimentar[]>('nutriapp-planejamentos', []);
+  const [receitas, setReceitas] = useLocalStorage<ReceitaMedica[]>('nutriapp-receitas', []);
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   const [atualizacoes, setAtualizacoes] = useLocalStorage<AtualizacaoQuestionario[]>('nutriapp-atualizacoes', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
@@ -35,6 +37,8 @@ export function Prontuario() {
   const [showAdicionarDoencasAlergias, setShowAdicionarDoencasAlergias] = useState(false);
   const [showNovoPlanejamento, setShowNovoPlanejamento] = useState(false);
   const [planejamentoParaEditar, setPlanejamentoParaEditar] = useState<PlanejamentoAlimentar | null>(null);
+  const [showNovaReceita, setShowNovaReceita] = useState(false);
+  const [receitaParaEditar, setReceitaParaEditar] = useState<ReceitaMedica | null>(null);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -292,12 +296,13 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
+          <TabsTrigger value="receitas">Receitas</TabsTrigger>
           <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
@@ -670,6 +675,99 @@ export function Prontuario() {
           )}
         </TabsContent>
 
+        <TabsContent value="receitas" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Receitas Médicas</h3>
+            <Button onClick={() => setShowNovaReceita(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Receita
+            </Button>
+          </div>
+          
+          {receitas.filter(r => r.clienteId === cliente.id && r.ativo).length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Pill className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhuma receita cadastrada</h3>
+                <p className="text-muted-foreground">
+                  Cadastre medicamentos e suplementos prescritos para o paciente
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {receitas
+                .filter(r => r.clienteId === cliente.id && r.ativo)
+                .sort((a, b) => new Date(b.dataEmissao).getTime() - new Date(a.dataEmissao).getTime())
+                .map((receita) => (
+                  <Card key={receita.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Pill className="w-5 h-5 text-primary" />
+                            {receita.nome}
+                            <Badge variant={receita.tipo === 'medicamento' ? 'default' : 'outline'}>
+                              {receita.tipo}
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription>
+                            {receita.dosagem} - {receita.frequencia}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setReceitaParaEditar(receita)}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Editar
+                          </Button>
+                          <div className="text-right text-sm text-muted-foreground">
+                            <div>Emissão: {new Date(receita.dataEmissao).toLocaleDateString('pt-BR')}</div>
+                            <div>Início: {new Date(receita.dataInicio).toLocaleDateString('pt-BR')}</div>
+                            {receita.dataFim && (
+                              <div>Fim: {new Date(receita.dataFim).toLocaleDateString('pt-BR')}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Duração</p>
+                          <p className="text-base">{receita.duracao}</p>
+                        </div>
+                        {receita.medico && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Médico</p>
+                            <p className="text-base">{receita.medico}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {receita.instrucoes && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Instruções de Uso</p>
+                          <p className="text-sm bg-muted p-3 rounded-md">{receita.instrucoes}</p>
+                        </div>
+                      )}
+                      
+                      {receita.observacoes && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Observações</p>
+                          <p className="text-sm bg-muted p-3 rounded-md">{receita.observacoes}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="atualizacoes" className="space-y-4">
           <AtualizacoesQuestionario 
             clienteId={cliente.id} 
@@ -899,6 +997,31 @@ export function Prontuario() {
                 p.id === plano.id ? plano : p
               ));
               setPlanejamentoParaEditar(null);
+            }}
+          />
+        )}
+
+        {showNovaReceita && (
+          <NovaReceita
+            clienteId={cliente.id}
+            onClose={() => setShowNovaReceita(false)}
+            onSave={(receita) => {
+              setReceitas([...receitas, receita]);
+              setShowNovaReceita(false);
+            }}
+          />
+        )}
+
+        {receitaParaEditar && (
+          <NovaReceita
+            clienteId={cliente.id}
+            receitaParaEditar={receitaParaEditar}
+            onClose={() => setReceitaParaEditar(null)}
+            onSave={(receita) => {
+              setReceitas(receitas.map(r => 
+                r.id === receita.id ? receita : r
+              ));
+              setReceitaParaEditar(null);
             }}
           />
         )}
