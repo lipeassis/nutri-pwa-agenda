@@ -163,6 +163,18 @@ export interface ResultadoExame {
   status: 'abaixo' | 'normal' | 'acima';
 }
 
+export interface DocumentoCliente {
+  id: string;
+  clienteId: string;
+  nome: string;
+  tipo: 'exame' | 'receita' | 'relatorio' | 'outros';
+  arquivo: string; // base64 ou URL
+  tamanho: number; // em bytes
+  mimeType: string;
+  criadoEm: string;
+  criadoPor: string; // id do usuário
+}
+
 export interface Usuario {
   id: string;
   nome: string;

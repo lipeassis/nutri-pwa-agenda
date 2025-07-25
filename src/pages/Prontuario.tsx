@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube } from "lucide-react";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente } from "@/types";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -23,6 +23,7 @@ export function Prontuario() {
   const [objetivos] = useLocalStorage<ObjetivosCliente[]>('nutriapp-objetivos', []);
   const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
+  const [documentos, setDocumentos] = useLocalStorage<DocumentoCliente[]>('nutriapp-documentos', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
   const [showEditarCliente, setShowEditarCliente] = useState(false);
@@ -71,6 +72,81 @@ export function Prontuario() {
     if (imc < 25) return { label: "Peso normal", variant: "default" as const };
     if (imc < 30) return { label: "Sobrepeso", variant: "destructive" as const };
     return { label: "Obesidade", variant: "destructive" as const };
+  };
+
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType.startsWith('image/')) return <Image className="w-6 h-6 text-blue-500" />;
+    if (mimeType === 'application/pdf') return <FileText className="w-6 h-6 text-red-500" />;
+    return <File className="w-6 h-6 text-gray-500" />;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const downloadDocument = (documento: DocumentoCliente) => {
+    const link = document.createElement('a');
+    link.href = documento.arquivo;
+    link.download = documento.nome;
+    link.click();
+  };
+
+  const deleteDocument = (documentoId: string) => {
+    setDocumentos(documentos.filter(d => d.id !== documentoId));
+  };
+
+  // Componente de Upload
+  const UploadDocument = ({ clienteId, onUpload }: { clienteId: string; onUpload: (doc: DocumentoCliente) => void }) => {
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      setIsUploading(true);
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const documento: DocumentoCliente = {
+          id: Date.now().toString(),
+          clienteId,
+          nome: file.name,
+          tipo: file.type.includes('image') ? 'exame' : 'outros',
+          arquivo: e.target?.result as string,
+          tamanho: file.size,
+          mimeType: file.type,
+          criadoEm: new Date().toISOString(),
+          criadoPor: 'user' // Substituir pelo ID do usuário logado
+        };
+        
+        onUpload(documento);
+        setIsUploading(false);
+      };
+      
+      reader.readAsDataURL(file);
+    };
+
+    return (
+      <div>
+        <input
+          type="file"
+          id="file-upload"
+          className="hidden"
+          onChange={handleFileUpload}
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+        />
+        <Button asChild variant="outline">
+          <label htmlFor="file-upload" className="cursor-pointer">
+            <Upload className="w-4 h-4 mr-2" />
+            {isUploading ? 'Enviando...' : 'Anexar Documento'}
+          </label>
+        </Button>
+      </div>
+    );
   };
 
   return (
@@ -190,11 +266,12 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
+          <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
         </TabsList>
 
@@ -457,6 +534,75 @@ export function Prontuario() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="documentos" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Documentos do Paciente</h3>
+            <UploadDocument clienteId={cliente.id} onUpload={(doc) => setDocumentos([...documentos, doc])} />
+          </div>
+          
+          {documentos.filter(d => d.clienteId === cliente.id).length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhum documento anexado</h3>
+                <p className="text-muted-foreground">
+                  Anexe documentos como exames, receitas e relatórios do paciente
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {documentos
+                .filter(d => d.clienteId === cliente.id)
+                .map((documento) => (
+                  <Card key={documento.id}>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-muted">
+                            {getFileIcon(documento.mimeType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium truncate">{documento.nome}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {formatFileSize(documento.tamanho)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline">
+                            {documento.tipo}
+                          </Badge>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => downloadDocument(documento)}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteDocument(documento.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(documento.criadoEm).toLocaleDateString('pt-BR')}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
