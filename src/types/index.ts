@@ -257,6 +257,33 @@ export interface RespostasDetalhadas {
   motivacaoProgresso: number[]; // 5 respostas (1-5 cada)
 }
 
+export interface TransacaoFinanceira {
+  id: string;
+  tipo: 'entrada' | 'saida';
+  categoria: 'agendamento' | 'despesa' | 'receita_extra';
+  descricao: string;
+  valor: number;
+  data: string;
+  usuarioId?: string; // Profissional responsável
+  servicoId?: string; // Serviço relacionado
+  agendamentoId?: string; // Agendamento relacionado (se aplicável)
+  observacoes?: string;
+  criadoEm: string;
+  criadoPor: string;
+}
+
+export interface RelatorioFinanceiro {
+  periodo: string;
+  totalConsultas: number;
+  totalFaturamento: number;
+  consultasRealizadas: number;
+  consultasCanceladas: number;
+  ticketMedio: number;
+  totalEntradas: number;
+  totalSaidas: number;
+  lucroLiquido: number;
+}
+
 export interface AtualizacaoQuestionario {
   id: string;
   clienteId: string;
