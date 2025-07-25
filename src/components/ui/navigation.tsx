@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,7 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/doencas", icon: UserCog, label: "Doenças", roles: ['administrador'] },
     { href: "/convenios", icon: UserCog, label: "Convênios", roles: ['administrador'] },
     { href: "/servicos", icon: UserCog, label: "Serviços", roles: ['administrador'] },
+    { href: "/exames-bioquimicos", icon: TestTube, label: "Exames", roles: ['administrador'] },
   ].filter(item => hasPermission(item.roles as any));
 
   return (

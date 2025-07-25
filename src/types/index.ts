@@ -94,6 +94,7 @@ export interface ConsultaProntuario {
   data: string;
   medidas: MedidasAntropometricas;
   dobrasCutaneas: DobrasCutaneas;
+  resultadosExames: ResultadoExame[];
   relatoPaciente: string;
   observacoesNutricionista: string;
   criadoEm: string;
@@ -133,6 +134,33 @@ export interface DisponibilidadeAgenda {
   quinta: HorarioDisponivel[];
   sexta: HorarioDisponivel[];
   sabado: HorarioDisponivel[];
+}
+
+export interface ValorReferencia {
+  id: string;
+  minimo: number;
+  maximo: number;
+  genero: 'masculino' | 'feminino' | 'ambos';
+  idadeMinima: number;
+  idadeMaxima: number;
+  unidade: string;
+}
+
+export interface ExameBioquimico {
+  id: string;
+  nome: string;
+  descricao: string;
+  valoresReferencia: ValorReferencia[];
+  ativo: boolean;
+  criadoEm: string;
+}
+
+export interface ResultadoExame {
+  exameId: string;
+  exameNome: string;
+  valor: number;
+  unidade: string;
+  status: 'abaixo' | 'normal' | 'acima';
 }
 
 export interface Usuario {

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -190,11 +190,12 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="historico">Histórico de Consultas</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
-          <TabsTrigger value="doencas">Doenças e Alergias</TabsTrigger>
+          <TabsTrigger value="exames">Exames</TabsTrigger>
+          <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
         </TabsList>
 
         <TabsContent value="historico" className="space-y-4">
@@ -403,6 +404,63 @@ export function Prontuario() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="exames" className="space-y-4">
+          <h3 className="text-lg font-semibold">Histórico de Exames Bioquímicos</h3>
+          
+          {consultas.filter(c => c.resultadosExames && c.resultadosExames.length > 0).length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <TestTube className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhum exame registrado</h3>
+                <p className="text-muted-foreground">
+                  Os resultados dos exames aparecerão aqui quando adicionados nas consultas
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {consultas
+                .filter(c => c.resultadosExames && c.resultadosExames.length > 0)
+                .map((consulta) => (
+                  <Card key={consulta.id}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TestTube className="w-5 h-5 text-primary" />
+                        Exames - {new Date(consulta.data).toLocaleDateString('pt-BR')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {consulta.resultadosExames.map((resultado, index) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-medium">{resultado.exameNome}</h4>
+                                <Badge 
+                                  variant={
+                                    resultado.status === 'normal' ? 'default' : 
+                                    resultado.status === 'abaixo' ? 'destructive' : 
+                                    'destructive'
+                                  }
+                                >
+                                  {resultado.status === 'normal' ? 'Normal' : 
+                                   resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
+                                </Badge>
+                              </div>
+                              <div className="text-lg font-semibold">
+                                {resultado.valor} {resultado.unidade}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           )}
         </TabsContent>
