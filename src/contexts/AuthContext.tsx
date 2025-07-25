@@ -5,6 +5,7 @@ interface AuthContextType {
   user: Usuario | null;
   login: (email: string, senha: string) => boolean;
   logout: () => void;
+  updateUser: (updatedUser: Usuario) => void;
   hasPermission: (requiredRole: UserRole | UserRole[]) => boolean;
   isAuthenticated: boolean;
 }
@@ -67,6 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  const updateUser = (updatedUser: Usuario) => {
+    setUser(updatedUser);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
+  };
+
   const hasPermission = (requiredRole: UserRole | UserRole[]): boolean => {
     if (!user) return false;
 
@@ -81,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       login,
       logout,
+      updateUser,
       hasPermission,
       isAuthenticated: !!user
     }}>

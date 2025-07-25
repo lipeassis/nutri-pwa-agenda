@@ -21,6 +21,8 @@ import { Servicos } from "./pages/Servicos";
 import ExamesBioquimicos from "./pages/ExamesBioquimicos";
 import FinanceiroRelatorios from "./pages/FinanceiroRelatorios";
 import CadastroAlimentos from "./pages/CadastroAlimentos";
+import { EditarPerfil } from "./pages/EditarPerfil";
+import { TrocarSenha } from "./pages/TrocarSenha";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -105,6 +107,16 @@ const App = () => (
                   <Route path="/alimentos" element={
                     <ProtectedRoute requiredRole="administrador">
                       <CadastroAlimentos />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/perfil" element={
+                    <ProtectedRoute>
+                      <EditarPerfil />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/trocar-senha" element={
+                    <ProtectedRoute>
+                      <TrocarSenha />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />
