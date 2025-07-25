@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image } from "lucide-react";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento } from "@/types";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -15,6 +15,7 @@ import { NovoObjetivo } from "@/components/prontuario/NovoObjetivo";
 import { GraficoEvolucao } from "@/components/prontuario/GraficoEvolucao";
 import { EditarCliente } from "@/components/prontuario/EditarCliente";
 import { AdicionarDoencasAlergias } from "@/components/prontuario/AdicionarDoencasAlergias";
+import { NovoPlanejamento } from "@/components/prontuario/NovoPlanejamento";
 
 export function Prontuario() {
   const { clienteId } = useParams<{ clienteId: string }>();
@@ -24,10 +25,13 @@ export function Prontuario() {
   const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
   const [documentos, setDocumentos] = useLocalStorage<DocumentoCliente[]>('nutriapp-documentos', []);
+  const [planejamentos, setPlanejamentos] = useLocalStorage<PlanejamentoAlimentar[]>('nutriapp-planejamentos', []);
+  const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
   const [showEditarCliente, setShowEditarCliente] = useState(false);
   const [showAdicionarDoencasAlergias, setShowAdicionarDoencasAlergias] = useState(false);
+  const [showNovoPlanejamento, setShowNovoPlanejamento] = useState(false);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -149,6 +153,21 @@ export function Prontuario() {
     );
   };
 
+  const calcularTotaisRefeicao = (refeicao: any) => {
+    return refeicao.alimentos.reduce((total: any, alimentoRef: any) => {
+      const alimento = alimentos.find(a => a.id === alimentoRef.alimentoId);
+      if (!alimento) return total;
+
+      const fator = alimentoRef.quantidade / alimento.porcaoReferencia;
+      return {
+        kcal: total.kcal + (alimento.informacaoNutricional.kcal * fator),
+        proteina: total.proteina + (alimento.informacaoNutricional.proteina * fator),
+        carboidratos: total.carboidratos + (alimento.informacaoNutricional.carboidratos * fator),
+        lipideos: total.lipideos + (alimento.informacaoNutricional.lipideos * fator),
+      };
+    }, { kcal: 0, proteina: 0, carboidratos: 0, lipideos: 0 });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -266,11 +285,12 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
+          <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
         </TabsList>
@@ -542,6 +562,96 @@ export function Prontuario() {
           )}
         </TabsContent>
 
+        <TabsContent value="planejamento" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Planejamento Alimentar</h3>
+            <Button onClick={() => setShowNovoPlanejamento(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Planejamento
+            </Button>
+          </div>
+          
+          {planejamentos.filter(p => p.clienteId === cliente.id && p.ativo).length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <ChefHat className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhum planejamento alimentar</h3>
+                <p className="text-muted-foreground">
+                  Crie um planejamento alimentar personalizado para o paciente
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {planejamentos
+                .filter(p => p.clienteId === cliente.id && p.ativo)
+                .map((plano) => (
+                  <Card key={plano.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <ChefHat className="w-5 h-5 text-primary" />
+                            {plano.nome}
+                          </CardTitle>
+                          <CardDescription>
+                            {plano.descricao}
+                          </CardDescription>
+                        </div>
+                        <div className="text-right text-sm text-muted-foreground">
+                          <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
+                          {plano.dataFim && (
+                            <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {plano.refeicoes.map((refeicao) => {
+                          const totais = calcularTotaisRefeicao(refeicao);
+                          
+                          return (
+                            <div key={refeicao.id} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <h4 className="font-medium flex items-center gap-2">
+                                  <Clock className="w-4 h-4" />
+                                  {refeicao.nome} - {refeicao.horario}
+                                </h4>
+                                <div className="text-sm text-muted-foreground">
+                                  {totais.kcal.toFixed(0)} kcal | {totais.proteina.toFixed(1)}g P | {totais.carboidratos.toFixed(1)}g C | {totais.lipideos.toFixed(1)}g L
+                                </div>
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                {refeicao.alimentos.map((alimentoRef, index) => {
+                                  const alimento = alimentos.find(a => a.id === alimentoRef.alimentoId);
+                                  if (!alimento) return null;
+                                  
+                                  const fator = alimentoRef.quantidade / alimento.porcaoReferencia;
+                                  
+                                  return (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+                                      <span className="font-medium">{alimentoRef.alimentoNome}</span>
+                                      <div className="flex gap-4 text-muted-foreground">
+                                        <span>{alimentoRef.quantidade} {alimentoRef.unidade}</span>
+                                        <span>{(alimento.informacaoNutricional.kcal * fator).toFixed(0)} kcal</span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="documentos" className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Documentos do Paciente</h3>
@@ -743,6 +853,13 @@ export function Prontuario() {
           onClose={() => setShowAdicionarDoencasAlergias(false)}
         />
       )}
-    </div>
-  );
+        {showNovoPlanejamento && (
+          <NovoPlanejamento
+            clienteId={cliente.id}
+            onClose={() => setShowNovoPlanejamento(false)}
+            onSave={(plano) => setPlanejamentos([...planejamentos, plano])}
+          />
+        )}
+      </div>
+    );
 }

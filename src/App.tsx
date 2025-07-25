@@ -20,6 +20,7 @@ import { Convenios } from "./pages/Convenios";
 import { Servicos } from "./pages/Servicos";
 import ExamesBioquimicos from "./pages/ExamesBioquimicos";
 import FinanceiroRelatorios from "./pages/FinanceiroRelatorios";
+import CadastroAlimentos from "./pages/CadastroAlimentos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +100,11 @@ const App = () => (
                   <Route path="/financeiro" element={
                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
                       <FinanceiroRelatorios />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/alimentos" element={
+                    <ProtectedRoute requiredRole="administrador">
+                      <CadastroAlimentos />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />

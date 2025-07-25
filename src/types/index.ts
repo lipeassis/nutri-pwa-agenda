@@ -177,6 +177,75 @@ export interface DocumentoCliente {
   criadoPor: string; // id do usuário
 }
 
+export interface InformacaoNutricional {
+  kcal: number;
+  proteina: number;
+  carboidratos: number;
+  lipideos: number;
+  fibras: number;
+  gordurasSaturadas: number;
+  gordurasTrans: number;
+  sodio: number;
+  // Vitaminas
+  vitaminaA: number;
+  vitaminaB1: number;
+  vitaminaB2: number;
+  vitaminaB6: number;
+  vitaminaB12: number;
+  vitaminaC: number;
+  vitaminaD: number;
+  vitaminaE: number;
+  vitaminaK: number;
+  acido_folico: number;
+  niacina: number;
+  // Minerais
+  calcio: number;
+  ferro: number;
+  magnesio: number;
+  fosforo: number;
+  potassio: number;
+  zinco: number;
+  selenio: number;
+}
+
+export interface Alimento {
+  id: string;
+  nome: string;
+  categoria: string;
+  unidadeMedida: string; // g, ml, unidade, colher, etc.
+  porcaoReferencia: number; // quantidade da porção de referência (ex: 100g)
+  informacaoNutricional: InformacaoNutricional; // valores por porção de referência
+  ativo: boolean;
+  criadoEm: string;
+}
+
+export interface AlimentoRefeicao {
+  alimentoId: string;
+  alimentoNome: string;
+  quantidade: number;
+  unidade: string;
+}
+
+export interface Refeicao {
+  id: string;
+  nome: string;
+  horario: string;
+  alimentos: AlimentoRefeicao[];
+}
+
+export interface PlanejamentoAlimentar {
+  id: string;
+  clienteId: string;
+  nome: string;
+  descricao: string;
+  refeicoes: Refeicao[];
+  dataInicio: string;
+  dataFim?: string;
+  ativo: boolean;
+  criadoEm: string;
+  criadoPor: string;
+}
+
 export interface Usuario {
   id: string;
   nome: string;
