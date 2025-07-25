@@ -332,12 +332,12 @@ export default function FinanceiroRelatorios() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Profissional (opcional)</Label>
-                    <Select value={novaTransacao.usuarioId} onValueChange={(value) => setNovaTransacao({...novaTransacao, usuarioId: value})}>
+                    <Select value={novaTransacao.usuarioId || 'none'} onValueChange={(value) => setNovaTransacao({...novaTransacao, usuarioId: value === 'none' ? '' : value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
+                        <SelectItem value="none">Nenhum</SelectItem>
                         {profissionais.map(prof => (
                           <SelectItem key={prof.id} value={prof.id}>{prof.nome}</SelectItem>
                         ))}
@@ -346,12 +346,12 @@ export default function FinanceiroRelatorios() {
                   </div>
                   <div>
                     <Label>Serviço (opcional)</Label>
-                    <Select value={novaTransacao.servicoId} onValueChange={(value) => setNovaTransacao({...novaTransacao, servicoId: value})}>
+                    <Select value={novaTransacao.servicoId || 'none'} onValueChange={(value) => setNovaTransacao({...novaTransacao, servicoId: value === 'none' ? '' : value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
+                        <SelectItem value="none">Nenhum</SelectItem>
                         {servicos.filter(s => s.ativo).map(servico => (
                           <SelectItem key={servico.id} value={servico.id}>{servico.nome}</SelectItem>
                         ))}
