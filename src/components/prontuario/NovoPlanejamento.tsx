@@ -18,30 +18,33 @@ import { toast } from 'sonner';
 interface NovoPlanejamentoProps {
   clienteId: string;
   cliente: Cliente;
+  planejamentoParaEditar?: PlanejamentoAlimentar;
   onClose: () => void;
   onSave: (plano: PlanejamentoAlimentar) => void;
 }
 
-export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPlanejamentoProps) {
+export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, onClose, onSave }: NovoPlanejamentoProps) {
   const { user } = useAuth();
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   
   const [formData, setFormData] = useState({
-    nome: '',
-    descricao: '',
-    dataInicio: new Date().toISOString().split('T')[0],
-    dataFim: '',
+    nome: planejamentoParaEditar?.nome || '',
+    descricao: planejamentoParaEditar?.descricao || '',
+    dataInicio: planejamentoParaEditar?.dataInicio || new Date().toISOString().split('T')[0],
+    dataFim: planejamentoParaEditar?.dataFim || '',
   });
 
-  const [refeicoes, setRefeicoes] = useState<Refeicao[]>([
-    { id: '1', nome: 'Café da Manhã', horario: '07:00', alimentos: [] },
-    { id: '2', nome: 'Lanche da Manhã', horario: '10:00', alimentos: [] },
-    { id: '3', nome: 'Almoço', horario: '12:00', alimentos: [] },
-    { id: '4', nome: 'Lanche da Tarde', horario: '15:00', alimentos: [] },
-    { id: '5', nome: 'Jantar', horario: '19:00', alimentos: [] },
-    { id: '6', nome: 'Ceia', horario: '22:00', alimentos: [] },
-  ]);
+  const [refeicoes, setRefeicoes] = useState<Refeicao[]>(
+    planejamentoParaEditar?.refeicoes || [
+      { id: '1', nome: 'Café da Manhã', horario: '07:00', alimentos: [] },
+      { id: '2', nome: 'Lanche da Manhã', horario: '10:00', alimentos: [] },
+      { id: '3', nome: 'Almoço', horario: '12:00', alimentos: [] },
+      { id: '4', nome: 'Lanche da Tarde', horario: '15:00', alimentos: [] },
+      { id: '5', nome: 'Jantar', horario: '19:00', alimentos: [] },
+      { id: '6', nome: 'Ceia', horario: '22:00', alimentos: [] },
+    ]
+  );
 
   const [refeicaoAtual, setRefeicaoAtual] = useState<string>('1');
   const [novoAlimento, setNovoAlimento] = useState({
@@ -148,7 +151,7 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
     }
 
     const plano: PlanejamentoAlimentar = {
-      id: Date.now().toString(),
+      id: planejamentoParaEditar?.id || Date.now().toString(),
       clienteId,
       nome: formData.nome,
       descricao: formData.descricao,
@@ -156,12 +159,12 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
       dataInicio: formData.dataInicio,
       dataFim: formData.dataFim || undefined,
       ativo: true,
-      criadoEm: new Date().toISOString(),
-      criadoPor: user?.id || 'unknown'
+      criadoEm: planejamentoParaEditar?.criadoEm || new Date().toISOString(),
+      criadoPor: planejamentoParaEditar?.criadoPor || user?.id || 'unknown'
     };
 
     onSave(plano);
-    toast.success('Plano alimentar criado com sucesso');
+    toast.success(planejamentoParaEditar ? 'Plano alimentar atualizado com sucesso' : 'Plano alimentar criado com sucesso');
     onClose();
   };
 
@@ -266,10 +269,10 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Apple className="w-5 h-5 text-primary" />
-            Novo Planejamento Alimentar
+            {planejamentoParaEditar ? 'Editar Planejamento Alimentar' : 'Novo Planejamento Alimentar'}
           </DialogTitle>
           <DialogDescription>
-            Crie um plano alimentar personalizado para o paciente
+            {planejamentoParaEditar ? 'Edite o plano alimentar do paciente' : 'Crie um plano alimentar personalizado para o paciente'}
           </DialogDescription>
         </DialogHeader>
 

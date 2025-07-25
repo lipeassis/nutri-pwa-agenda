@@ -34,6 +34,7 @@ export function Prontuario() {
   const [showEditarCliente, setShowEditarCliente] = useState(false);
   const [showAdicionarDoencasAlergias, setShowAdicionarDoencasAlergias] = useState(false);
   const [showNovoPlanejamento, setShowNovoPlanejamento] = useState(false);
+  const [planejamentoParaEditar, setPlanejamentoParaEditar] = useState<PlanejamentoAlimentar | null>(null);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -594,25 +595,35 @@ export function Prontuario() {
                 .filter(p => p.clienteId === cliente.id && p.ativo)
                 .map((plano) => (
                   <Card key={plano.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <ChefHat className="w-5 h-5 text-primary" />
-                            {plano.nome}
-                          </CardTitle>
-                          <CardDescription>
-                            {plano.descricao}
-                          </CardDescription>
-                        </div>
-                        <div className="text-right text-sm text-muted-foreground">
-                          <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
-                          {plano.dataFim && (
-                            <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
+                     <CardHeader>
+                       <div className="flex items-center justify-between">
+                         <div>
+                           <CardTitle className="flex items-center gap-2">
+                             <ChefHat className="w-5 h-5 text-primary" />
+                             {plano.nome}
+                           </CardTitle>
+                           <CardDescription>
+                             {plano.descricao}
+                           </CardDescription>
+                         </div>
+                         <div className="flex items-center gap-3">
+                           <Button 
+                             variant="outline" 
+                             size="sm" 
+                             onClick={() => setPlanejamentoParaEditar(plano)}
+                           >
+                             <Edit className="w-4 h-4 mr-2" />
+                             Editar
+                           </Button>
+                           <div className="text-right text-sm text-muted-foreground">
+                             <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
+                             {plano.dataFim && (
+                               <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {plano.refeicoes.map((refeicao) => {
@@ -874,6 +885,21 @@ export function Prontuario() {
             cliente={cliente}
             onClose={() => setShowNovoPlanejamento(false)}
             onSave={(plano) => setPlanejamentos([...planejamentos, plano])}
+          />
+        )}
+
+        {planejamentoParaEditar && (
+          <NovoPlanejamento
+            clienteId={cliente.id}
+            cliente={cliente}
+            planejamentoParaEditar={planejamentoParaEditar}
+            onClose={() => setPlanejamentoParaEditar(null)}
+            onSave={(plano) => {
+              setPlanejamentos(planejamentos.map(p => 
+                p.id === plano.id ? plano : p
+              ));
+              setPlanejamentoParaEditar(null);
+            }}
           />
         )}
       </div>
