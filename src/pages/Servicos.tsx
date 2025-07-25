@@ -308,38 +308,81 @@ export function Servicos() {
                 />
               </div>
 
-              {conveniosAtivos.length > 0 && (
-                <div className="space-y-3">
-                  <Label className="text-base font-semibold">Valores por Convênio</Label>
-                  <div className="grid gap-3 md:grid-cols-2 border rounded-md p-4">
-                    {conveniosAtivos.map((convenio) => (
-                      <div key={convenio.id} className="space-y-2">
-                        <Label htmlFor={`convenio-${convenio.id}`}>
-                          {convenio.nome}
-                        </Label>
-                        <Input
-                          id={`convenio-${convenio.id}`}
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={formData.valoresConvenios[convenio.id] || ""}
-                          onChange={(e) => setFormData(prev => ({
-                            ...prev,
-                            valoresConvenios: {
-                              ...prev.valoresConvenios,
-                              [convenio.id]: e.target.value
-                            }
-                          }))}
-                          placeholder={`R$ ${convenio.valorConsulta.toFixed(2)}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Deixe em branco para usar o valor padrão do convênio
-                  </p>
+              {/* Seção de Preços Convênio */}
+              <div className="border-t pt-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <h3 className="text-lg font-semibold">Preços Convênio</h3>
                 </div>
-              )}
+
+                {conveniosAtivos.length > 0 ? (
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Preços por Convênio</Label>
+                    <div className="border rounded-md">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[200px]">Convênio</TableHead>
+                            <TableHead className="w-[150px]">Valor Padrão</TableHead>
+                            <TableHead>Preço Personalizado (R$)</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {conveniosAtivos.map((convenio) => (
+                            <TableRow key={convenio.id}>
+                              <TableCell className="font-medium">
+                                {convenio.nome}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                R$ {convenio.valorConsulta.toFixed(2)}
+                                {convenio.percentualDesconto > 0 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    ({convenio.percentualDesconto}% desconto)
+                                  </div>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={formData.valoresConvenios[convenio.id] || ""}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    valoresConvenios: {
+                                      ...prev.valoresConvenios,
+                                      [convenio.id]: e.target.value
+                                    }
+                                  }))}
+                                  placeholder={`${convenio.valorConsulta.toFixed(2)}`}
+                                  className="w-full"
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+                      <p className="font-medium mb-1">💡 Dica:</p>
+                      <ul className="space-y-1">
+                        <li>• Deixe em branco para usar o valor padrão do convênio</li>
+                        <li>• O valor padrão já considera o desconto configurado no convênio</li>
+                        <li>• Valores personalizados substituem completamente o valor padrão</li>
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border rounded-md p-6 text-center">
+                    <p className="text-muted-foreground text-sm">
+                      Nenhum convênio cadastrado no sistema.
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Cadastre convênios para definir preços específicos.
+                    </p>
+                  </div>
+                )}
+              </div>
 
               <div className="flex gap-2 pt-4">
                 <Button type="submit">{editingServico ? "Atualizar" : "Cadastrar"}</Button>
@@ -400,13 +443,16 @@ export function Servicos() {
                     </TableCell>
                     <TableCell>R$ {servico.valorParticular.toFixed(2)}</TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="space-y-1">
                         {conveniosAtivos.filter(c => servico.valoresConvenios[c.id]).map(convenio => (
-                          <Badge key={convenio.id} variant="secondary" className="text-xs">
-                            {convenio.nome}: R$ {servico.valoresConvenios[convenio.id].toFixed(2)}
-                          </Badge>
+                          <div key={convenio.id} className="flex justify-between items-center text-xs bg-muted/50 px-2 py-1 rounded">
+                            <span className="font-medium">{convenio.nome}:</span>
+                            <span>R$ {servico.valoresConvenios[convenio.id].toFixed(2)}</span>
+                          </div>
                         ))}
-                        {Object.keys(servico.valoresConvenios).length === 0 && "-"}
+                        {Object.keys(servico.valoresConvenios).length === 0 && (
+                          <span className="text-muted-foreground text-xs">Valores padrão dos convênios</span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
