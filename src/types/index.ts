@@ -265,6 +265,7 @@ export interface TransacaoFinanceira {
   valor: number;
   data: string;
   usuarioId?: string; // Profissional responsável
+  clienteId?: string; // Cliente relacionado
   servicoId?: string; // Serviço relacionado
   agendamentoId?: string; // Agendamento relacionado (se aplicável)
   observacoes?: string;

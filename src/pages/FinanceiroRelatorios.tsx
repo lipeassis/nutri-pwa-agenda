@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Agendamento, Servico, Convenio, Usuario, TransacaoFinanceira, RelatorioFinanceiro } from '@/types';
+import { Agendamento, Servico, Convenio, Usuario, Cliente, TransacaoFinanceira, RelatorioFinanceiro } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -23,6 +23,7 @@ export default function FinanceiroRelatorios() {
   const [servicos] = useLocalStorage<Servico[]>('nutriapp-servicos', []);
   const [convenios] = useLocalStorage<Convenio[]>('nutriapp-convenios', []);
   const [usuarios] = useLocalStorage<Usuario[]>('system_users', []);
+  const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [transacoes, setTransacoes] = useLocalStorage<TransacaoFinanceira[]>('nutriapp-transacoes', []);
   
   const [filtroInicio, setFiltroInicio] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -41,6 +42,7 @@ export default function FinanceiroRelatorios() {
     valor: '',
     data: format(new Date(), 'yyyy-MM-dd'),
     usuarioId: '',
+    clienteId: '',
     servicoId: '',
     observacoes: ''
   });
@@ -85,6 +87,7 @@ export default function FinanceiroRelatorios() {
             valor,
             data: agendamento.data,
             usuarioId: agendamento.profissionalId,
+            clienteId: agendamento.clienteId,
             servicoId: agendamento.servicoId,
             agendamentoId: agendamento.id,
             criadoEm: agendamento.criadoEm,
@@ -206,6 +209,7 @@ export default function FinanceiroRelatorios() {
       valor: parseFloat(novaTransacao.valor),
       data: novaTransacao.data,
       usuarioId: novaTransacao.usuarioId || undefined,
+      clienteId: novaTransacao.clienteId || undefined,
       servicoId: novaTransacao.servicoId || undefined,
       observacoes: novaTransacao.observacoes || undefined,
       criadoEm: new Date().toISOString(),
@@ -220,6 +224,7 @@ export default function FinanceiroRelatorios() {
       valor: '',
       data: format(new Date(), 'yyyy-MM-dd'),
       usuarioId: '',
+      clienteId: '',
       servicoId: '',
       observacoes: ''
     });
@@ -358,6 +363,21 @@ export default function FinanceiroRelatorios() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                
+                <div>
+                  <Label>Cliente (opcional)</Label>
+                  <Select value={novaTransacao.clienteId || 'none'} onValueChange={(value) => setNovaTransacao({...novaTransacao, clienteId: value === 'none' ? '' : value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      {clientes.map(cliente => (
+                        <SelectItem key={cliente.id} value={cliente.id}>{cliente.nome}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
@@ -640,6 +660,7 @@ export default function FinanceiroRelatorios() {
                       <TableHead>Tipo</TableHead>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Descrição</TableHead>
+                      <TableHead>Cliente</TableHead>
                       <TableHead>Profissional</TableHead>
                       <TableHead>Serviço</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
@@ -650,6 +671,7 @@ export default function FinanceiroRelatorios() {
                       .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
                       .map((transacao) => {
                         const profissional = usuarios.find(u => u.id === transacao.usuarioId);
+                        const cliente = clientes.find(c => c.id === transacao.clienteId);
                         const servico = servicos.find(s => s.id === transacao.servicoId);
                         
                         return (
@@ -675,6 +697,9 @@ export default function FinanceiroRelatorios() {
                             </TableCell>
                             <TableCell className="max-w-xs truncate">
                               {transacao.descricao}
+                            </TableCell>
+                            <TableCell>
+                              {cliente ? cliente.nome : '-'}
                             </TableCell>
                             <TableCell>
                               {profissional ? profissional.nome : '-'}
