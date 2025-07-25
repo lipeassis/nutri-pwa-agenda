@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { PlanejamentoAlimentar, Refeicao, AlimentoRefeicao, Alimento } from '@/types';
+import { PlanejamentoAlimentar, Refeicao, AlimentoRefeicao, Alimento, Cliente } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +17,12 @@ import { toast } from 'sonner';
 
 interface NovoPlanejamentoProps {
   clienteId: string;
+  cliente: Cliente;
   onClose: () => void;
   onSave: (plano: PlanejamentoAlimentar) => void;
 }
 
-export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejamentoProps) {
+export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPlanejamentoProps) {
   const { user } = useAuth();
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   
@@ -61,6 +62,59 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
       lipideos: alimentoSelecionado.informacaoNutricional.lipideos * fator,
     };
   })() : null;
+
+  // Estados para cálculos energéticos
+  const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle'>('mifflin-st-jeor');
+  const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
+  const [peso, setPeso] = useState<number>(0);
+  const [altura, setAltura] = useState<number>(0);
+  const [idade, setIdade] = useState<number>(0);
+  const [sexo, setSexo] = useState<'masculino' | 'feminino'>('masculino');
+
+  // Calcular idade baseado na data de nascimento
+  React.useEffect(() => {
+    if (cliente.dataNascimento) {
+      const hoje = new Date();
+      const nascimento = new Date(cliente.dataNascimento);
+      let idadeCalculada = hoje.getFullYear() - nascimento.getFullYear();
+      const mesAtual = hoje.getMonth();
+      const mesNascimento = nascimento.getMonth();
+      
+      if (mesAtual < mesNascimento || (mesAtual === mesNascimento && hoje.getDate() < nascimento.getDate())) {
+        idadeCalculada--;
+      }
+      
+      setIdade(idadeCalculada);
+    }
+  }, [cliente.dataNascimento]);
+
+  // Calcular TMB (Taxa Metabólica Basal)
+  const calcularTMB = () => {
+    if (!peso || !altura || !idade) return 0;
+
+    switch (formulaTMB) {
+      case 'harris-benedict':
+        return sexo === 'masculino' 
+          ? 88.362 + (13.397 * peso) + (4.799 * altura) - (5.677 * idade)
+          : 447.593 + (9.247 * peso) + (3.098 * altura) - (4.330 * idade);
+      
+      case 'mifflin-st-jeor':
+        return sexo === 'masculino'
+          ? (10 * peso) + (6.25 * altura) - (5 * idade) + 5
+          : (10 * peso) + (6.25 * altura) - (5 * idade) - 161;
+      
+      case 'katch-mcardle':
+        // Usando estimativa de 15% de gordura corporal se não fornecido
+        const massaMagra = peso * 0.85;
+        return 370 + (21.6 * massaMagra);
+      
+      default:
+        return 0;
+    }
+  };
+
+  const tmb = calcularTMB();
+  const gastoTotal = tmb * fatorAtividade;
 
   const handleSave = () => {
     if (!formData.nome.trim()) {
@@ -242,6 +296,146 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
                   placeholder="Objetivo do plano, observações especiais..."
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Cálculos Energéticos */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Cálculos Energéticos</CardTitle>
+              <CardDescription>
+                Configure os parâmetros para calcular as necessidades energéticas do paciente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="peso">Peso (kg)</Label>
+                  <Input
+                    id="peso"
+                    type="number"
+                    step="0.1"
+                    value={peso || ''}
+                    onChange={(e) => setPeso(parseFloat(e.target.value) || 0)}
+                    placeholder="70.0"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="altura">Altura (cm)</Label>
+                  <Input
+                    id="altura"
+                    type="number"
+                    value={altura || ''}
+                    onChange={(e) => setAltura(parseFloat(e.target.value) || 0)}
+                    placeholder="170"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="idade">Idade</Label>
+                  <Input
+                    id="idade"
+                    type="number"
+                    value={idade || ''}
+                    onChange={(e) => setIdade(parseInt(e.target.value) || 0)}
+                    placeholder="30"
+                  />
+                </div>
+                
+                <div>
+                  <Label>Sexo</Label>
+                  <Select value={sexo} onValueChange={(value: any) => setSexo(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Fórmula para TMB</Label>
+                  <Select value={formulaTMB} onValueChange={(value: any) => setFormulaTMB(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mifflin-st-jeor">Mifflin-St Jeor (Recomendada)</SelectItem>
+                      <SelectItem value="harris-benedict">Harris-Benedict</SelectItem>
+                      <SelectItem value="katch-mcardle">Katch-McArdle</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Nível de Atividade Física</Label>
+                  <Select value={fatorAtividade.toString()} onValueChange={(value) => setFatorAtividade(parseFloat(value))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1.2">Sedentário (1.2)</SelectItem>
+                      <SelectItem value="1.375">Levemente ativo (1.375)</SelectItem>
+                      <SelectItem value="1.55">Moderadamente ativo (1.55)</SelectItem>
+                      <SelectItem value="1.725">Muito ativo (1.725)</SelectItem>
+                      <SelectItem value="1.9">Extremamente ativo (1.9)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Resultados dos Cálculos */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{tmb.toFixed(0)}</div>
+                  <div className="text-sm text-muted-foreground">Gasto Energético Basal (kcal)</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {formulaTMB === 'mifflin-st-jeor' ? 'Mifflin-St Jeor' : 
+                     formulaTMB === 'harris-benedict' ? 'Harris-Benedict' : 'Katch-McArdle'}
+                  </div>
+                </div>
+                
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{gastoTotal.toFixed(0)}</div>
+                  <div className="text-sm text-muted-foreground">Gasto Energético Total (kcal)</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    TMB × {fatorAtividade}
+                  </div>
+                </div>
+                
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">{totaisDia.kcal.toFixed(0)}</div>
+                  <div className="text-sm text-muted-foreground">Oferta do Plano (kcal)</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {gastoTotal > 0 ? 
+                      `${((totaisDia.kcal / gastoTotal) * 100).toFixed(0)}% do GET` : 
+                      'Configure os parâmetros'
+                    }
+                  </div>
+                </div>
+              </div>
+
+              {gastoTotal > 0 && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="text-sm">
+                    <strong>Interpretação:</strong>
+                    {totaisDia.kcal < gastoTotal * 0.8 && (
+                      <span className="text-red-600 ml-2">⚠️ Plano hipocalórico - pode promover perda de peso</span>
+                    )}
+                    {totaisDia.kcal >= gastoTotal * 0.8 && totaisDia.kcal <= gastoTotal * 1.2 && (
+                      <span className="text-green-600 ml-2">✅ Plano balanceado - manutenção de peso</span>
+                    )}
+                    {totaisDia.kcal > gastoTotal * 1.2 && (
+                      <span className="text-orange-600 ml-2">⚠️ Plano hipercalórico - pode promover ganho de peso</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

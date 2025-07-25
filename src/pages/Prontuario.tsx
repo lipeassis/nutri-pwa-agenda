@@ -856,6 +856,7 @@ export function Prontuario() {
         {showNovoPlanejamento && (
           <NovoPlanejamento
             clienteId={cliente.id}
+            cliente={cliente}
             onClose={() => setShowNovoPlanejamento(false)}
             onSave={(plano) => setPlanejamentos([...planejamentos, plano])}
           />
