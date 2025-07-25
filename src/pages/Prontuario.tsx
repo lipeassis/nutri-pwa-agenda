@@ -264,6 +264,36 @@ export function Prontuario() {
                       </div>
                     </div>
 
+                    {/* Dobras Cutâneas */}
+                    {consulta.dobrasCutaneas && (
+                      <div>
+                        <h4 className="font-medium mb-2">Dobras Cutâneas</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Tricipital:</span> {consulta.dobrasCutaneas.tricipital}mm
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Bicipital:</span> {consulta.dobrasCutaneas.bicipital}mm
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Subescapular:</span> {consulta.dobrasCutaneas.subescapular}mm
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Suprailíaca:</span> {consulta.dobrasCutaneas.suprailiaca}mm
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Abdominal:</span> {consulta.dobrasCutaneas.abdominal}mm
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Coxa:</span> {consulta.dobrasCutaneas.coxa}mm
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Panturrilha:</span> {consulta.dobrasCutaneas.panturrilha}mm
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Relato do paciente */}
                     {consulta.relatoPaciente && (
                       <div>

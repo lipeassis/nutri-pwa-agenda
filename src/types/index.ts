@@ -78,11 +78,22 @@ export interface MedidasAntropometricas {
   massaMuscular: number;
 }
 
+export interface DobrasCutaneas {
+  tricipital: number;
+  bicipital: number;
+  subescapular: number;
+  suprailiaca: number;
+  abdominal: number;
+  coxa: number;
+  panturrilha: number;
+}
+
 export interface ConsultaProntuario {
   id: string;
   clienteId: string;
   data: string;
   medidas: MedidasAntropometricas;
+  dobrasCutaneas: DobrasCutaneas;
   relatoPaciente: string;
   observacoesNutricionista: string;
   criadoEm: string;
