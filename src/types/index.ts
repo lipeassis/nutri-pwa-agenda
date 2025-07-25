@@ -60,6 +60,8 @@ export interface Agendamento {
   profissionalNome: string;
   servicoId: string; // Alterado de tipo para servicoId
   servicoNome: string; // Nome do serviço
+  convenioId?: string; // ID do convênio (opcional)
+  convenioNome?: string; // Nome do convênio (opcional)
   data: string;
   hora: string;
   status: 'agendado' | 'realizado' | 'cancelado';

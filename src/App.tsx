@@ -19,6 +19,7 @@ import { Doencas } from "./pages/Doencas";
 import { Convenios } from "./pages/Convenios";
 import { Servicos } from "./pages/Servicos";
 import ExamesBioquimicos from "./pages/ExamesBioquimicos";
+import FinanceiroRelatorios from "./pages/FinanceiroRelatorios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,11 @@ const App = () => (
                   <Route path="/exames-bioquimicos" element={
                     <ProtectedRoute requiredRole="administrador">
                       <ExamesBioquimicos />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/financeiro" element={
+                    <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                      <FinanceiroRelatorios />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />
