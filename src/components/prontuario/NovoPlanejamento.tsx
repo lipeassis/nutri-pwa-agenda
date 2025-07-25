@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2, Clock, Apple, Save, X } from 'lucide-react';
+import { Plus, Trash2, Clock, Apple, Save, X, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface NovoPlanejamentoProps {
@@ -70,6 +70,29 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
     onSave(plano);
     toast.success('Plano alimentar criado com sucesso');
     onClose();
+  };
+
+  const adicionarRefeicao = () => {
+    const novaRefeicao: Refeicao = {
+      id: Date.now().toString(),
+      nome: 'Nova Refeição',
+      horario: '12:00',
+      alimentos: []
+    };
+    setRefeicoes([...refeicoes, novaRefeicao]);
+  };
+
+  const removerRefeicao = (id: string) => {
+    setRefeicoes(refeicoes.filter(r => r.id !== id));
+    if (refeicaoAtual === id) {
+      setRefeicaoAtual(refeicoes[0]?.id || '');
+    }
+  };
+
+  const editarRefeicao = (id: string, campo: 'nome' | 'horario', valor: string) => {
+    setRefeicoes(refeicoes.map(r => 
+      r.id === id ? { ...r, [campo]: valor } : r
+    ));
   };
 
   const adicionarAlimento = () => {
@@ -229,7 +252,13 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
           {/* Refeições */}
           <Card>
             <CardHeader>
-              <CardTitle>Refeições</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Refeições</CardTitle>
+                <Button variant="outline" size="sm" onClick={adicionarRefeicao}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Refeição
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Tabs value={refeicaoAtual} onValueChange={setRefeicaoAtual}>
@@ -252,12 +281,33 @@ export function NovoPlanejamento({ clienteId, onClose, onSave }: NovoPlanejament
                   return (
                     <TabsContent key={refeicao.id} value={refeicao.id} className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          <span className="font-medium">{refeicao.nome} - {refeicao.horario}</span>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={refeicao.nome}
+                              onChange={(e) => editarRefeicao(refeicao.id, 'nome', e.target.value)}
+                              className="font-medium w-40"
+                            />
+                            <Input
+                              type="time"
+                              value={refeicao.horario}
+                              onChange={(e) => editarRefeicao(refeicao.id, 'horario', e.target.value)}
+                              className="w-32"
+                            />
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {totais.kcal.toFixed(0)} kcal | {totais.proteina.toFixed(1)}g P | {totais.carboidratos.toFixed(1)}g C | {totais.lipideos.toFixed(1)}g L
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm text-muted-foreground">
+                            {totais.kcal.toFixed(0)} kcal | {totais.proteina.toFixed(1)}g P | {totais.carboidratos.toFixed(1)}g C | {totais.lipideos.toFixed(1)}g L
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removerRefeicao(refeicao.id)}
+                            disabled={refeicoes.length <= 1}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
 
