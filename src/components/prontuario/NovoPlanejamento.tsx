@@ -67,6 +67,7 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
   // Estados para cálculos energéticos
   const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
+  const [metaKcal, setMetaKcal] = useState<number>(0);
   const [peso, setPeso] = useState<number>(0);
   const [altura, setAltura] = useState<number>(0);
   const [idade, setIdade] = useState<number>(0);
@@ -375,7 +376,7 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>Fórmula para TMB</Label>
                   <Select value={formulaTMB} onValueChange={(value: any) => setFormulaTMB(value)}>
@@ -405,6 +406,17 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div>
+                  <Label htmlFor="meta-kcal">Meta de KCAL do Plano</Label>
+                  <Input
+                    id="meta-kcal"
+                    type="number"
+                    value={metaKcal || ''}
+                    onChange={(e) => setMetaKcal(parseFloat(e.target.value) || 0)}
+                    placeholder="Ex: 1800"
+                  />
+                </div>
               </div>
 
               {/* Resultados dos Cálculos */}
@@ -430,26 +442,46 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
                   <div className="text-2xl font-bold text-orange-600">{totaisDia.kcal.toFixed(0)}</div>
                   <div className="text-sm text-muted-foreground">Oferta do Plano (kcal)</div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {gastoTotal > 0 ? 
-                      `${((totaisDia.kcal / gastoTotal) * 100).toFixed(0)}% do GET` : 
-                      'Configure os parâmetros'
+                    {metaKcal > 0 ? 
+                      `${((totaisDia.kcal / metaKcal) * 100).toFixed(0)}% da Meta` :
+                      gastoTotal > 0 ? 
+                        `${((totaisDia.kcal / gastoTotal) * 100).toFixed(0)}% do GET` : 
+                        'Configure os parâmetros'
                     }
                   </div>
                 </div>
               </div>
 
-              {gastoTotal > 0 && (
+              {(gastoTotal > 0 || metaKcal > 0) && (
                 <div className="p-3 bg-muted rounded-lg">
                   <div className="text-sm">
                     <strong>Interpretação:</strong>
-                    {totaisDia.kcal < gastoTotal * 0.8 && (
-                      <span className="text-red-600 ml-2">⚠️ Plano hipocalórico - pode promover perda de peso</span>
-                    )}
-                    {totaisDia.kcal >= gastoTotal * 0.8 && totaisDia.kcal <= gastoTotal * 1.2 && (
-                      <span className="text-green-600 ml-2">✅ Plano balanceado - manutenção de peso</span>
-                    )}
-                    {totaisDia.kcal > gastoTotal * 1.2 && (
-                      <span className="text-orange-600 ml-2">⚠️ Plano hipercalórico - pode promover ganho de peso</span>
+                    {metaKcal > 0 ? (
+                      // Interpretação baseada na meta definida
+                      <>
+                        {totaisDia.kcal < metaKcal * 0.95 && (
+                          <span className="text-red-600 ml-2">⚠️ Plano abaixo da meta - {(metaKcal - totaisDia.kcal).toFixed(0)} kcal faltantes</span>
+                        )}
+                        {totaisDia.kcal >= metaKcal * 0.95 && totaisDia.kcal <= metaKcal * 1.05 && (
+                          <span className="text-green-600 ml-2">✅ Plano dentro da meta estabelecida</span>
+                        )}
+                        {totaisDia.kcal > metaKcal * 1.05 && (
+                          <span className="text-orange-600 ml-2">⚠️ Plano acima da meta - {(totaisDia.kcal - metaKcal).toFixed(0)} kcal excedentes</span>
+                        )}
+                      </>
+                    ) : (
+                      // Interpretação baseada no GET
+                      <>
+                        {totaisDia.kcal < gastoTotal * 0.8 && (
+                          <span className="text-red-600 ml-2">⚠️ Plano hipocalórico - pode promover perda de peso</span>
+                        )}
+                        {totaisDia.kcal >= gastoTotal * 0.8 && totaisDia.kcal <= gastoTotal * 1.2 && (
+                          <span className="text-green-600 ml-2">✅ Plano balanceado - manutenção de peso</span>
+                        )}
+                        {totaisDia.kcal > gastoTotal * 1.2 && (
+                          <span className="text-orange-600 ml-2">⚠️ Plano hipercalórico - pode promover ganho de peso</span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
