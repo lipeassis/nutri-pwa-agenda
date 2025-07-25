@@ -1,8 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench } from "lucide-react";
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface NavigationProps {
@@ -13,17 +22,20 @@ export function Navigation({ className }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout, hasPermission } = useAuth();
 
-  const navItems = [
+  const mainNavItems = [
     { href: "/", icon: Home, label: "Dashboard", roles: ['secretaria', 'profissional', 'administrador'] },
     { href: "/clientes", icon: Users, label: "Clientes", roles: ['secretaria', 'profissional', 'administrador'] },
     { href: "/agenda", icon: Calendar, label: "Agenda", roles: ['secretaria', 'profissional', 'administrador'] },
-    { href: "/tipos-profissionais", icon: UserCog, label: "Tipos Prof.", roles: ['administrador'] },
-    { href: "/usuarios", icon: UserCog, label: "Usuários", roles: ['administrador'] },
-    { href: "/doencas", icon: UserCog, label: "Doenças", roles: ['administrador'] },
-    { href: "/convenios", icon: UserCog, label: "Convênios", roles: ['administrador'] },
-    { href: "/servicos", icon: UserCog, label: "Serviços", roles: ['administrador'] },
-    { href: "/exames-bioquimicos", icon: TestTube, label: "Exames", roles: ['administrador'] },
   ].filter(item => hasPermission(item.roles as any));
+
+  const adminItems = [
+    { href: "/tipos-profissionais", icon: UserCog, label: "Tipos de Profissionais" },
+    { href: "/usuarios", icon: UserCog, label: "Usuários" },
+    { href: "/doencas", icon: FileText, label: "Doenças" },
+    { href: "/convenios", icon: CreditCard, label: "Convênios" },
+    { href: "/servicos", icon: Wrench, label: "Serviços" },
+    { href: "/exames-bioquimicos", icon: TestTube, label: "Exames Bioquímicos" },
+  ];
 
   return (
     <nav className={cn("bg-card border-b border-border shadow-soft", className)}>
@@ -38,24 +50,46 @@ export function Navigation({ className }: NavigationProps) {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.href}
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )
-                }
-              >
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+          <div className="hidden md:flex items-center">
+            <NavigationMenu>
+              <NavigationMenuList>
+                {mainNavItems.map((item) => (
+                  <NavigationMenuItem key={item.href}>
+                    <Link to={item.href}>
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <item.icon className="w-4 h-4 mr-2" />
+                        {item.label}
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                ))}
+                
+                {hasPermission('administrador') && (
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Ajustes
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[200px] gap-1 p-2">
+                        {adminItems.map((item) => (
+                          <li key={item.href}>
+                            <Link to={item.href}>
+                              <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                <div className="flex items-center gap-2">
+                                  <item.icon className="w-4 h-4" />
+                                  <div className="text-sm font-medium leading-none">{item.label}</div>
+                                </div>
+                              </NavigationMenuLink>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
           {/* User info and logout */}
@@ -89,7 +123,7 @@ export function Navigation({ className }: NavigationProps) {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col space-y-2">
-              {navItems.map((item) => (
+              {mainNavItems.map((item) => (
                 <NavLink
                   key={item.href}
                   to={item.href}
@@ -107,6 +141,32 @@ export function Navigation({ className }: NavigationProps) {
                   <span>{item.label}</span>
                 </NavLink>
               ))}
+              
+              {hasPermission('administrador') && (
+                <>
+                  <div className="px-3 py-2 text-sm font-medium text-muted-foreground border-t pt-4 mt-2">
+                    Ajustes
+                  </div>
+                  {adminItems.map((item) => (
+                    <NavLink
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        )
+                      }
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  ))}
+                </>
+              )}
             </div>
             
             {/* Mobile user info and logout */}
