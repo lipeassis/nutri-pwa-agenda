@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { PlanejamentoAlimentar, Refeicao, AlimentoRefeicao, Alimento, Cliente } from '@/types';
+import { PlanejamentoAlimentar, Refeicao, AlimentoRefeicao, Alimento, Cliente, ConsultaProntuario } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,7 @@ interface NovoPlanejamentoProps {
 export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPlanejamentoProps) {
   const { user } = useAuth();
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
+  const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   
   const [formData, setFormData] = useState({
     nome: '',
@@ -87,6 +88,23 @@ export function NovoPlanejamento({ clienteId, cliente, onClose, onSave }: NovoPl
       setIdade(idadeCalculada);
     }
   }, [cliente.dataNascimento]);
+
+  // Buscar peso e altura da última consulta
+  React.useEffect(() => {
+    const consultasDoCliente = consultas
+      .filter(c => c.clienteId === clienteId)
+      .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
+    
+    if (consultasDoCliente.length > 0) {
+      const ultimaConsulta = consultasDoCliente[0];
+      if (ultimaConsulta.medidas.peso > 0) {
+        setPeso(ultimaConsulta.medidas.peso);
+      }
+      if (ultimaConsulta.medidas.altura > 0) {
+        setAltura(ultimaConsulta.medidas.altura);
+      }
+    }
+  }, [consultas, clienteId]);
 
   // Calcular TMB (Taxa Metabólica Basal)
   const calcularTMB = () => {
