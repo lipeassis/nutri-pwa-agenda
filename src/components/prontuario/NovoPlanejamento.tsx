@@ -71,7 +71,6 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle' | 'cunningham' | 'tinsley' | 'bolso'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
   const [metaKcal, setMetaKcal] = useState<number>(0);
-  const [tipoMetaKcal, setTipoMetaKcal] = useState<'absoluto' | 'por-kg'>('absoluto');
   const [metaProteina, setMetaProteina] = useState<number>(0);
   const [metaCarboidratos, setMetaCarboidratos] = useState<number>(0);
   const [metaLipideos, setMetaLipideos] = useState<number>(0);
@@ -456,34 +455,15 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                    </div>
                  )}
 
-                <div className="space-y-2">
-                  <Label>Tipo de Meta - KCAL</Label>
-                  <Select value={tipoMetaKcal} onValueChange={(value: any) => setTipoMetaKcal(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="absoluto">Valor absoluto (kcal)</SelectItem>
-                      <SelectItem value="por-kg">Kcal por kg</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div>
-                    <Label htmlFor="meta-kcal">
-                      Meta de KCAL {tipoMetaKcal === 'por-kg' ? '(kcal/kg)' : '(kcal)'}
-                    </Label>
-                    <Input
-                      id="meta-kcal"
-                      type="number"
-                      value={metaKcal || ''}
-                      onChange={(e) => setMetaKcal(parseFloat(e.target.value) || 0)}
-                      placeholder={tipoMetaKcal === 'por-kg' ? "Ex: 30" : "Ex: 1800"}
-                    />
-                    {tipoMetaKcal === 'por-kg' && peso > 0 && metaKcal > 0 && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        = {(metaKcal * peso).toFixed(0)} kcal absolutos
-                      </div>
-                    )}
-                  </div>
+                <div>
+                  <Label htmlFor="meta-kcal">Meta de KCAL do Plano</Label>
+                  <Input
+                    id="meta-kcal"
+                    type="number"
+                    value={metaKcal || ''}
+                    onChange={(e) => setMetaKcal(parseFloat(e.target.value) || 0)}
+                    placeholder="Ex: 1800"
+                  />
                 </div>
               </div>
 
@@ -514,7 +494,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   <div className="text-sm text-muted-foreground">Oferta do Plano (kcal)</div>
                    <div className="text-xs text-muted-foreground mt-1">
                      {metaKcal > 0 ? 
-                       `${((totaisDia.kcal / (tipoMetaKcal === 'por-kg' ? metaKcal * peso : metaKcal)) * 100).toFixed(0)}% da Meta` :
+                       `${((totaisDia.kcal / metaKcal) * 100).toFixed(0)}% da Meta` :
                        gastoTotal > 0 ? 
                          `${((totaisDia.kcal / gastoTotal) * 100).toFixed(0)}% do GET` : 
                          'Configure os parâmetros'
@@ -530,22 +510,15 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                     {metaKcal > 0 ? (
                       // Interpretação baseada na meta definida
                        <>
-                         {(() => {
-                           const metaAbsoluta = tipoMetaKcal === 'por-kg' ? metaKcal * peso : metaKcal;
-                           return (
-                             <>
-                               {totaisDia.kcal < metaAbsoluta * 0.95 && (
-                                 <span className="text-red-600 ml-2">⚠️ Plano abaixo da meta - {(metaAbsoluta - totaisDia.kcal).toFixed(0)} kcal faltantes</span>
-                               )}
-                               {totaisDia.kcal >= metaAbsoluta * 0.95 && totaisDia.kcal <= metaAbsoluta * 1.05 && (
-                                 <span className="text-green-600 ml-2">✅ Plano dentro da meta estabelecida</span>
-                               )}
-                               {totaisDia.kcal > metaAbsoluta * 1.05 && (
-                                 <span className="text-orange-600 ml-2">⚠️ Plano acima da meta - {(totaisDia.kcal - metaAbsoluta).toFixed(0)} kcal excedentes</span>
-                               )}
-                             </>
-                           );
-                         })()}
+                         {totaisDia.kcal < metaKcal * 0.95 && (
+                           <span className="text-red-600 ml-2">⚠️ Plano abaixo da meta - {(metaKcal - totaisDia.kcal).toFixed(0)} kcal faltantes</span>
+                         )}
+                         {totaisDia.kcal >= metaKcal * 0.95 && totaisDia.kcal <= metaKcal * 1.05 && (
+                           <span className="text-green-600 ml-2">✅ Plano dentro da meta estabelecida</span>
+                         )}
+                         {totaisDia.kcal > metaKcal * 1.05 && (
+                           <span className="text-orange-600 ml-2">⚠️ Plano acima da meta - {(totaisDia.kcal - metaKcal).toFixed(0)} kcal excedentes</span>
+                         )}
                        </>
                     ) : (
                       // Interpretação baseada no GET
