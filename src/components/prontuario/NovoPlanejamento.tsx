@@ -68,7 +68,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   })() : null;
 
   // Estados para cálculos energéticos
-  const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle' | 'cunningham' | 'tinsley'>('mifflin-st-jeor');
+  const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle' | 'cunningham' | 'tinsley' | 'bolso'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
   const [metaKcal, setMetaKcal] = useState<number>(0);
   const [metaProteina, setMetaProteina] = useState<number>(0);
@@ -82,6 +82,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   const [idade, setIdade] = useState<number>(0);
   const [sexo, setSexo] = useState<'masculino' | 'feminino'>('masculino');
   const [percentualGordura, setPercentualGordura] = useState<number>(0);
+  const [kcalPorKg, setKcalPorKg] = useState<number>(25);
 
   // Calcular idade baseado na data de nascimento
   React.useEffect(() => {
@@ -149,6 +150,10 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
         // Tinsley: TMB = 25.9 × massa magra + 284 (para pessoas treinadas)
         const massaMagraTinsley = percentualGordura > 0 ? peso * (1 - percentualGordura / 100) : peso * 0.85;
         return 25.9 * massaMagraTinsley + 284;
+      
+      case 'bolso':
+        // Fórmula de Bolso: TMB = peso × kcal/kg
+        return peso * kcalPorKg;
       
       default:
         return 0;
@@ -412,25 +417,43 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                       <SelectItem value="katch-mcardle">Katch-McArdle</SelectItem>
                       <SelectItem value="cunningham">Cunningham</SelectItem>
                       <SelectItem value="tinsley">Tinsley</SelectItem>
+                      <SelectItem value="bolso">Bolso</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
-                <div>
-                  <Label>Nível de Atividade Física</Label>
-                  <Select value={fatorAtividade.toString()} onValueChange={(value) => setFatorAtividade(parseFloat(value))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1.2">Sedentário (1.2)</SelectItem>
-                      <SelectItem value="1.375">Levemente ativo (1.375)</SelectItem>
-                      <SelectItem value="1.55">Moderadamente ativo (1.55)</SelectItem>
-                      <SelectItem value="1.725">Muito ativo (1.725)</SelectItem>
-                      <SelectItem value="1.9">Extremamente ativo (1.9)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                 <div>
+                   <Label>Nível de Atividade Física</Label>
+                   <Select value={fatorAtividade.toString()} onValueChange={(value) => setFatorAtividade(parseFloat(value))}>
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="1.2">Sedentário (1.2)</SelectItem>
+                       <SelectItem value="1.375">Levemente ativo (1.375)</SelectItem>
+                       <SelectItem value="1.55">Moderadamente ativo (1.55)</SelectItem>
+                       <SelectItem value="1.725">Muito ativo (1.725)</SelectItem>
+                       <SelectItem value="1.9">Extremamente ativo (1.9)</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+
+                 {formulaTMB === 'bolso' && (
+                   <div>
+                     <Label htmlFor="kcal-por-kg">Kcal por kg</Label>
+                     <Input
+                       id="kcal-por-kg"
+                       type="number"
+                       step="0.1"
+                       value={kcalPorKg || ''}
+                       onChange={(e) => setKcalPorKg(parseFloat(e.target.value) || 25)}
+                       placeholder="25"
+                     />
+                     <div className="text-xs text-muted-foreground mt-1">
+                       Valor padrão: 25 kcal/kg
+                     </div>
+                   </div>
+                 )}
 
                 <div>
                   <Label htmlFor="meta-kcal">Meta de KCAL do Plano</Label>
@@ -449,12 +472,13 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{tmb.toFixed(0)}</div>
                   <div className="text-sm text-muted-foreground">Gasto Energético Basal (kcal)</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {formulaTMB === 'mifflin-st-jeor' ? 'Mifflin-St Jeor' : 
-                     formulaTMB === 'harris-benedict' ? 'Harris-Benedict' : 
-                     formulaTMB === 'katch-mcardle' ? 'Katch-McArdle' :
-                     formulaTMB === 'cunningham' ? 'Cunningham' : 'Tinsley'}
-                  </div>
+                   <div className="text-xs text-muted-foreground mt-1">
+                     {formulaTMB === 'mifflin-st-jeor' ? 'Mifflin-St Jeor' : 
+                      formulaTMB === 'harris-benedict' ? 'Harris-Benedict' : 
+                      formulaTMB === 'katch-mcardle' ? 'Katch-McArdle' :
+                      formulaTMB === 'cunningham' ? 'Cunningham' : 
+                      formulaTMB === 'tinsley' ? 'Tinsley' : 'Bolso'}
+                   </div>
                 </div>
                 
                 <div className="text-center p-4 bg-green-50 rounded-lg">
