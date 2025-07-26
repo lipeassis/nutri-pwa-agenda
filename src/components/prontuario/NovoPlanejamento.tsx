@@ -68,7 +68,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   })() : null;
 
   // Estados para cálculos energéticos
-  const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle'>('mifflin-st-jeor');
+  const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle' | 'cunningham' | 'tinsley'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
   const [metaKcal, setMetaKcal] = useState<number>(0);
   const [metaProteina, setMetaProteina] = useState<number>(0);
@@ -81,6 +81,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   const [altura, setAltura] = useState<number>(0);
   const [idade, setIdade] = useState<number>(0);
   const [sexo, setSexo] = useState<'masculino' | 'feminino'>('masculino');
+  const [percentualGordura, setPercentualGordura] = useState<number>(0);
 
   // Calcular idade baseado na data de nascimento
   React.useEffect(() => {
@@ -99,7 +100,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
     }
   }, [cliente.dataNascimento]);
 
-  // Buscar peso e altura da última consulta
+  // Buscar peso, altura e composição corporal da última consulta
   React.useEffect(() => {
     const consultasDoCliente = consultas
       .filter(c => c.clienteId === clienteId)
@@ -112,6 +113,9 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
       }
       if (ultimaConsulta.medidas.altura > 0) {
         setAltura(ultimaConsulta.medidas.altura);
+      }
+      if (ultimaConsulta.medidas.percentualGordura > 0) {
+        setPercentualGordura(ultimaConsulta.medidas.percentualGordura);
       }
     }
   }, [consultas, clienteId]);
@@ -133,8 +137,18 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
       
       case 'katch-mcardle':
         // Usando estimativa de 15% de gordura corporal se não fornecido
-        const massaMagra = peso * 0.85;
-        return 370 + (21.6 * massaMagra);
+        const massaMagraKM = percentualGordura > 0 ? peso * (1 - percentualGordura / 100) : peso * 0.85;
+        return 370 + (21.6 * massaMagraKM);
+      
+      case 'cunningham':
+        // Cunningham: TMB = 500 + (22 × massa magra em kg)
+        const massaMagraCunningham = percentualGordura > 0 ? peso * (1 - percentualGordura / 100) : peso * 0.85;
+        return 500 + (22 * massaMagraCunningham);
+      
+      case 'tinsley':
+        // Tinsley: TMB = 25.9 × massa magra + 284 (para pessoas treinadas)
+        const massaMagraTinsley = percentualGordura > 0 ? peso * (1 - percentualGordura / 100) : peso * 0.85;
+        return 25.9 * massaMagraTinsley + 284;
       
       default:
         return 0;
@@ -396,6 +410,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                       <SelectItem value="mifflin-st-jeor">Mifflin-St Jeor (Recomendada)</SelectItem>
                       <SelectItem value="harris-benedict">Harris-Benedict</SelectItem>
                       <SelectItem value="katch-mcardle">Katch-McArdle</SelectItem>
+                      <SelectItem value="cunningham">Cunningham</SelectItem>
+                      <SelectItem value="tinsley">Tinsley</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -435,7 +451,9 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   <div className="text-sm text-muted-foreground">Gasto Energético Basal (kcal)</div>
                   <div className="text-xs text-muted-foreground mt-1">
                     {formulaTMB === 'mifflin-st-jeor' ? 'Mifflin-St Jeor' : 
-                     formulaTMB === 'harris-benedict' ? 'Harris-Benedict' : 'Katch-McArdle'}
+                     formulaTMB === 'harris-benedict' ? 'Harris-Benedict' : 
+                     formulaTMB === 'katch-mcardle' ? 'Katch-McArdle' :
+                     formulaTMB === 'cunningham' ? 'Cunningham' : 'Tinsley'}
                   </div>
                 </div>
                 
