@@ -74,9 +74,9 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   const [metaProteina, setMetaProteina] = useState<number>(0);
   const [metaCarboidratos, setMetaCarboidratos] = useState<number>(0);
   const [metaLipideos, setMetaLipideos] = useState<number>(0);
-  const [tipoMetaProteina, setTipoMetaProteina] = useState<'absoluto' | 'por-kg' | 'kcal-por-kg'>('por-kg');
-  const [tipoMetaCarboidratos, setTipoMetaCarboidratos] = useState<'absoluto' | 'por-kg' | 'kcal-por-kg'>('absoluto');
-  const [tipoMetaLipideos, setTipoMetaLipideos] = useState<'absoluto' | 'por-kg' | 'kcal-por-kg'>('absoluto');
+  const [tipoMetaProteina, setTipoMetaProteina] = useState<'absoluto' | 'por-kg' | 'kcal-absoluto'>('por-kg');
+  const [tipoMetaCarboidratos, setTipoMetaCarboidratos] = useState<'absoluto' | 'por-kg' | 'kcal-absoluto'>('absoluto');
+  const [tipoMetaLipideos, setTipoMetaLipideos] = useState<'absoluto' | 'por-kg' | 'kcal-absoluto'>('absoluto');
   const [peso, setPeso] = useState<number>(0);
   const [altura, setAltura] = useState<number>(0);
   const [idade, setIdade] = useState<number>(0);
@@ -559,12 +559,12 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                      <SelectContent>
                        <SelectItem value="por-kg">Gramas por kg</SelectItem>
                        <SelectItem value="absoluto">Valor absoluto (g)</SelectItem>
-                       <SelectItem value="kcal-por-kg">Kcal por kg</SelectItem>
+                        <SelectItem value="kcal-absoluto">Kcal absoluto</SelectItem>
                      </SelectContent>
                   </Select>
                   <div>
                      <Label htmlFor="meta-proteina">
-                       Meta de Proteína {tipoMetaProteina === 'por-kg' ? '(g/kg)' : tipoMetaProteina === 'kcal-por-kg' ? '(kcal/kg)' : '(g)'}
+                       Meta de Proteína {tipoMetaProteina === 'por-kg' ? '(g/kg)' : tipoMetaProteina === 'kcal-absoluto' ? '(kcal absoluto)' : '(g)'}
                      </Label>
                     <Input
                       id="meta-proteina"
@@ -572,16 +572,16 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                       step="0.1"
                       value={metaProteina || ''}
                       onChange={(e) => setMetaProteina(parseFloat(e.target.value) || 0)}
-                      placeholder={tipoMetaProteina === 'por-kg' ? "Ex: 1.2" : tipoMetaProteina === 'kcal-por-kg' ? "Ex: 5.0" : "Ex: 84"}
+                      placeholder={tipoMetaProteina === 'por-kg' ? "Ex: 1.2" : tipoMetaProteina === 'kcal-absoluto' ? "Ex: 200" : "Ex: 84"}
                     />
                      {tipoMetaProteina === 'por-kg' && peso > 0 && metaProteina > 0 && (
                        <div className="text-xs text-muted-foreground mt-1">
                          = {(metaProteina * peso).toFixed(1)}g absolutos
                        </div>
                      )}
-                     {tipoMetaProteina === 'kcal-por-kg' && peso > 0 && metaProteina > 0 && (
+                     {tipoMetaProteina === 'kcal-absoluto' && metaProteina > 0 && (
                        <div className="text-xs text-muted-foreground mt-1">
-                         = {((metaProteina * peso) / 4).toFixed(1)}g de proteína ({(metaProteina * peso).toFixed(0)} kcal totais)
+                         = {(metaProteina / 4).toFixed(1)}g de proteína ({metaProteina.toFixed(0)} kcal)
                        </div>
                      )}
                   </div>
@@ -596,12 +596,12 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                      <SelectContent>
                        <SelectItem value="por-kg">Gramas por kg</SelectItem>
                        <SelectItem value="absoluto">Valor absoluto (g)</SelectItem>
-                       <SelectItem value="kcal-por-kg">Kcal por kg</SelectItem>
+                       <SelectItem value="kcal-absoluto">Kcal absoluto</SelectItem>
                      </SelectContent>
                   </Select>
                   <div>
-                     <Label htmlFor="meta-carboidratos">
-                       Meta de Carboidratos {tipoMetaCarboidratos === 'por-kg' ? '(g/kg)' : tipoMetaCarboidratos === 'kcal-por-kg' ? '(kcal/kg)' : '(g)'}
+                      <Label htmlFor="meta-carboidratos">
+                        Meta de Carboidratos {tipoMetaCarboidratos === 'por-kg' ? '(g/kg)' : tipoMetaCarboidratos === 'kcal-absoluto' ? '(kcal absoluto)' : '(g)'}
                      </Label>
                     <Input
                       id="meta-carboidratos"
@@ -609,56 +609,56 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                       step="0.1"
                       value={metaCarboidratos || ''}
                       onChange={(e) => setMetaCarboidratos(parseFloat(e.target.value) || 0)}
-                      placeholder={tipoMetaCarboidratos === 'por-kg' ? "Ex: 5.0" : tipoMetaCarboidratos === 'kcal-por-kg' ? "Ex: 12.0" : "Ex: 350"}
+                      placeholder={tipoMetaCarboidratos === 'por-kg' ? "Ex: 5.0" : tipoMetaCarboidratos === 'kcal-absoluto' ? "Ex: 480" : "Ex: 350"}
                     />
                      {tipoMetaCarboidratos === 'por-kg' && peso > 0 && metaCarboidratos > 0 && (
                        <div className="text-xs text-muted-foreground mt-1">
                          = {(metaCarboidratos * peso).toFixed(1)}g absolutos
                        </div>
                      )}
-                     {tipoMetaCarboidratos === 'kcal-por-kg' && peso > 0 && metaCarboidratos > 0 && (
+                     {tipoMetaCarboidratos === 'kcal-absoluto' && metaCarboidratos > 0 && (
                        <div className="text-xs text-muted-foreground mt-1">
-                         = {((metaCarboidratos * peso) / 4).toFixed(1)}g de carboidratos ({(metaCarboidratos * peso).toFixed(0)} kcal totais)
-                       </div>
-                     )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tipo de Meta - Lipídeos</Label>
-                  <Select value={tipoMetaLipideos} onValueChange={(value: any) => setTipoMetaLipideos(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                     <SelectContent>
-                       <SelectItem value="por-kg">Gramas por kg</SelectItem>
-                       <SelectItem value="absoluto">Valor absoluto (g)</SelectItem>
-                       <SelectItem value="kcal-por-kg">Kcal por kg</SelectItem>
-                     </SelectContent>
-                  </Select>
-                  <div>
-                     <Label htmlFor="meta-lipideos">
-                       Meta de Lipídeos {tipoMetaLipideos === 'por-kg' ? '(g/kg)' : tipoMetaLipideos === 'kcal-por-kg' ? '(kcal/kg)' : '(g)'}
-                     </Label>
-                    <Input
-                      id="meta-lipideos"
-                      type="number"
-                      step="0.1"
-                      value={metaLipideos || ''}
-                      onChange={(e) => setMetaLipideos(parseFloat(e.target.value) || 0)}
-                      placeholder={tipoMetaLipideos === 'por-kg' ? "Ex: 1.0" : tipoMetaLipideos === 'kcal-por-kg' ? "Ex: 8.0" : "Ex: 70"}
-                    />
-                     {tipoMetaLipideos === 'por-kg' && peso > 0 && metaLipideos > 0 && (
-                       <div className="text-xs text-muted-foreground mt-1">
-                         = {(metaLipideos * peso).toFixed(1)}g absolutos
-                       </div>
-                     )}
-                     {tipoMetaLipideos === 'kcal-por-kg' && peso > 0 && metaLipideos > 0 && (
-                       <div className="text-xs text-muted-foreground mt-1">
-                         = {((metaLipideos * peso) / 9).toFixed(1)}g de lipídeos ({(metaLipideos * peso).toFixed(0)} kcal totais)
+                         = {(metaCarboidratos / 4).toFixed(1)}g de carboidratos ({metaCarboidratos.toFixed(0)} kcal)
                        </div>
                      )}
                    </div>
+                 </div>
+
+                 <div className="space-y-2">
+                   <Label>Tipo de Meta - Lipídeos</Label>
+                   <Select value={tipoMetaLipideos} onValueChange={(value: any) => setTipoMetaLipideos(value)}>
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="por-kg">Gramas por kg</SelectItem>
+                        <SelectItem value="absoluto">Valor absoluto (g)</SelectItem>
+                        <SelectItem value="kcal-absoluto">Kcal absoluto</SelectItem>
+                      </SelectContent>
+                   </Select>
+                   <div>
+                      <Label htmlFor="meta-lipideos">
+                        Meta de Lipídeos {tipoMetaLipideos === 'por-kg' ? '(g/kg)' : tipoMetaLipideos === 'kcal-absoluto' ? '(kcal absoluto)' : '(g)'}
+                      </Label>
+                     <Input
+                       id="meta-lipideos"
+                       type="number"
+                       step="0.1"
+                       value={metaLipideos || ''}
+                       onChange={(e) => setMetaLipideos(parseFloat(e.target.value) || 0)}
+                       placeholder={tipoMetaLipideos === 'por-kg' ? "Ex: 1.0" : tipoMetaLipideos === 'kcal-absoluto' ? "Ex: 720" : "Ex: 70"}
+                     />
+                      {tipoMetaLipideos === 'por-kg' && peso > 0 && metaLipideos > 0 && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          = {(metaLipideos * peso).toFixed(1)}g absolutos
+                        </div>
+                      )}
+                      {tipoMetaLipideos === 'kcal-absoluto' && metaLipideos > 0 && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          = {(metaLipideos / 9).toFixed(1)}g de lipídeos ({metaLipideos.toFixed(0)} kcal)
+                        </div>
+                      )}
+                    </div>
                 </div>
               </div>
             </CardContent>
@@ -692,8 +692,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                            (() => {
                              const metaAbsoluta = tipoMetaProteina === 'por-kg' 
                                ? metaProteina * peso
-                               : tipoMetaProteina === 'kcal-por-kg' 
-                                 ? (metaProteina * peso) / 4  // Convertendo kcal para gramas
+                                : tipoMetaProteina === 'kcal-absoluto' 
+                                  ? metaProteina / 4  // Convertendo kcal para gramas
                                  : metaProteina;
                              const percentual = metaAbsoluta > 0 ? (totaisDia.proteina / metaAbsoluta) * 100 : 0;
                              return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
@@ -702,8 +702,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                            {(() => {
                              const metaAbsoluta = tipoMetaProteina === 'por-kg' 
                                ? metaProteina * peso
-                               : tipoMetaProteina === 'kcal-por-kg' 
-                                 ? (metaProteina * peso) / 4  // Convertendo kcal para gramas
+                                : tipoMetaProteina === 'kcal-absoluto' 
+                                  ? metaProteina / 4  // Convertendo kcal para gramas
                                  : metaProteina;
                              return `${(metaAbsoluta > 0 ? (totaisDia.proteina / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
                            })()}
@@ -729,21 +729,21 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                            (() => {
                              const metaAbsoluta = tipoMetaCarboidratos === 'por-kg' 
                                ? metaCarboidratos * peso
-                               : tipoMetaCarboidratos === 'kcal-por-kg'
-                                 ? (metaCarboidratos * peso) / 4  // Convertendo kcal para gramas
-                                 : metaCarboidratos;
-                             const percentual = metaAbsoluta > 0 ? (totaisDia.carboidratos / metaAbsoluta) * 100 : 0;
-                             return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
-                           })()
-                         }>
-                           {(() => {
-                             const metaAbsoluta = tipoMetaCarboidratos === 'por-kg' 
-                               ? metaCarboidratos * peso
-                               : tipoMetaCarboidratos === 'kcal-por-kg'
-                                 ? (metaCarboidratos * peso) / 4  // Convertendo kcal para gramas
-                                 : metaCarboidratos;
-                             return `${(metaAbsoluta > 0 ? (totaisDia.carboidratos / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
-                           })()}
+                                : tipoMetaCarboidratos === 'kcal-absoluto'
+                                  ? metaCarboidratos / 4  // Convertendo kcal para gramas
+                                  : metaCarboidratos;
+                              const percentual = metaAbsoluta > 0 ? (totaisDia.carboidratos / metaAbsoluta) * 100 : 0;
+                              return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
+                            })()
+                          }>
+                            {(() => {
+                              const metaAbsoluta = tipoMetaCarboidratos === 'por-kg' 
+                                ? metaCarboidratos * peso
+                                : tipoMetaCarboidratos === 'kcal-absoluto'
+                                  ? metaCarboidratos / 4  // Convertendo kcal para gramas
+                                  : metaCarboidratos;
+                              return `${(metaAbsoluta > 0 ? (totaisDia.carboidratos / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
+                            })()}
                         </span>
                       </div>
                     )}
@@ -766,22 +766,22 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                            (() => {
                              const metaAbsoluta = tipoMetaLipideos === 'por-kg' 
                                ? metaLipideos * peso
-                               : tipoMetaLipideos === 'kcal-por-kg'
-                                 ? (metaLipideos * peso) / 9  // Convertendo kcal para gramas
-                                 : metaLipideos;
-                             const percentual = metaAbsoluta > 0 ? (totaisDia.lipideos / metaAbsoluta) * 100 : 0;
-                             return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
-                           })()
-                         }>
-                           {(() => {
-                             const metaAbsoluta = tipoMetaLipideos === 'por-kg' 
-                               ? metaLipideos * peso
-                               : tipoMetaLipideos === 'kcal-por-kg'
-                                 ? (metaLipideos * peso) / 9  // Convertendo kcal para gramas
-                                 : metaLipideos;
-                             return `${(metaAbsoluta > 0 ? (totaisDia.lipideos / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
-                           })()}
-                        </span>
+                                : tipoMetaLipideos === 'kcal-absoluto'
+                                  ? metaLipideos / 9  // Convertendo kcal para gramas
+                                  : metaLipideos;
+                              const percentual = metaAbsoluta > 0 ? (totaisDia.lipideos / metaAbsoluta) * 100 : 0;
+                              return percentual >= 90 && percentual <= 110 ? 'text-green-600' : 'text-orange-600';
+                            })()
+                          }>
+                            {(() => {
+                              const metaAbsoluta = tipoMetaLipideos === 'por-kg' 
+                                ? metaLipideos * peso
+                                : tipoMetaLipideos === 'kcal-absoluto'
+                                  ? metaLipideos / 9  // Convertendo kcal para gramas
+                                  : metaLipideos;
+                              return `${(metaAbsoluta > 0 ? (totaisDia.lipideos / metaAbsoluta) * 100 : 0).toFixed(0)}%`;
+                            })()}
+                         </span>
                       </div>
                     )}
                   </div>
