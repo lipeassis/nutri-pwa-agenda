@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, MedidasAntropometricas, DobrasCutaneas, ExameBioquimico, ResultadoExame } from "@/types";
-import { Save, Activity, Ruler, TestTube, Plus, Trash2 } from "lucide-react";
+import { Cliente, ConsultaProntuario, MedidasAntropometricas, DobrasCutaneas, ExameBioquimico, ResultadoExame, Anamnese } from "@/types";
+import { Save, Activity, Ruler, TestTube, Plus, Trash2, FileText } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 
 interface NovaConsultaProps {
@@ -45,6 +47,22 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
       coxa: 0,
       panturrilha: 0,
     } as DobrasCutaneas,
+    anamnese: {
+      funcaoIntestinal: '' as const,
+      padraoAlimentar: '',
+      horariosIrregulares: false,
+      compulsoes: false,
+      consumoAgua: 0,
+      sintomasAtuais: [],
+      outros: '',
+      habitosAjustar: '',
+      manutencaoPlano: '',
+      suplementacao: '',
+      alimentosPriorizados: '',
+      alimentosEvitados: '',
+      reforcoComportamental: '',
+      estrategiasComplementares: '',
+    } as Anamnese,
     relatoPaciente: '',
     observacoesNutricionista: '',
   });
@@ -56,7 +74,7 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
     unidade: ''
   });
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     if (field.startsWith('medidas.')) {
       const medidasField = field.replace('medidas.', '');
       setFormData(prev => ({
@@ -75,9 +93,30 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
           [dobrasField]: typeof value === 'string' ? parseFloat(value) || 0 : value
         }
       }));
+    } else if (field.startsWith('anamnese.')) {
+      const anamneseField = field.replace('anamnese.', '');
+      setFormData(prev => ({
+        ...prev,
+        anamnese: {
+          ...prev.anamnese,
+          [anamneseField]: anamneseField === 'consumoAgua' && typeof value === 'string' ? parseFloat(value) || 0 : value
+        }
+      }));
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
+  };
+
+  const handleSintomaChange = (sintoma: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      anamnese: {
+        ...prev.anamnese,
+        sintomasAtuais: checked 
+          ? [...prev.anamnese.sintomasAtuais, sintoma]
+          : prev.anamnese.sintomasAtuais.filter(s => s !== sintoma)
+      }
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +131,7 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
         medidas: formData.medidas,
         dobrasCutaneas: formData.dobrasCutaneas,
         resultadosExames: resultadosExames,
+        anamnese: formData.anamnese,
         relatoPaciente: formData.relatoPaciente,
         observacoesNutricionista: formData.observacoesNutricionista,
         criadoEm: new Date().toISOString()
@@ -212,10 +252,11 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
           </div>
 
           <Tabs defaultValue="medidas" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="medidas">Medidas Antropométricas</TabsTrigger>
               <TabsTrigger value="dobras">Dobras Cutâneas</TabsTrigger>
               <TabsTrigger value="exames">Exames Bioquímicos</TabsTrigger>
+              <TabsTrigger value="anamnese">Anamnese</TabsTrigger>
               <TabsTrigger value="relatos">Relatos e Observações</TabsTrigger>
             </TabsList>
 
@@ -532,6 +573,212 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
                       <li>• Sempre confira a unidade de medida do exame</li>
                       <li>• Resultados fora da normalidade são destacados</li>
                     </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="anamnese" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Anamnese
+                  </CardTitle>
+                  <CardDescription>
+                    Registre informações sobre hábitos alimentares e sintomas do paciente
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Função Intestinal */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Função intestinal:</Label>
+                    <RadioGroup 
+                      value={formData.anamnese.funcaoIntestinal} 
+                      onValueChange={(value) => handleInputChange('anamnese.funcaoIntestinal', value as any)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="regular" id="regular" />
+                        <Label htmlFor="regular">Regular</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="constipada" id="constipada" />
+                        <Label htmlFor="constipada">Constipada</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="diarreia" id="diarreia" />
+                        <Label htmlFor="diarreia">Diarreia</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="alternancia" id="alternancia" />
+                        <Label htmlFor="alternancia">Alternâncias</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="laxantes" id="laxantes" />
+                        <Label htmlFor="laxantes">Uso de laxantes frequente</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Hábitos Alimentares */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Hábitos Alimentares:</Label>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="padraoAlimentar">Padrão alimentar predominante:</Label>
+                      <Input
+                        id="padraoAlimentar"
+                        value={formData.anamnese.padraoAlimentar}
+                        onChange={(e) => handleInputChange('anamnese.padraoAlimentar', e.target.value)}
+                        placeholder="Descreva o padrão alimentar do paciente"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="horariosIrregulares"
+                          checked={formData.anamnese.horariosIrregulares}
+                          onCheckedChange={(checked) => handleInputChange('anamnese.horariosIrregulares', checked as boolean)}
+                        />
+                        <Label htmlFor="horariosIrregulares">Horários irregulares / pulos de refeição?</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="compulsoes"
+                          checked={formData.anamnese.compulsoes}
+                          onCheckedChange={(checked) => handleInputChange('anamnese.compulsoes', checked as boolean)}
+                        />
+                        <Label htmlFor="compulsoes">Presença de compulsões ou beliscos frequentes?</Label>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="consumoAgua">Consumo de água (média/dia) - ml:</Label>
+                      <Input
+                        id="consumoAgua"
+                        type="number"
+                        value={formData.anamnese.consumoAgua || ''}
+                        onChange={(e) => handleInputChange('anamnese.consumoAgua', e.target.value)}
+                        placeholder="2000"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sinais e Sintomas Atuais */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Sinais e Sintomas Atuais:</Label>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Cansaço excessivo',
+                        'Inchaço / retenção',
+                        'Constipação',
+                        'Gases / distensão',
+                        'Azia / refluxo',
+                        'Dor de cabeça frequente',
+                        'Queda de cabelo'
+                      ].map((sintoma) => (
+                        <div key={sintoma} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={sintoma}
+                            checked={formData.anamnese.sintomasAtuais.includes(sintoma)}
+                            onCheckedChange={(checked) => handleSintomaChange(sintoma, checked as boolean)}
+                          />
+                          <Label htmlFor={sintoma}>{sintoma}</Label>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="outros">Outros:</Label>
+                      <Input
+                        id="outros"
+                        value={formData.anamnese.outros}
+                        onChange={(e) => handleInputChange('anamnese.outros', e.target.value)}
+                        placeholder="Outros sintomas não listados"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="habitosAjustar">Hábitos que precisam ser ajustados:</Label>
+                      <Textarea
+                        id="habitosAjustar"
+                        value={formData.anamnese.habitosAjustar}
+                        onChange={(e) => handleInputChange('anamnese.habitosAjustar', e.target.value)}
+                        placeholder="Descreva os hábitos que precisam ser modificados"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Condutas Nutricionais Adotadas */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Condutas Nutricionais Adotadas:</Label>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="manutencaoPlano">Manutenção / Ajuste do plano alimentar:</Label>
+                      <Textarea
+                        id="manutencaoPlano"
+                        value={formData.anamnese.manutencaoPlano}
+                        onChange={(e) => handleInputChange('anamnese.manutencaoPlano', e.target.value)}
+                        placeholder="Descreva as orientações sobre o plano alimentar"
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="suplementacao">Introdução de suplementação:</Label>
+                      <Input
+                        id="suplementacao"
+                        value={formData.anamnese.suplementacao}
+                        onChange={(e) => handleInputChange('anamnese.suplementacao', e.target.value)}
+                        placeholder="Suplementos recomendados"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="alimentosPriorizados">Alimentos priorizados:</Label>
+                      <Input
+                        id="alimentosPriorizados"
+                        value={formData.anamnese.alimentosPriorizados}
+                        onChange={(e) => handleInputChange('anamnese.alimentosPriorizados', e.target.value)}
+                        placeholder="Alimentos que devem ser priorizados"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="alimentosEvitados">Alimentos evitados:</Label>
+                      <Input
+                        id="alimentosEvitados"
+                        value={formData.anamnese.alimentosEvitados}
+                        onChange={(e) => handleInputChange('anamnese.alimentosEvitados', e.target.value)}
+                        placeholder="Alimentos que devem ser evitados"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="reforcoComportamental">Reforço comportamental:</Label>
+                      <Textarea
+                        id="reforcoComportamental"
+                        value={formData.anamnese.reforcoComportamental}
+                        onChange={(e) => handleInputChange('anamnese.reforcoComportamental', e.target.value)}
+                        placeholder="Orientações comportamentais"
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="estrategiasComplementares">Estratégias complementares:</Label>
+                      <Textarea
+                        id="estrategiasComplementares"
+                        value={formData.anamnese.estrategiasComplementares}
+                        onChange={(e) => handleInputChange('anamnese.estrategiasComplementares', e.target.value)}
+                        placeholder="Outras estratégias e orientações complementares"
+                        rows={2}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>

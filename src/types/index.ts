@@ -90,6 +90,23 @@ export interface DobrasCutaneas {
   panturrilha: number;
 }
 
+export interface Anamnese {
+  funcaoIntestinal: 'regular' | 'constipada' | 'diarreia' | 'alternancia' | 'laxantes' | '';
+  padraoAlimentar: string;
+  horariosIrregulares: boolean;
+  compulsoes: boolean;
+  consumoAgua: number;
+  sintomasAtuais: string[];
+  outros: string;
+  habitosAjustar: string;
+  manutencaoPlano: string;
+  suplementacao: string;
+  alimentosPriorizados: string;
+  alimentosEvitados: string;
+  reforcoComportamental: string;
+  estrategiasComplementares: string;
+}
+
 export interface ConsultaProntuario {
   id: string;
   clienteId: string;
@@ -97,6 +114,7 @@ export interface ConsultaProntuario {
   medidas: MedidasAntropometricas;
   dobrasCutaneas: DobrasCutaneas;
   resultadosExames: ResultadoExame[];
+  anamnese: Anamnese;
   relatoPaciente: string;
   observacoesNutricionista: string;
   criadoEm: string;
