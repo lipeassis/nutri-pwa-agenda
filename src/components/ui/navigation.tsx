@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -38,6 +38,7 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/servicos", icon: Wrench, label: "Serviços" },
     { href: "/exames-bioquimicos", icon: TestTube, label: "Exames Bioquímicos" },
     { href: "/alimentos", icon: Apple, label: "Alimentos" },
+    { href: "/programas", icon: Star, label: "Programas" },
   ];
 
   return (

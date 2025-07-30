@@ -23,6 +23,7 @@ import FinanceiroRelatorios from "./pages/FinanceiroRelatorios";
 import CadastroAlimentos from "./pages/CadastroAlimentos";
 import { EditarPerfil } from "./pages/EditarPerfil";
 import { TrocarSenha } from "./pages/TrocarSenha";
+import { Programas } from "./pages/Programas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -108,8 +109,13 @@ const App = () => (
                     <ProtectedRoute requiredRole="administrador">
                       <CadastroAlimentos />
                     </ProtectedRoute>
-                  } />
-                  <Route path="/perfil" element={
+                   } />
+                   <Route path="/programas" element={
+                     <ProtectedRoute requiredRole="administrador">
+                       <Programas />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/perfil" element={
                     <ProtectedRoute>
                       <EditarPerfil />
                     </ProtectedRoute>

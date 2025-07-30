@@ -350,3 +350,17 @@ export interface Usuario {
   ativo: boolean;
   criadoEm: string;
 }
+
+export interface ProgramaNutricional {
+  id: string;
+  nome: string;
+  descricao: string;
+  duracao: number; // em semanas
+  preco: number;
+  objetivos: string[];
+  fasesDoProjeto: string[];
+  beneficios: string[];
+  restricoes?: string;
+  ativo: boolean;
+  criadoEm: string;
+}
