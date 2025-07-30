@@ -339,6 +339,19 @@ export interface AtualizacaoQuestionario {
   criadoEm: string;
 }
 
+export interface ClientePrograma {
+  id: string;
+  clienteId: string;
+  programaId: string;
+  programaNome: string;
+  dataInicio: string;
+  dataFim: string;
+  preco: number;
+  ativo: boolean;
+  observacoes?: string;
+  criadoEm: string;
+}
+
 export interface Usuario {
   id: string;
   nome: string;

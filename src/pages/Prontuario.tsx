@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill } from "lucide-react";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma } from "@/types";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -18,6 +18,7 @@ import { AdicionarDoencasAlergias } from "@/components/prontuario/AdicionarDoenc
 import { NovoPlanejamento } from "@/components/prontuario/NovoPlanejamento";
 import { NovaReceita } from "@/components/prontuario/NovaReceita";
 import { AdicionarExame } from "@/components/prontuario/AdicionarExame";
+import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
 
 export function Prontuario() {
@@ -32,6 +33,7 @@ export function Prontuario() {
   const [receitas, setReceitas] = useLocalStorage<ReceitaMedica[]>('nutriapp-receitas', []);
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   const [atualizacoes, setAtualizacoes] = useLocalStorage<AtualizacaoQuestionario[]>('nutriapp-atualizacoes', []);
+  const [clienteProgramas, setClienteProgramas] = useLocalStorage<ClientePrograma[]>('nutriapp-cliente-programas', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
   const [showEditarCliente, setShowEditarCliente] = useState(false);
@@ -40,6 +42,7 @@ export function Prontuario() {
   const [planejamentoParaEditar, setPlanejamentoParaEditar] = useState<PlanejamentoAlimentar | null>(null);
   const [showNovaReceita, setShowNovaReceita] = useState(false);
   const [showAdicionarExame, setShowAdicionarExame] = useState(false);
+  const [showVincularPrograma, setShowVincularPrograma] = useState(false);
   const [receitaParaEditar, setReceitaParaEditar] = useState<ReceitaMedica | null>(null);
 
   const cliente = clientes.find(c => c.id === clienteId);
@@ -56,6 +59,7 @@ export function Prontuario() {
 
   const doencasCliente = doencas.filter(d => cliente?.doencasIds?.includes(d.id) && d.ativo);
   const alergiasCliente = alergias.filter(a => cliente?.alergiasIds?.includes(a.id) && a.ativo);
+  const programasCliente = clienteProgramas.filter(cp => cp.clienteId === clienteId);
 
   if (!cliente) {
     return (
@@ -181,6 +185,14 @@ export function Prontuario() {
     setAtualizacoes([...atualizacoes, ...sampleData]);
   };
 
+  const finalizarPrograma = (programaId: string) => {
+    if (window.confirm('Tem certeza que deseja finalizar este programa?')) {
+      setClienteProgramas(clienteProgramas.map(cp => 
+        cp.id === programaId ? { ...cp, ativo: false } : cp
+      ));
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -298,13 +310,14 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
           <TabsTrigger value="receitas">Medicamentos</TabsTrigger>
+          <TabsTrigger value="programas">Programas</TabsTrigger>
           <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
@@ -776,6 +789,114 @@ export function Prontuario() {
           )}
         </TabsContent>
 
+        <TabsContent value="programas" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Programas Nutricionais</h3>
+            <Button onClick={() => setShowVincularPrograma(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Vincular Programa
+            </Button>
+          </div>
+          
+          {programasCliente.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Star className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhum programa vinculado</h3>
+                <p className="text-muted-foreground">
+                  Vincule o cliente a um programa nutricional para acompanhar seu progresso
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {programasCliente
+                .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime())
+                .map((clientePrograma) => {
+                  const isAtivo = clientePrograma.ativo && new Date(clientePrograma.dataFim) >= new Date();
+                  const isVencido = new Date(clientePrograma.dataFim) < new Date();
+                  
+                  return (
+                    <Card key={clientePrograma.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="flex items-center gap-2">
+                              <Star className="w-5 h-5 text-primary" />
+                              {clientePrograma.programaNome}
+                              {isAtivo ? (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Ativo
+                                </Badge>
+                              ) : isVencido ? (
+                                <Badge variant="secondary">
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Vencido
+                                </Badge>
+                              ) : (
+                                <Badge variant="destructive">
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Finalizado
+                                </Badge>
+                              )}
+                            </CardTitle>
+                            <CardDescription>
+                              Período: {format(new Date(clientePrograma.dataInicio), "dd/MM/yyyy", { locale: ptBR })} - {format(new Date(clientePrograma.dataFim), "dd/MM/yyyy", { locale: ptBR })}
+                            </CardDescription>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {isAtivo && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => finalizarPrograma(clientePrograma.id)}
+                              >
+                                Finalizar
+                              </Button>
+                            )}
+                            <div className="text-right text-sm text-muted-foreground">
+                              <div>Valor: R$ {clientePrograma.preco.toFixed(2)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Data de Início</p>
+                            <p className="text-base">{format(new Date(clientePrograma.dataInicio), "dd/MM/yyyy", { locale: ptBR })}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Data de Fim</p>
+                            <p className="text-base">{format(new Date(clientePrograma.dataFim), "dd/MM/yyyy", { locale: ptBR })}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Status</p>
+                            <p className="text-base">
+                              {isAtivo ? "Em andamento" : isVencido ? "Vencido" : "Finalizado"}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {clientePrograma.observacoes && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">Observações</p>
+                            <p className="text-sm bg-muted p-3 rounded-md">{clientePrograma.observacoes}</p>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-muted-foreground">
+                          Vinculado em {format(new Date(clientePrograma.criadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="atualizacoes" className="space-y-4">
           <AtualizacoesQuestionario 
             clienteId={cliente.id} 
@@ -1038,6 +1159,13 @@ export function Prontuario() {
           <AdicionarExame
             cliente={cliente}
             onClose={() => setShowAdicionarExame(false)}
+          />
+        )}
+
+        {showVincularPrograma && (
+          <VincularPrograma
+            cliente={cliente}
+            onClose={() => setShowVincularPrograma(false)}
           />
         )}
       </div>

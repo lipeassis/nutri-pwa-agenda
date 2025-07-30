@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario } from "@/types";
-import { Search, Plus, User, Phone, Mail, Calendar, FileText } from "lucide-react";
+import { Cliente, ConsultaProntuario, ClientePrograma } from "@/types";
+import { Search, Plus, User, Phone, Mail, Calendar, FileText, Star } from "lucide-react";
+import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -13,7 +14,10 @@ import { ptBR } from "date-fns/locale";
 export function Clientes() {
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
+  const [clienteProgramas] = useLocalStorage<ClientePrograma[]>('nutriapp-cliente-programas', []);
   const [busca, setBusca] = useState("");
+  const [showVincularPrograma, setShowVincularPrograma] = useState(false);
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
 
   const clientesFiltrados = clientes.filter(cliente =>
     cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -25,6 +29,19 @@ export function Clientes() {
     return consultas
       .filter(c => c.clienteId === clienteId)
       .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())[0];
+  };
+
+  const getProgramasAtivos = (clienteId: string) => {
+    return clienteProgramas.filter(cp => 
+      cp.clienteId === clienteId && 
+      cp.ativo && 
+      new Date(cp.dataFim) >= new Date()
+    );
+  };
+
+  const abrirVincularPrograma = (cliente: Cliente) => {
+    setClienteSelecionado(cliente);
+    setShowVincularPrograma(true);
   };
 
   const calcularIMC = (peso: number, altura: number) => {
@@ -143,6 +160,7 @@ export function Clientes() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {clientesFiltrados.map((cliente) => {
             const ultimaConsulta = getUltimaConsulta(cliente.id);
+            const programasAtivos = getProgramasAtivos(cliente.id);
             const peso = ultimaConsulta?.medidas.peso;
             const altura = ultimaConsulta?.medidas.altura;
             
@@ -201,9 +219,40 @@ export function Clientes() {
                     </div>
                   )}
 
+                  {/* Programas Ativos */}
+                  {programasAtivos.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                        <Star className="w-4 h-4 text-primary" />
+                        Programas Ativos ({programasAtivos.length})
+                      </p>
+                      <div className="space-y-1">
+                        {programasAtivos.slice(0, 2).map((cp) => (
+                          <div key={cp.id} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                            {cp.programaNome}
+                          </div>
+                        ))}
+                        {programasAtivos.length > 2 && (
+                          <div className="text-xs text-muted-foreground">
+                            +{programasAtivos.length - 2} programa(s)
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex gap-2 pt-2">
                     <Button asChild size="sm" variant="outline" className="flex-1">
                       <Link to={`/clientes/${cliente.id}`}>Prontuário</Link>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => abrirVincularPrograma(cliente)}
+                      className="flex items-center gap-1"
+                    >
+                      <Star className="w-3 h-3" />
+                      Programa
                     </Button>
                     <Button asChild size="sm" className="flex-1">
                       <Link to={`/agenda/novo?clienteId=${cliente.id}`}>Agendar</Link>
@@ -214,6 +263,17 @@ export function Clientes() {
             );
           })}
         </div>
+      )}
+
+      {/* Modal de Vincular Programa */}
+      {showVincularPrograma && clienteSelecionado && (
+        <VincularPrograma
+          cliente={clienteSelecionado}
+          onClose={() => {
+            setShowVincularPrograma(false);
+            setClienteSelecionado(null);
+          }}
+        />
       )}
     </div>
   );
