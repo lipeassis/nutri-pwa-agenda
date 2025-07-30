@@ -4,18 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Agendamento } from "@/types";
-import { Search, Plus, Calendar, Clock, User, Filter } from "lucide-react";
+import { Search, Plus, Calendar, Clock, User, Filter, CalendarDays, CalendarIcon, List } from "lucide-react";
 import { Link } from "react-router-dom";
-import { format, isToday, isTomorrow, isPast } from "date-fns";
+import { format, isToday, isTomorrow, isPast, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 export function Agenda() {
   const [agendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
+  const [filtroData, setFiltroData] = useState<Date | undefined>();
+  const [visualizacao, setVisualizacao] = useState<"lista" | "calendario">("lista");
 
   const agendamentosFiltrados = agendamentos
     .filter(agendamento => {
@@ -25,7 +31,9 @@ export function Agenda() {
       const matchStatus = filtroStatus === "todos" || agendamento.status === filtroStatus;
       const matchTipo = filtroTipo === "todos" || agendamento.servicoNome.toLowerCase().includes(filtroTipo.toLowerCase());
       
-      return matchBusca && matchStatus && matchTipo;
+      const matchData = !filtroData || isSameDay(new Date(agendamento.data), filtroData);
+      
+      return matchBusca && matchStatus && matchTipo && matchData;
     })
     .sort((a, b) => `${b.data} ${b.hora}`.localeCompare(`${a.data} ${a.hora}`));
 
@@ -86,12 +94,26 @@ export function Agenda() {
             Gerencie seus agendamentos e consultas
           </p>
         </div>
-        <Button asChild>
-          <Link to="/agenda/novo">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Agendamento
-          </Link>
-        </Button>
+        <div className="flex space-x-2">
+          <Tabs value={visualizacao} onValueChange={(value) => setVisualizacao(value as "lista" | "calendario")}>
+            <TabsList>
+              <TabsTrigger value="lista" className="flex items-center gap-2">
+                <List className="w-4 h-4" />
+                Lista
+              </TabsTrigger>
+              <TabsTrigger value="calendario" className="flex items-center gap-2">
+                <CalendarDays className="w-4 h-4" />
+                Calendário
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button asChild>
+            <Link to="/agenda/novo">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Agendamento
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -173,85 +195,184 @@ export function Agenda() {
                 <SelectItem value="todos">Todos os serviços</SelectItem>
               </SelectContent>
             </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full md:w-60 justify-start text-left font-normal",
+                    !filtroData && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {filtroData ? format(filtroData, "dd/MM/yyyy", { locale: ptBR }) : "Filtrar por data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={filtroData}
+                  onSelect={setFiltroData}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+                <div className="p-3 border-t">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setFiltroData(undefined)}
+                  >
+                    Limpar filtro
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>
 
-      {/* Agendamentos List */}
-      {agendamentosFiltrados.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {agendamentos.length === 0 ? "Nenhum agendamento encontrado" : "Nenhum resultado encontrado"}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {agendamentos.length === 0 
-                ? "Comece criando seu primeiro agendamento"
-                : "Tente ajustar os filtros de busca"
-              }
-            </p>
-            {agendamentos.length === 0 && (
-              <Button asChild>
-                <Link to="/agenda/novo">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Agendamento
-                </Link>
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {agendamentosFiltrados.map((agendamento) => {
-            const dataObj = new Date(`${agendamento.data}T${agendamento.hora}`);
-            const isVencido = isPast(dataObj) && agendamento.status === 'agendado';
-            
-            return (
-              <Card key={agendamento.id} className={`hover:shadow-medium transition-all duration-300 ${isVencido ? 'border-destructive/50' : ''}`}>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold">{agendamento.clienteNome}</h3>
-                        <Badge variant={getStatusVariant(agendamento.status)}>
-                          {getStatusText(agendamento.status)}
-                        </Badge>
-                        <Badge variant="outline">
-                          {agendamento.servicoNome}
-                        </Badge>
-                        {isVencido && (
-                          <Badge variant="destructive">Vencido</Badge>
+      {/* Content */}
+      {visualizacao === "lista" ? (
+        // Lista de Agendamentos
+        agendamentosFiltrados.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {agendamentos.length === 0 ? "Nenhum agendamento encontrado" : "Nenhum resultado encontrado"}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {agendamentos.length === 0 
+                  ? "Comece criando seu primeiro agendamento"
+                  : "Tente ajustar os filtros de busca"
+                }
+              </p>
+              {agendamentos.length === 0 && (
+                <Button asChild>
+                  <Link to="/agenda/novo">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Agendamento
+                  </Link>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {agendamentosFiltrados.map((agendamento) => {
+              const dataObj = new Date(`${agendamento.data}T${agendamento.hora}`);
+              const isVencido = isPast(dataObj) && agendamento.status === 'agendado';
+              
+              return (
+                <Card key={agendamento.id} className={`hover:shadow-medium transition-all duration-300 ${isVencido ? 'border-destructive/50' : ''}`}>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-semibold">{agendamento.clienteNome}</h3>
+                          <Badge variant={getStatusVariant(agendamento.status)}>
+                            {getStatusText(agendamento.status)}
+                          </Badge>
+                          <Badge variant="outline">
+                            {agendamento.servicoNome}
+                          </Badge>
+                          {isVencido && (
+                            <Badge variant="destructive">Vencido</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center text-muted-foreground space-x-4">
+                          <span className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            {formatarDataHora(agendamento.data, agendamento.hora)}
+                          </span>
+                        </div>
+                        {agendamento.observacoes && (
+                          <p className="text-sm text-muted-foreground">
+                            {agendamento.observacoes}
+                          </p>
                         )}
                       </div>
-                      <div className="flex items-center text-muted-foreground space-x-4">
-                        <span className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {formatarDataHora(agendamento.data, agendamento.hora)}
-                        </span>
-                      </div>
-                      {agendamento.observacoes && (
-                        <p className="text-sm text-muted-foreground">
-                          {agendamento.observacoes}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        Editar
-                      </Button>
-                      {agendamento.status === 'agendado' && (
-                        <Button size="sm">
-                          Marcar como Realizado
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          Editar
                         </Button>
+                        {agendamento.status === 'agendado' && (
+                          <Button size="sm">
+                            Marcar como Realizado
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )
+      ) : (
+        // Visualização em Calendário
+        <Card>
+          <CardContent className="pt-6">
+            <CalendarComponent
+              mode="single"
+              className="w-full pointer-events-auto"
+              components={{
+                DayContent: ({ date }) => {
+                  const agendamentosNoDia = agendamentos.filter(ag => 
+                    isSameDay(new Date(ag.data), date)
+                  );
+                  
+                  return (
+                    <div className="relative w-full h-full">
+                      <span>{format(date, "d")}</span>
+                      {agendamentosNoDia.length > 0 && (
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                          <div className="flex space-x-0.5">
+                            {agendamentosNoDia.slice(0, 3).map((ag, i) => (
+                              <div
+                                key={i}
+                                className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  ag.status === 'agendado' ? "bg-primary" :
+                                  ag.status === 'realizado' ? "bg-success" :
+                                  "bg-destructive"
+                                )}
+                              />
+                            ))}
+                            {agendamentosNoDia.length > 3 && (
+                              <div className="text-xs text-muted-foreground">+{agendamentosNoDia.length - 3}</div>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  );
+                }
+              }}
+              onDayClick={(date) => {
+                setFiltroData(date);
+                setVisualizacao("lista");
+              }}
+            />
+            <div className="mt-4 text-sm text-muted-foreground">
+              <p>Clique em uma data para ver os agendamentos do dia.</p>
+              <div className="flex items-center space-x-4 mt-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <span>Agendado</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-success" />
+                  <span>Realizado</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-destructive" />
+                  <span>Cancelado</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
