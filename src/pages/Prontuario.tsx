@@ -420,6 +420,115 @@ export function Prontuario() {
                       </div>
                     )}
 
+                    {/* Anamnese */}
+                    {consulta.anamnese && (
+                      <div>
+                        <h4 className="font-medium mb-2">Anamnese</h4>
+                        <div className="space-y-3 bg-muted p-4 rounded-md">
+                          {consulta.anamnese.funcaoIntestinal && (
+                            <div className="flex gap-2">
+                              <span className="font-medium text-sm">Função Intestinal:</span>
+                              <span className="text-sm capitalize">{consulta.anamnese.funcaoIntestinal}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.padraoAlimentar && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Padrão Alimentar:</span>
+                              <span className="text-sm">{consulta.anamnese.padraoAlimentar}</span>
+                            </div>
+                          )}
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex gap-2">
+                              <span className="font-medium text-sm">Horários Irregulares:</span>
+                              <span className="text-sm">{consulta.anamnese.horariosIrregulares ? 'Sim' : 'Não'}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="font-medium text-sm">Compulsões:</span>
+                              <span className="text-sm">{consulta.anamnese.compulsoes ? 'Sim' : 'Não'}</span>
+                            </div>
+                          </div>
+                          
+                          {consulta.anamnese.consumoAgua > 0 && (
+                            <div className="flex gap-2">
+                              <span className="font-medium text-sm">Consumo de Água:</span>
+                              <span className="text-sm">{consulta.anamnese.consumoAgua}L/dia</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.sintomasAtuais && consulta.anamnese.sintomasAtuais.length > 0 && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Sintomas Atuais:</span>
+                              <div className="flex flex-wrap gap-1">
+                                {consulta.anamnese.sintomasAtuais.map((sintoma, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {sintoma}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.outros && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Outros:</span>
+                              <span className="text-sm">{consulta.anamnese.outros}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.habitosAjustar && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Hábitos a Ajustar:</span>
+                              <span className="text-sm">{consulta.anamnese.habitosAjustar}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.manutencaoPlano && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Manutenção do Plano:</span>
+                              <span className="text-sm">{consulta.anamnese.manutencaoPlano}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.suplementacao && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Suplementação:</span>
+                              <span className="text-sm">{consulta.anamnese.suplementacao}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.alimentosPriorizados && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Alimentos Priorizados:</span>
+                              <span className="text-sm">{consulta.anamnese.alimentosPriorizados}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.alimentosEvitados && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Alimentos Evitados:</span>
+                              <span className="text-sm">{consulta.anamnese.alimentosEvitados}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.reforcoComportamental && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Reforço Comportamental:</span>
+                              <span className="text-sm">{consulta.anamnese.reforcoComportamental}</span>
+                            </div>
+                          )}
+                          
+                          {consulta.anamnese.estrategiasComplementares && (
+                            <div>
+                              <span className="font-medium text-sm block mb-1">Estratégias Complementares:</span>
+                              <span className="text-sm">{consulta.anamnese.estrategiasComplementares}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Relato do paciente */}
                     {consulta.relatoPaciente && (
                       <div>
