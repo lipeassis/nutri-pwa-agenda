@@ -17,6 +17,7 @@ import { EditarCliente } from "@/components/prontuario/EditarCliente";
 import { AdicionarDoencasAlergias } from "@/components/prontuario/AdicionarDoencasAlergias";
 import { NovoPlanejamento } from "@/components/prontuario/NovoPlanejamento";
 import { NovaReceita } from "@/components/prontuario/NovaReceita";
+import { AdicionarExame } from "@/components/prontuario/AdicionarExame";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
 
 export function Prontuario() {
@@ -38,6 +39,7 @@ export function Prontuario() {
   const [showNovoPlanejamento, setShowNovoPlanejamento] = useState(false);
   const [planejamentoParaEditar, setPlanejamentoParaEditar] = useState<PlanejamentoAlimentar | null>(null);
   const [showNovaReceita, setShowNovaReceita] = useState(false);
+  const [showAdicionarExame, setShowAdicionarExame] = useState(false);
   const [receitaParaEditar, setReceitaParaEditar] = useState<ReceitaMedica | null>(null);
 
   const cliente = clientes.find(c => c.id === clienteId);
@@ -519,7 +521,13 @@ export function Prontuario() {
         </TabsContent>
 
         <TabsContent value="exames" className="space-y-4">
-          <h3 className="text-lg font-semibold">Histórico de Exames Bioquímicos</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Histórico de Exames Bioquímicos</h3>
+            <Button onClick={() => setShowAdicionarExame(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Exames
+            </Button>
+          </div>
           
           {consultas.filter(c => c.resultadosExames && c.resultadosExames.length > 0).length === 0 ? (
             <Card>
@@ -1023,6 +1031,13 @@ export function Prontuario() {
               ));
               setReceitaParaEditar(null);
             }}
+          />
+        )}
+
+        {showAdicionarExame && (
+          <AdicionarExame
+            cliente={cliente}
+            onClose={() => setShowAdicionarExame(false)}
           />
         )}
       </div>
