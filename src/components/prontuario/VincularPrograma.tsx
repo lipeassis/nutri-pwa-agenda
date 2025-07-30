@@ -60,17 +60,45 @@ export function VincularPrograma({ cliente, onClose }: VincularProgramaProps) {
       return;
     }
 
-    // Verificar se o cliente já está vinculado a este programa
-    const jaVinculado = clienteProgramas.some(cp => 
+    // Verificar se o cliente já está vinculado a este programa em período ativo/vigente
+    const programaAtivo = clienteProgramas.find(cp => 
       cp.clienteId === cliente.id && 
       cp.programaId === formData.programaId && 
-      cp.ativo
+      cp.ativo && 
+      new Date(cp.dataFim) >= new Date() // Ainda não venceu
     );
 
-    if (jaVinculado) {
+    // Verificar conflito de datas com programas existentes do mesmo tipo
+    const dataInicioNova = new Date(formData.dataInicio);
+    const dataFimNova = new Date(calcularDataFim(formData.dataInicio, programa.duracao));
+    
+    const conflitoDatas = clienteProgramas.some(cp => 
+      cp.clienteId === cliente.id && 
+      cp.programaId === formData.programaId && 
+      cp.ativo &&
+      (
+        // Nova data início está dentro de um programa existente
+        (dataInicioNova >= new Date(cp.dataInicio) && dataInicioNova <= new Date(cp.dataFim)) ||
+        // Nova data fim está dentro de um programa existente  
+        (dataFimNova >= new Date(cp.dataInicio) && dataFimNova <= new Date(cp.dataFim)) ||
+        // Novo programa engloba um programa existente
+        (dataInicioNova <= new Date(cp.dataInicio) && dataFimNova >= new Date(cp.dataFim))
+      )
+    );
+
+    if (programaAtivo) {
       toast({
         title: "Erro",
-        description: "Cliente já está vinculado a este programa.",
+        description: "Cliente já possui este programa ativo. Aguarde o término ou finalize o programa atual.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (conflitoDatas) {
+      toast({
+        title: "Erro", 
+        description: "As datas escolhidas conflitam com outro período deste programa. Escolha datas diferentes.",
         variant: "destructive",
       });
       return;
