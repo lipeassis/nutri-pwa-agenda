@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -20,11 +20,14 @@ import { NovaReceita } from "@/components/prontuario/NovaReceita";
 import { AdicionarExame } from "@/components/prontuario/AdicionarExame";
 import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function Prontuario() {
+  const { toast } = useToast();
   const { clienteId } = useParams<{ clienteId: string }>();
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
-  const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
+  const [consultas, setConsultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   const [objetivos] = useLocalStorage<ObjetivosCliente[]>('nutriapp-objetivos', []);
   const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
@@ -44,6 +47,8 @@ export function Prontuario() {
   const [showAdicionarExame, setShowAdicionarExame] = useState(false);
   const [showVincularPrograma, setShowVincularPrograma] = useState(false);
   const [receitaParaEditar, setReceitaParaEditar] = useState<ReceitaMedica | null>(null);
+  const [consultaSelecionada, setConsultaSelecionada] = useState<ConsultaProntuario | null>(null);
+  const [showDetalhesConsulta, setShowDetalhesConsulta] = useState(false);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -355,7 +360,37 @@ export function Prontuario() {
                       <CardTitle className="text-base">
                         Consulta {format(new Date(consulta.data), "dd/MM/yyyy", { locale: ptBR })}
                       </CardTitle>
-                      {index === 0 && <Badge>Mais recente</Badge>}
+                      <div className="flex items-center gap-2">
+                        {index === 0 && <Badge>Mais recente</Badge>}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setConsultaSelecionada(consulta);
+                            setShowDetalhesConsulta(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Ver Detalhes
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (window.confirm('Tem certeza que deseja excluir esta consulta?')) {
+                              const consultasAtualizadas = consultas.filter(c => c.id !== consulta.id);
+                              setConsultas(consultasAtualizadas);
+                              toast({
+                                title: "Consulta excluída",
+                                description: "A consulta foi removida com sucesso.",
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Excluir
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1277,6 +1312,257 @@ export function Prontuario() {
             onClose={() => setShowVincularPrograma(false)}
           />
         )}
+
+        {/* Modal de detalhes da consulta */}
+        <Dialog open={showDetalhesConsulta} onOpenChange={setShowDetalhesConsulta}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Detalhes da Consulta - {consultaSelecionada && format(new Date(consultaSelecionada.data), "dd/MM/yyyy", { locale: ptBR })}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {consultaSelecionada && (
+              <div className="space-y-6">
+                {/* Medidas Antropométricas */}
+                <div>
+                  <h4 className="font-semibold mb-3 text-lg">Medidas Antropométricas</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+                    <div>
+                      <span className="text-muted-foreground text-sm">Peso:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.peso}kg</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">Altura:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.altura}cm</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">C. Braço:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaBraco}cm</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">C. Abdômen:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaAbdomen}cm</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">C. Quadril:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaQuadril}cm</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">C. Pescoço:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaPescoco}cm</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">% Gordura:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.percentualGordura}%</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground text-sm">M. Muscular:</span>
+                      <p className="font-medium">{consultaSelecionada.medidas.massaMuscular}kg</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dobras Cutâneas */}
+                {consultaSelecionada.dobrasCutaneas && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-lg">Dobras Cutâneas</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+                      <div>
+                        <span className="text-muted-foreground text-sm">Tricipital:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.tricipital}mm</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">Bicipital:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.bicipital}mm</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">Subescapular:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.subescapular}mm</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">Suprailíaca:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.suprailiaca}mm</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">Abdominal:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.abdominal}mm</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">Coxa:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.coxa}mm</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">Panturrilha:</span>
+                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.panturrilha}mm</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Anamnese completa */}
+                {consultaSelecionada.anamnese && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-lg">Anamnese Completa</h4>
+                    <div className="space-y-4 p-4 bg-muted rounded-lg">
+                      {consultaSelecionada.anamnese.funcaoIntestinal && (
+                        <div>
+                          <span className="font-medium text-sm">Função Intestinal:</span>
+                          <p className="mt-1 capitalize">{consultaSelecionada.anamnese.funcaoIntestinal}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.padraoAlimentar && (
+                        <div>
+                          <span className="font-medium text-sm">Padrão Alimentar:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.padraoAlimentar}</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="font-medium text-sm">Horários Irregulares:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.horariosIrregulares ? 'Sim' : 'Não'}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-sm">Compulsões:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.compulsoes ? 'Sim' : 'Não'}</p>
+                        </div>
+                      </div>
+                      
+                      {consultaSelecionada.anamnese.consumoAgua > 0 && (
+                        <div>
+                          <span className="font-medium text-sm">Consumo de Água:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.consumoAgua}L/dia</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.sintomasAtuais && consultaSelecionada.anamnese.sintomasAtuais.length > 0 && (
+                        <div>
+                          <span className="font-medium text-sm">Sintomas Atuais:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {consultaSelecionada.anamnese.sintomasAtuais.map((sintoma, index) => (
+                              <Badge key={index} variant="outline">
+                                {sintoma}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.outros && (
+                        <div>
+                          <span className="font-medium text-sm">Outros:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.outros}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.habitosAjustar && (
+                        <div>
+                          <span className="font-medium text-sm">Hábitos a Ajustar:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.habitosAjustar}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.manutencaoPlano && (
+                        <div>
+                          <span className="font-medium text-sm">Manutenção do Plano:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.manutencaoPlano}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.suplementacao && (
+                        <div>
+                          <span className="font-medium text-sm">Suplementação:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.suplementacao}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.alimentosPriorizados && (
+                        <div>
+                          <span className="font-medium text-sm">Alimentos Priorizados:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.alimentosPriorizados}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.alimentosEvitados && (
+                        <div>
+                          <span className="font-medium text-sm">Alimentos Evitados:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.alimentosEvitados}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.reforcoComportamental && (
+                        <div>
+                          <span className="font-medium text-sm">Reforço Comportamental:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.reforcoComportamental}</p>
+                        </div>
+                      )}
+                      
+                      {consultaSelecionada.anamnese.estrategiasComplementares && (
+                        <div>
+                          <span className="font-medium text-sm">Estratégias Complementares:</span>
+                          <p className="mt-1">{consultaSelecionada.anamnese.estrategiasComplementares}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Relato do paciente */}
+                {consultaSelecionada.relatoPaciente && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-lg">Relato do Paciente</h4>
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p>{consultaSelecionada.relatoPaciente}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Observações do nutricionista */}
+                {consultaSelecionada.observacoesNutricionista && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-lg">Observações do Nutricionista</h4>
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p>{consultaSelecionada.observacoesNutricionista}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Exames */}
+                {consultaSelecionada.resultadosExames && consultaSelecionada.resultadosExames.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-lg">Resultados de Exames</h4>
+                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      {consultaSelecionada.resultadosExames.map((resultado, index) => (
+                        <div key={index} className="p-4 border rounded-lg">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h5 className="font-medium">{resultado.exameNome}</h5>
+                              <Badge 
+                                variant={
+                                  resultado.status === 'normal' ? 'default' : 
+                                  resultado.status === 'abaixo' ? 'destructive' : 
+                                  'destructive'
+                                }
+                              >
+                                {resultado.status === 'normal' ? 'Normal' : 
+                                 resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
+                              </Badge>
+                            </div>
+                            <div className="text-lg font-semibold">
+                              {resultado.valor} {resultado.unidade}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     );
 }
