@@ -377,3 +377,21 @@ export interface ProgramaNutricional {
   ativo: boolean;
   criadoEm: string;
 }
+
+export interface ComponenteFormula {
+  id: string;
+  nome: string;
+  dosagem: string;
+  unidade: string;
+}
+
+export interface FormulaMagistral {
+  id: string;
+  nome: string;
+  componentes: ComponenteFormula[];
+  posologia: string;
+  observacoes?: string;
+  ativo: boolean;
+  criadoEm: string;
+  criadoPor: string;
+}

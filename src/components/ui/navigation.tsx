@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -39,6 +39,7 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/exames-bioquimicos", icon: TestTube, label: "Exames Bioquímicos" },
     { href: "/alimentos", icon: Apple, label: "Alimentos" },
     { href: "/programas", icon: Star, label: "Programas" },
+    { href: "/formulas-magistrais", icon: FlaskConical, label: "Fórmulas Magistrais" },
   ];
 
   return (
@@ -68,7 +69,7 @@ export function Navigation({ className }: NavigationProps) {
                   </NavigationMenuItem>
                 ))}
                 
-                {hasPermission('administrador') && (
+                {hasPermission(['administrador', 'profissional']) && (
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>
                       <Settings className="w-4 h-4 mr-2" />
@@ -76,7 +77,14 @@ export function Navigation({ className }: NavigationProps) {
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <ul className="grid w-[240px] gap-1 p-4 bg-white border border-border rounded-md shadow-lg">
-                        {adminItems.map((item) => (
+                        {adminItems.filter(item => {
+                          // Fórmulas Magistrais é acessível para administradores e profissionais
+                          if (item.href === '/formulas-magistrais') {
+                            return hasPermission(['administrador', 'profissional']);
+                          }
+                          // Outros itens são apenas para administradores
+                          return hasPermission('administrador');
+                        }).map((item) => (
                           <li key={item.href}>
                             <Link to={item.href}>
                               <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
@@ -169,12 +177,19 @@ export function Navigation({ className }: NavigationProps) {
                 </NavLink>
               ))}
               
-              {hasPermission('administrador') && (
+              {hasPermission(['administrador', 'profissional']) && (
                 <>
                   <div className="px-3 py-2 text-sm font-medium text-muted-foreground border-t pt-4 mt-2">
                     Ajustes
                   </div>
-                  {adminItems.map((item) => (
+                  {adminItems.filter(item => {
+                    // Fórmulas Magistrais é acessível para administradores e profissionais
+                    if (item.href === '/formulas-magistrais') {
+                      return hasPermission(['administrador', 'profissional']);
+                    }
+                    // Outros itens são apenas para administradores
+                    return hasPermission('administrador');
+                  }).map((item) => (
                     <NavLink
                       key={item.href}
                       to={item.href}

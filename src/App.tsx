@@ -24,6 +24,7 @@ import CadastroAlimentos from "./pages/CadastroAlimentos";
 import { EditarPerfil } from "./pages/EditarPerfil";
 import { TrocarSenha } from "./pages/TrocarSenha";
 import { Programas } from "./pages/Programas";
+import { FormulasMagistrais } from "./pages/FormulasMagistrais";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -113,6 +114,11 @@ const App = () => (
                    <Route path="/programas" element={
                      <ProtectedRoute requiredRole="administrador">
                        <Programas />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/formulas-magistrais" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <FormulasMagistrais />
                      </ProtectedRoute>
                    } />
                    <Route path="/perfil" element={
