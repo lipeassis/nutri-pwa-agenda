@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye, FlaskConical } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -20,6 +20,7 @@ import { NovaReceita } from "@/components/prontuario/NovaReceita";
 import { AdicionarExame } from "@/components/prontuario/AdicionarExame";
 import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
+import { VincularFormula } from "@/components/prontuario/VincularFormula";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -315,13 +316,14 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-11">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
           <TabsTrigger value="receitas">Medicamentos</TabsTrigger>
+          <TabsTrigger value="formulas">Fórmulas</TabsTrigger>
           <TabsTrigger value="programas">Programas</TabsTrigger>
           <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
@@ -931,6 +933,13 @@ export function Prontuario() {
                 ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="formulas" className="space-y-4">
+          <VincularFormula 
+            clienteId={cliente.id} 
+            clienteNome={cliente.nome}
+          />
         </TabsContent>
 
         <TabsContent value="programas" className="space-y-4">

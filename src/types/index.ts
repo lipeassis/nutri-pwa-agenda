@@ -395,3 +395,16 @@ export interface FormulaMagistral {
   criadoEm: string;
   criadoPor: string;
 }
+
+export interface FormulaVinculada {
+  id: string;
+  clienteId: string;
+  formulaId: string;
+  formulaNome: string;
+  dataInicio: string;
+  dataFim?: string;
+  observacoes?: string;
+  ativo: boolean;
+  criadoEm: string;
+  criadoPor: string;
+}

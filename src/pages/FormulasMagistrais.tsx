@@ -11,14 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2, Plus, Edit, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { FormulaMagistral, ComponenteFormula } from "@/types";
 
 export function FormulasMagistrais() {
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Estados
-  const [formulas, setFormulas] = useState<FormulaMagistral[]>([]);
+  // Estados usando localStorage
+  const [formulas, setFormulas] = useLocalStorage<FormulaMagistral[]>('formulas-magistrais', []);
   const [dialogAberto, setDialogAberto] = useState(false);
   const [formulaEditando, setFormulaEditando] = useState<FormulaMagistral | null>(null);
   const [visualizandoFormula, setVisualizandoFormula] = useState<FormulaMagistral | null>(null);
