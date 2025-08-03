@@ -126,10 +126,35 @@ export function Prontuario() {
   // Componente de Upload
   const UploadDocument = ({ clienteId, onUpload }: { clienteId: string; onUpload: (doc: DocumentoCliente) => void }) => {
     const [isUploading, setIsUploading] = useState(false);
+    const [showDialog, setShowDialog] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [tipoDocumento, setTipoDocumento] = useState<DocumentoCliente['tipo']>('outros');
+    const [descricao, setDescricao] = useState('');
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const tiposDocumento = [
+      { value: 'exame', label: 'Exame Médico' },
+      { value: 'receita', label: 'Receita Médica' },
+      { value: 'relatorio', label: 'Relatório' },
+      { value: 'atestado', label: 'Atestado' },
+      { value: 'termo', label: 'Termo de Consentimento' },
+      { value: 'foto', label: 'Foto/Imagem' },
+      { value: 'outros', label: 'Outros' }
+    ];
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file) return;
+
+      setSelectedFile(file);
+      setShowDialog(true);
+      
+      // Reset form
+      setTipoDocumento('outros');
+      setDescricao('');
+    };
+
+    const handleUpload = () => {
+      if (!selectedFile) return;
 
       setIsUploading(true);
       const reader = new FileReader();
@@ -138,38 +163,105 @@ export function Prontuario() {
         const documento: DocumentoCliente = {
           id: Date.now().toString(),
           clienteId,
-          nome: file.name,
-          tipo: file.type.includes('image') ? 'exame' : 'outros',
+          nome: selectedFile.name,
+          tipo: tipoDocumento,
           arquivo: e.target?.result as string,
-          tamanho: file.size,
-          mimeType: file.type,
+          tamanho: selectedFile.size,
+          mimeType: selectedFile.type,
+          descricao: descricao.trim() || undefined,
           criadoEm: new Date().toISOString(),
           criadoPor: 'user' // Substituir pelo ID do usuário logado
         };
         
         onUpload(documento);
         setIsUploading(false);
+        setShowDialog(false);
+        setSelectedFile(null);
+        setDescricao('');
+        toast({
+          title: "Documento anexado",
+          description: "O documento foi anexado com sucesso ao prontuário.",
+        });
       };
       
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(selectedFile);
     };
 
     return (
-      <div>
-        <input
-          type="file"
-          id="file-upload"
-          className="hidden"
-          onChange={handleFileUpload}
-          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-        />
-        <Button asChild variant="outline">
-          <label htmlFor="file-upload" className="cursor-pointer">
-            <Upload className="w-4 h-4 mr-2" />
-            {isUploading ? 'Enviando...' : 'Anexar Documento'}
-          </label>
-        </Button>
-      </div>
+      <>
+        <div>
+          <input
+            type="file"
+            id="file-upload"
+            className="hidden"
+            onChange={handleFileSelect}
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          />
+          <Button asChild variant="outline">
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <Upload className="w-4 h-4 mr-2" />
+              Anexar Documento
+            </label>
+          </Button>
+        </div>
+
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Anexar Documento</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Arquivo selecionado: <span className="font-medium">{selectedFile?.name}</span>
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium block mb-2">Tipo de Documento</label>
+                <select
+                  value={tipoDocumento}
+                  onChange={(e) => setTipoDocumento(e.target.value as DocumentoCliente['tipo'])}
+                  className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                >
+                  {tiposDocumento.map(tipo => (
+                    <option key={tipo.value} value={tipo.value}>
+                      {tipo.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium block mb-2">Descrição (opcional)</label>
+                <textarea
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  placeholder="Adicione uma breve descrição sobre o documento..."
+                  className="w-full px-3 py-2 border border-input rounded-md bg-background resize-none"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDialog(false);
+                    setSelectedFile(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button onClick={handleUpload} disabled={isUploading}>
+                  {isUploading ? 'Anexando...' : 'Anexar Documento'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   };
 
@@ -1084,51 +1176,69 @@ export function Prontuario() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {documentos
                 .filter(d => d.clienteId === cliente.id)
-                .map((documento) => (
-                  <Card key={documento.id}>
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-muted">
-                            {getFileIcon(documento.mimeType)}
+                .map((documento) => {
+                  const tipoLabel = {
+                    'exame': 'Exame Médico',
+                    'receita': 'Receita Médica',
+                    'relatorio': 'Relatório',
+                    'atestado': 'Atestado',
+                    'termo': 'Termo de Consentimento',
+                    'foto': 'Foto/Imagem',
+                    'outros': 'Outros'
+                  }[documento.tipo] || documento.tipo;
+
+                  return (
+                    <Card key={documento.id}>
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-muted">
+                              {getFileIcon(documento.mimeType)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium truncate">{documento.nome}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {formatFileSize(documento.tamanho)}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium truncate">{documento.nome}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {formatFileSize(documento.tamanho)}
-                            </p>
+                          
+                          {documento.descricao && (
+                            <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+                              {documento.descricao}
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline">
+                              {tipoLabel}
+                            </Badge>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => downloadDocument(documento)}
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteDocument(documento.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(documento.criadoEm).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <Badge variant="outline">
-                            {documento.tipo}
-                          </Badge>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => downloadDocument(documento)}
-                            >
-                              <Download className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteDocument(documento.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(documento.criadoEm).toLocaleDateString('pt-BR')}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
             </div>
           )}
         </TabsContent>

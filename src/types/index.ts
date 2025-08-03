@@ -187,10 +187,11 @@ export interface DocumentoCliente {
   id: string;
   clienteId: string;
   nome: string;
-  tipo: 'exame' | 'receita' | 'relatorio' | 'outros';
+  tipo: 'exame' | 'receita' | 'relatorio' | 'atestado' | 'termo' | 'foto' | 'outros';
   arquivo: string; // base64 ou URL
   tamanho: number; // em bytes
   mimeType: string;
+  descricao?: string; // Nova propriedade para descrição
   criadoEm: string;
   criadoPor: string; // id do usuário
 }
