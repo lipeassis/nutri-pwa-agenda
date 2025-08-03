@@ -21,6 +21,7 @@ import { AdicionarExame } from "@/components/prontuario/AdicionarExame";
 import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
 import { VincularFormula } from "@/components/prontuario/VincularFormula";
+import { FotosEvolucao } from "@/components/prontuario/FotosEvolucao";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -316,7 +317,7 @@ export function Prontuario() {
       )}
 
       <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-11">
+        <TabsList className="grid w-full grid-cols-12">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
@@ -324,6 +325,7 @@ export function Prontuario() {
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
           <TabsTrigger value="receitas">Medicamentos</TabsTrigger>
           <TabsTrigger value="formulas">Fórmulas</TabsTrigger>
+          <TabsTrigger value="fotos">Fotos</TabsTrigger>
           <TabsTrigger value="programas">Programas</TabsTrigger>
           <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
@@ -940,6 +942,10 @@ export function Prontuario() {
             clienteId={cliente.id} 
             clienteNome={cliente.nome}
           />
+        </TabsContent>
+
+        <TabsContent value="fotos" className="space-y-4">
+          <FotosEvolucao clienteId={cliente.id} />
         </TabsContent>
 
         <TabsContent value="programas" className="space-y-4">
