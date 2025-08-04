@@ -25,6 +25,8 @@ import { EditarPerfil } from "./pages/EditarPerfil";
 import { TrocarSenha } from "./pages/TrocarSenha";
 import { Programas } from "./pages/Programas";
 import { FormulasMagistrais } from "./pages/FormulasMagistrais";
+import { ConfirmarConsulta } from "./pages/ConfirmarConsulta";
+import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,9 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            {/* Rotas públicas para confirmação de consultas */}
+            <Route path="/confirmar-consulta" element={<ConfirmarConsulta />} />
+            <Route path="/confirmacao-sucesso" element={<ConfirmacaoSucesso />} />
             <Route path="/*" element={
               <Layout>
                 <Routes>
