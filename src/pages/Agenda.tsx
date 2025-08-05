@@ -9,19 +9,26 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Agendamento } from "@/types";
-import { Search, Plus, Calendar, Clock, User, Filter, CalendarDays, CalendarIcon, List } from "lucide-react";
+import { Search, Plus, Calendar, Clock, User, Filter, CalendarDays, CalendarIcon, List, Edit3, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format, isToday, isTomorrow, isPast, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { ReagendarModal } from "@/components/agenda/ReagendarModal";
+import { CancelarModal } from "@/components/agenda/CancelarModal";
 
 export function Agenda() {
-  const [agendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
+  const [agendamentos, setAgendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [filtroData, setFiltroData] = useState<Date | undefined>();
   const [visualizacao, setVisualizacao] = useState<"lista" | "calendario">("lista");
+  
+  // Estados dos modais
+  const [reagendarModalOpen, setReagendarModalOpen] = useState(false);
+  const [cancelarModalOpen, setCancelarModalOpen] = useState(false);
+  const [agendamentoSelecionado, setAgendamentoSelecionado] = useState<Agendamento | null>(null);
 
   const agendamentosFiltrados = agendamentos
     .filter(agendamento => {
@@ -78,6 +85,41 @@ export function Agenda() {
       case 'avaliacao': return 'Avaliação';
       default: return tipo;
     }
+  };
+
+  // Funções de manipulação dos agendamentos
+  const abrirModalReagendar = (agendamento: Agendamento) => {
+    setAgendamentoSelecionado(agendamento);
+    setReagendarModalOpen(true);
+  };
+
+  const abrirModalCancelar = (agendamento: Agendamento) => {
+    setAgendamentoSelecionado(agendamento);
+    setCancelarModalOpen(true);
+  };
+
+  const reagendarAgendamento = (agendamentoId: string, novaData: string, novoHorario: string) => {
+    setAgendamentos(agendamentos.map(ag => 
+      ag.id === agendamentoId 
+        ? { ...ag, data: novaData, hora: novoHorario }
+        : ag
+    ));
+  };
+
+  const cancelarAgendamento = (agendamentoId: string, motivo?: string) => {
+    setAgendamentos(agendamentos.map(ag => 
+      ag.id === agendamentoId 
+        ? { ...ag, status: 'cancelado', observacoes: motivo ? `Cancelado: ${motivo}` : ag.observacoes }
+        : ag
+    ));
+  };
+
+  const marcarComoRealizado = (agendamentoId: string) => {
+    setAgendamentos(agendamentos.map(ag => 
+      ag.id === agendamentoId 
+        ? { ...ag, status: 'realizado' }
+        : ag
+    ));
   };
 
   const hoje = new Date().toISOString().split('T')[0];
@@ -292,13 +334,38 @@ export function Agenda() {
                           </p>
                         )}
                       </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          Editar
-                        </Button>
+                      <div className="flex flex-wrap gap-2">
                         {agendamento.status === 'agendado' && (
-                          <Button size="sm">
-                            Marcar como Realizado
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => abrirModalReagendar(agendamento)}
+                              className="flex items-center gap-1"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              Reagendar
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => abrirModalCancelar(agendamento)}
+                              className="flex items-center gap-1 text-destructive hover:text-destructive"
+                            >
+                              <X className="w-3 h-3" />
+                              Cancelar
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => marcarComoRealizado(agendamento.id)}
+                            >
+                              Marcar como Realizado
+                            </Button>
+                          </>
+                        )}
+                        {agendamento.status !== 'agendado' && (
+                          <Button variant="outline" size="sm" disabled>
+                            {agendamento.status === 'realizado' ? 'Consulta Realizada' : 'Agendamento Cancelado'}
                           </Button>
                         )}
                       </div>
@@ -374,6 +441,21 @@ export function Agenda() {
           </CardContent>
         </Card>
       )}
+
+      {/* Modais */}
+      <ReagendarModal
+        agendamento={agendamentoSelecionado}
+        open={reagendarModalOpen}
+        onOpenChange={setReagendarModalOpen}
+        onConfirm={reagendarAgendamento}
+      />
+      
+      <CancelarModal
+        agendamento={agendamentoSelecionado}
+        open={cancelarModalOpen}
+        onOpenChange={setCancelarModalOpen}
+        onConfirm={cancelarAgendamento}
+      />
     </div>
   );
 }
