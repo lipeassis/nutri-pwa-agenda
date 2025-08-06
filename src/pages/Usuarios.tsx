@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Usuario, UserRole, TipoProfissional, DisponibilidadeAgenda } from "@/types";
+import { Usuario, UserRole, TipoProfissional, DisponibilidadePorLocal } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +44,7 @@ export function Usuarios() {
     senha: '',
     role: 'secretaria' as UserRole,
     tipoProfissionalId: '',
-    disponibilidade: undefined as DisponibilidadeAgenda | undefined
+    disponibilidade: undefined as DisponibilidadePorLocal | undefined
   });
   const { toast } = useToast();
 

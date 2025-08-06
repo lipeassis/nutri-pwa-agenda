@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Usuario, TipoProfissional, DisponibilidadeAgenda } from "@/types";
+import { Usuario, TipoProfissional, DisponibilidadePorLocal } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export function EditarPerfil() {
     nome: user?.nome || '',
     email: user?.email || '',
     tipoProfissionalId: user?.tipoProfissionalId || '',
-    disponibilidade: user?.disponibilidade as DisponibilidadeAgenda | undefined
+    disponibilidade: user?.disponibilidade as DisponibilidadePorLocal | undefined
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -168,6 +168,10 @@ export interface DisponibilidadeAgenda {
   sabado: HorarioDisponivel[];
 }
 
+export interface DisponibilidadePorLocal {
+  [localId: string]: DisponibilidadeAgenda;
+}
+
 export interface ValorReferencia {
   id: string;
   minimo: number;
@@ -372,7 +376,7 @@ export interface Usuario {
   senha: string;
   role: UserRole;
   tipoProfissionalId?: string; // Apenas para role 'profissional'
-  disponibilidade?: DisponibilidadeAgenda; // Apenas para role 'profissional'
+  disponibilidade?: DisponibilidadePorLocal; // Disponibilidade por local para role 'profissional'
   ativo: boolean;
   criadoEm: string;
 }
