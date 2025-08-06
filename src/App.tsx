@@ -25,6 +25,7 @@ import { EditarPerfil } from "./pages/EditarPerfil";
 import { TrocarSenha } from "./pages/TrocarSenha";
 import { Programas } from "./pages/Programas";
 import { FormulasMagistrais } from "./pages/FormulasMagistrais";
+import { LocaisAtendimento } from "./pages/LocaisAtendimento";
 import { ConfirmarConsulta } from "./pages/ConfirmarConsulta";
 import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
 import NotFound from "./pages/NotFound";
@@ -96,12 +97,17 @@ const App = () => (
                       <Convenios />
                     </ProtectedRoute>
                   } />
-                  <Route path="/servicos" element={
-                    <ProtectedRoute requiredRole="administrador">
-                      <Servicos />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/exames-bioquimicos" element={
+                   <Route path="/servicos" element={
+                     <ProtectedRoute requiredRole="administrador">
+                       <Servicos />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/locais-atendimento" element={
+                     <ProtectedRoute requiredRole="administrador">
+                       <LocaisAtendimento />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/exames-bioquimicos" element={
                     <ProtectedRoute requiredRole="administrador">
                       <ExamesBioquimicos />
                     </ProtectedRoute>

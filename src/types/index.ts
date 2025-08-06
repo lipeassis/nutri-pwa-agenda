@@ -18,6 +18,16 @@ export interface Alergia {
   criadoEm: string;
 }
 
+export interface LocalAtendimento {
+  id: string;
+  nome: string;
+  endereco: string;
+  telefone?: string;
+  observacoes?: string;
+  ativo: boolean;
+  criadoEm: string;
+}
+
 export interface Convenio {
   id: string;
   nome: string;
@@ -60,6 +70,8 @@ export interface Agendamento {
   profissionalNome: string;
   servicoId: string; // Alterado de tipo para servicoId
   servicoNome: string; // Nome do serviço
+  localId: string; // ID do local de atendimento
+  localNome: string; // Nome do local de atendimento
   convenioId?: string; // ID do convênio (opcional)
   convenioNome?: string; // Nome do convênio (opcional)
   data: string;

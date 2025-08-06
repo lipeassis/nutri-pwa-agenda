@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, Agendamento, Usuario, TipoProfissional, Servico } from "@/types";
+import { Cliente, Agendamento, Usuario, TipoProfissional, Servico, LocalAtendimento } from "@/types";
 import { ArrowLeft, Save, Calendar } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -24,10 +24,12 @@ export function NovoAgendamento() {
   const [usuarios] = useLocalStorage<Usuario[]>('system_users', []);
   const [tiposProfissionais] = useLocalStorage<TipoProfissional[]>('tipos_profissionais', []);
   const [servicos] = useLocalStorage<Servico[]>('nutriapp-servicos', []);
+  const [locais] = useLocalStorage<LocalAtendimento[]>('nutriapp-locais', []);
   
   // Filtrar apenas profissionais ativos
   const profissionais = usuarios.filter(u => u.role === 'profissional' && u.ativo);
   const servicosAtivos = servicos.filter(s => s.ativo);
+  const locaisAtivos = locais.filter(l => l.ativo);
   
   const [formData, setFormData] = useState({
     clienteId: clienteIdParam || "",
@@ -35,6 +37,7 @@ export function NovoAgendamento() {
     data: "",
     hora: "",
     servicoId: "",
+    localId: "",
     observacoes: ""
   });
 
@@ -62,10 +65,15 @@ export function NovoAgendamento() {
     return cliente?.nome || "";
   };
 
+  const getLocalNome = (localId: string) => {
+    const local = locais.find(l => l.id === localId);
+    return local?.nome || "";
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || !formData.servicoId) {
+    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || !formData.servicoId || !formData.localId) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -101,6 +109,8 @@ export function NovoAgendamento() {
       hora: formData.hora,
       servicoId: formData.servicoId,
       servicoNome: getServicoNome(formData.servicoId),
+      localId: formData.localId,
+      localNome: getLocalNome(formData.localId),
       status: 'agendado',
       observacoes: formData.observacoes,
       criadoEm: new Date().toISOString()
@@ -278,6 +288,28 @@ export function NovoAgendamento() {
               )}
             </div>
 
+            {/* Local de Atendimento */}
+            <div className="space-y-2">
+              <Label htmlFor="localId">Local de Atendimento *</Label>
+              <Select value={formData.localId} onValueChange={(value) => handleSelectChange('localId', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o local" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locaisAtivos.map((local) => (
+                    <SelectItem key={local.id} value={local.id}>
+                      {local.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {locaisAtivos.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum local cadastrado. Entre em contato com o administrador.
+                </p>
+              )}
+            </div>
+
             {/* Observações */}
             <div className="space-y-2">
               <Label htmlFor="observacoes">Observações</Label>
@@ -293,7 +325,7 @@ export function NovoAgendamento() {
 
             {/* Actions */}
             <div className="flex gap-3 pt-6 border-t">
-              <Button type="submit" className="flex-1" disabled={clientes.length === 0 || servicosAtivos.length === 0 || (user?.role !== 'profissional' && profissionais.length === 0)}>
+              <Button type="submit" className="flex-1" disabled={clientes.length === 0 || servicosAtivos.length === 0 || locaisAtivos.length === 0 || (user?.role !== 'profissional' && profissionais.length === 0)}>
                 <Save className="w-4 h-4 mr-2" />
                 Criar Agendamento
               </Button>
