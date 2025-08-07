@@ -72,12 +72,194 @@ export function Navigation({ className }: NavigationProps) {
                 
                 {hasPermission(['administrador', 'profissional']) && (
                   <NavigationMenuItem>
-                    <Link to="/ajustes">
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        <Settings className="w-4 h-4 mr-2" />
-                        Ajustes
-                      </NavigationMenuLink>
-                    </Link>
+                    <NavigationMenuTrigger>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Ajustes
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="w-[800px] p-6 bg-background border border-border rounded-md shadow-lg">
+                        <div className="grid grid-cols-3 gap-6">
+                          {/* Coluna 1 - Usuários & Configurações */}
+                          <div className="space-y-4">
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Usuários</h4>
+                              {hasPermission('administrador') && (
+                                <>
+                                  <Link to="/tipos-profissionais">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <UserCog className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Tipos de Profissionais</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Gerencie os tipos de profissionais do sistema</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                  <Link to="/usuarios">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <UserCog className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Usuários</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Cadastre e gerencie usuários do sistema</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                </>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Configurações</h4>
+                              {hasPermission('administrador') && (
+                                <>
+                                  <Link to="/locais-atendimento">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <Building2 className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Locais de Atendimento</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Configure os locais onde são realizados os atendimentos</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                  <Link to="/servicos">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <Wrench className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Serviços</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Configure os serviços oferecidos</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Coluna 2 - Clínico & Financeiro */}
+                          <div className="space-y-4">
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Clínico</h4>
+                              {hasPermission('administrador') && (
+                                <>
+                                  <Link to="/doencas">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <FileText className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Doenças</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Cadastre e organize doenças para os prontuários</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                  <Link to="/exames-bioquimicos">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <TestTube className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Exames Bioquímicos</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Cadastre tipos de exames bioquímicos</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                </>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Financeiro</h4>
+                              {hasPermission('administrador') && (
+                                <Link to="/convenios">
+                                  <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                    <div className="flex items-start gap-3">
+                                      <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                        <CreditCard className="w-4 h-4 text-primary" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <div className="font-medium text-sm">Convênios</div>
+                                        <div className="text-xs text-muted-foreground leading-relaxed">Gerencie convênios e planos de saúde</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Coluna 3 - Nutricional */}
+                          <div className="space-y-4">
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Nutricional</h4>
+                              {hasPermission('administrador') && (
+                                <>
+                                  <Link to="/alimentos">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <Apple className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Alimentos</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Base de dados de alimentos e nutrientes</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                  <Link to="/programas">
+                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                          <Star className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <div className="font-medium text-sm">Programas</div>
+                                          <div className="text-xs text-muted-foreground leading-relaxed">Programas nutricionais personalizados</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                </>
+                              )}
+                              {hasPermission(['administrador', 'profissional']) && (
+                                <Link to="/formulas-magistrais">
+                                  <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                    <div className="flex items-start gap-3">
+                                      <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                        <FlaskConical className="w-4 h-4 text-primary" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <div className="font-medium text-sm">Fórmulas Magistrais</div>
+                                        <div className="text-xs text-muted-foreground leading-relaxed">Gerencie fórmulas magistrais e composições</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
                   </NavigationMenuItem>
                 )}
               </NavigationMenuList>
@@ -158,21 +340,36 @@ export function Navigation({ className }: NavigationProps) {
               ))}
               
               {hasPermission(['administrador', 'profissional']) && (
-                <NavLink
-                  to="/ajustes"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )
-                  }
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Ajustes</span>
-                </NavLink>
+                <>
+                  <div className="px-3 py-2 text-sm font-medium text-muted-foreground border-t pt-4 mt-2">
+                    Ajustes
+                  </div>
+                  {adminItems.filter(item => {
+                    // Fórmulas Magistrais é acessível para administradores e profissionais
+                    if (item.href === '/formulas-magistrais') {
+                      return hasPermission(['administrador', 'profissional']);
+                    }
+                    // Outros itens são apenas para administradores
+                    return hasPermission('administrador');
+                  }).map((item) => (
+                    <NavLink
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        )
+                      }
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  ))}
+                </>
               )}
             </div>
             
