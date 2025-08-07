@@ -26,6 +26,7 @@ import { TrocarSenha } from "./pages/TrocarSenha";
 import { Programas } from "./pages/Programas";
 import { FormulasMagistrais } from "./pages/FormulasMagistrais";
 import { LocaisAtendimento } from "./pages/LocaisAtendimento";
+import Ajustes from "./pages/Ajustes";
 import { ConfirmarConsulta } from "./pages/ConfirmarConsulta";
 import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
 import NotFound from "./pages/NotFound";
@@ -130,6 +131,11 @@ const App = () => (
                    <Route path="/formulas-magistrais" element={
                      <ProtectedRoute requiredRole={['administrador', 'profissional']}>
                        <FormulasMagistrais />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/ajustes" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <Ajustes />
                      </ProtectedRoute>
                    } />
                    <Route path="/perfil" element={

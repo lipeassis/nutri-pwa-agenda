@@ -72,33 +72,12 @@ export function Navigation({ className }: NavigationProps) {
                 
                 {hasPermission(['administrador', 'profissional']) && (
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Ajustes
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[240px] gap-1 p-4 bg-white border border-border rounded-md shadow-lg">
-                        {adminItems.filter(item => {
-                          // Fórmulas Magistrais é acessível para administradores e profissionais
-                          if (item.href === '/formulas-magistrais') {
-                            return hasPermission(['administrador', 'profissional']);
-                          }
-                          // Outros itens são apenas para administradores
-                          return hasPermission('administrador');
-                        }).map((item) => (
-                          <li key={item.href}>
-                            <Link to={item.href}>
-                              <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                                <div className="flex items-center gap-2">
-                                  <item.icon className="w-4 h-4 text-muted-foreground" />
-                                  <div className="text-sm font-medium leading-none text-foreground">{item.label}</div>
-                                </div>
-                              </NavigationMenuLink>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
+                    <Link to="/ajustes">
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Ajustes
+                      </NavigationMenuLink>
+                    </Link>
                   </NavigationMenuItem>
                 )}
               </NavigationMenuList>
@@ -179,36 +158,21 @@ export function Navigation({ className }: NavigationProps) {
               ))}
               
               {hasPermission(['administrador', 'profissional']) && (
-                <>
-                  <div className="px-3 py-2 text-sm font-medium text-muted-foreground border-t pt-4 mt-2">
-                    Ajustes
-                  </div>
-                  {adminItems.filter(item => {
-                    // Fórmulas Magistrais é acessível para administradores e profissionais
-                    if (item.href === '/formulas-magistrais') {
-                      return hasPermission(['administrador', 'profissional']);
-                    }
-                    // Outros itens são apenas para administradores
-                    return hasPermission('administrador');
-                  }).map((item) => (
-                    <NavLink
-                      key={item.href}
-                      to={item.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all duration-200",
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                        )
-                      }
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.label}</span>
-                    </NavLink>
-                  ))}
-                </>
+                <NavLink
+                  to="/ajustes"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )
+                  }
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Ajustes</span>
+                </NavLink>
               )}
             </div>
             
