@@ -129,6 +129,7 @@ export interface ConsultaProntuario {
   anamnese: Anamnese;
   relatoPaciente: string;
   observacoesNutricionista: string;
+  sinaisAlerta?: string;
   criadoEm: string;
 }
 

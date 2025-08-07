@@ -408,6 +408,25 @@ export function Prontuario() {
         </div>
       )}
 
+      {/* Sinais de Alerta */}
+      {ultimaConsulta?.sinaisAlerta && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              🚨 Sinais de Alerta - Atenção na Próxima Consulta
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-background p-4 rounded-md border border-destructive/20">
+              <p className="text-sm whitespace-pre-wrap">{ultimaConsulta.sinaisAlerta}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              📅 Registrado em: {format(new Date(ultimaConsulta.data), "dd/MM/yyyy", { locale: ptBR })}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="historico" className="space-y-6">
         <TabsList className="grid w-full grid-cols-12">
           <TabsTrigger value="historico">Consultas</TabsTrigger>
@@ -676,6 +695,18 @@ export function Prontuario() {
                         <h4 className="font-medium mb-2">Observações do Nutricionista</h4>
                         <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
                           {consulta.observacoesNutricionista}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Sinais de Alerta */}
+                    {consulta.sinaisAlerta && (
+                      <div className="border border-destructive/50 bg-destructive/10 p-3 rounded-md">
+                        <h4 className="font-medium mb-2 text-destructive flex items-center gap-2">
+                          🚨 Sinais de Alerta
+                        </h4>
+                        <p className="text-sm whitespace-pre-wrap">
+                          {consulta.sinaisAlerta}
                         </p>
                       </div>
                     )}

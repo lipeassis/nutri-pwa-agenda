@@ -65,6 +65,7 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
     } as Anamnese,
     relatoPaciente: '',
     observacoesNutricionista: '',
+    sinaisAlerta: '',
   });
 
   const [resultadosExames, setResultadosExames] = useState<ResultadoExame[]>([]);
@@ -134,6 +135,7 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
         anamnese: formData.anamnese,
         relatoPaciente: formData.relatoPaciente,
         observacoesNutricionista: formData.observacoesNutricionista,
+        sinaisAlerta: formData.sinaisAlerta,
         criadoEm: new Date().toISOString()
       };
 
@@ -806,6 +808,23 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
                     placeholder="Avaliação profissional, recomendações, plano alimentar, etc."
                     rows={4}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sinaisAlerta" className="text-base font-medium text-destructive">
+                    🚨 Sinais de Alerta
+                  </Label>
+                  <Textarea
+                    id="sinaisAlerta"
+                    value={formData.sinaisAlerta}
+                    onChange={(e) => handleInputChange('sinaisAlerta', e.target.value)}
+                    placeholder="Pontos de atenção importantes para a próxima consulta (ex: pressão alta, sintomas preocupantes, medicamentos, etc.)"
+                    rows={3}
+                    className="border-destructive/50 focus-visible:ring-destructive"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    💡 Este campo aparecerá em destaque no prontuário para facilitar a identificação na próxima consulta
+                  </p>
                 </div>
               </div>
             </TabsContent>
