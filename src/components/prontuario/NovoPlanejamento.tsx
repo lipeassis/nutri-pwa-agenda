@@ -197,6 +197,21 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
 
   const previsaoPeso = calcularPrevisaoPeso();
 
+  // Calcular automaticamente a meta de kcal baseada no objetivo
+  React.useEffect(() => {
+    if (gastoTotal > 0) {
+      let metaCalculada = gastoTotal;
+      
+      if (tipoObjetivo === 'deficit') {
+        metaCalculada = gastoTotal - valorDeficitSuperavit;
+      } else if (tipoObjetivo === 'superavit') {
+        metaCalculada = gastoTotal + valorDeficitSuperavit;
+      }
+      
+      setMetaKcal(Math.round(metaCalculada));
+    }
+  }, [gastoTotal, tipoObjetivo, valorDeficitSuperavit]);
+
   const handleSave = () => {
     if (!formData.nome.trim()) {
       toast.error('Nome do plano é obrigatório');
@@ -536,14 +551,18 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                  )}
 
                  <div>
-                   <Label htmlFor="meta-kcal">Meta de KCAL do Plano</Label>
+                   <Label htmlFor="meta-kcal">Meta de KCAL do Plano (automático)</Label>
                    <Input
                      id="meta-kcal"
                      type="number"
                      value={metaKcal || ''}
                      onChange={(e) => setMetaKcal(parseFloat(e.target.value) || 0)}
-                     placeholder="Ex: 1800"
+                     placeholder="Calculado automaticamente"
+                     className="bg-muted"
                    />
+                   <div className="text-xs text-muted-foreground mt-1">
+                     Calculado automaticamente: Gasto Total {tipoObjetivo === 'deficit' ? '- Déficit' : tipoObjetivo === 'superavit' ? '+ Superávit' : '(Manutenção)'}
+                   </div>
                  </div>
                </div>
 
