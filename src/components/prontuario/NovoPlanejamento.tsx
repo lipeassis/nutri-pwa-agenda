@@ -70,6 +70,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   // Estados para cálculos energéticos
   const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle' | 'cunningham' | 'tinsley' | 'bolso'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
+  const [caloriasExtras, setCaloriasExtras] = useState<number>(0);
   const [metaKcal, setMetaKcal] = useState<number>(0);
   const [metaProteina, setMetaProteina] = useState<number>(0);
   const [metaCarboidratos, setMetaCarboidratos] = useState<number>(0);
@@ -161,7 +162,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   };
 
   const tmb = calcularTMB();
-  const gastoTotal = tmb * fatorAtividade;
+  const gastoTotal = tmb * fatorAtividade + caloriasExtras;
 
   const handleSave = () => {
     if (!formData.nome.trim()) {
@@ -438,6 +439,20 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                    </Select>
                  </div>
 
+                 <div>
+                   <Label htmlFor="calorias-extras">Calorias Extras (kcal)</Label>
+                   <Input
+                     id="calorias-extras"
+                     type="number"
+                     value={caloriasExtras || ''}
+                     onChange={(e) => setCaloriasExtras(parseFloat(e.target.value) || 0)}
+                     placeholder="Ex: 200"
+                   />
+                   <div className="text-xs text-muted-foreground mt-1">
+                     Calorias adicionais que serão somadas ao gasto total
+                   </div>
+                 </div>
+
                  {formulaTMB === 'bolso' && (
                    <div>
                      <Label htmlFor="kcal-por-kg">Kcal por kg</Label>
@@ -481,13 +496,13 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                    </div>
                 </div>
                 
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{gastoTotal.toFixed(0)}</div>
-                  <div className="text-sm text-muted-foreground">Gasto Energético Total (kcal)</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    TMB × {fatorAtividade}
-                  </div>
-                </div>
+                 <div className="text-center p-4 bg-green-50 rounded-lg">
+                   <div className="text-2xl font-bold text-green-600">{gastoTotal.toFixed(0)}</div>
+                   <div className="text-sm text-muted-foreground">Gasto Energético Total (kcal)</div>
+                   <div className="text-xs text-muted-foreground mt-1">
+                     TMB × {fatorAtividade}{caloriasExtras > 0 ? ` + ${caloriasExtras}` : ''}
+                   </div>
+                 </div>
                 
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
                   <div className="text-2xl font-bold text-orange-600">{totaisDia.kcal.toFixed(0)}</div>
