@@ -71,6 +71,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
   const [formulaTMB, setFormulaTMB] = useState<'harris-benedict' | 'mifflin-st-jeor' | 'katch-mcardle' | 'cunningham' | 'tinsley' | 'bolso'>('mifflin-st-jeor');
   const [fatorAtividade, setFatorAtividade] = useState<number>(1.55);
   const [caloriasExtras, setCaloriasExtras] = useState<number>(0);
+  const [tipoObjetivo, setTipoObjetivo] = useState<'deficit' | 'superavit' | 'manutencao'>('deficit');
+  const [valorDeficitSuperavit, setValorDeficitSuperavit] = useState<number>(500);
   const [metaKcal, setMetaKcal] = useState<number>(0);
   const [metaProteina, setMetaProteina] = useState<number>(0);
   const [metaCarboidratos, setMetaCarboidratos] = useState<number>(0);
@@ -163,6 +165,37 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
 
   const tmb = calcularTMB();
   const gastoTotal = tmb * fatorAtividade + caloriasExtras;
+
+  // Calcular previsão de peso baseado no déficit/superávit
+  const calcularPrevisaoPeso = () => {
+    if (!formData.dataInicio || !formData.dataFim) return null;
+    
+    const dataInicio = new Date(formData.dataInicio);
+    const dataFim = new Date(formData.dataFim);
+    const diasTotal = Math.ceil((dataFim.getTime() - dataInicio.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diasTotal <= 0) return null;
+    
+    let deficitSuperavitTotal = 0;
+    
+    if (tipoObjetivo === 'deficit') {
+      deficitSuperavitTotal = valorDeficitSuperavit * diasTotal;
+    } else if (tipoObjetivo === 'superavit') {
+      deficitSuperavitTotal = -valorDeficitSuperavit * diasTotal;
+    }
+    
+    // 7700 kcal = 1 kg de gordura
+    const previsaoKg = deficitSuperavitTotal / 7700;
+    
+    return {
+      dias: diasTotal,
+      previsaoKg: Math.abs(previsaoKg),
+      tipo: tipoObjetivo,
+      pesoFinal: peso + (tipoObjetivo === 'superavit' ? Math.abs(previsaoKg) : -Math.abs(previsaoKg))
+    };
+  };
+
+  const previsaoPeso = calcularPrevisaoPeso();
 
   const handleSave = () => {
     if (!formData.nome.trim()) {
@@ -470,17 +503,81 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                    </div>
                  )}
 
-                <div>
-                  <Label htmlFor="meta-kcal">Meta de KCAL do Plano</Label>
-                  <Input
-                    id="meta-kcal"
-                    type="number"
-                    value={metaKcal || ''}
-                    onChange={(e) => setMetaKcal(parseFloat(e.target.value) || 0)}
-                    placeholder="Ex: 1800"
-                  />
-                </div>
-              </div>
+                 <div>
+                   <Label>Objetivo do Plano</Label>
+                   <Select value={tipoObjetivo} onValueChange={(value: any) => setTipoObjetivo(value)}>
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="deficit">Déficit Calórico (Perda de Peso)</SelectItem>
+                       <SelectItem value="superavit">Superávit Calórico (Ganho de Peso)</SelectItem>
+                       <SelectItem value="manutencao">Manutenção</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+
+                 {tipoObjetivo !== 'manutencao' && (
+                   <div>
+                     <Label htmlFor="valor-deficit-superavit">
+                       {tipoObjetivo === 'deficit' ? 'Déficit Calórico' : 'Superávit Calórico'} (kcal/dia)
+                     </Label>
+                     <Input
+                       id="valor-deficit-superavit"
+                       type="number"
+                       value={valorDeficitSuperavit || ''}
+                       onChange={(e) => setValorDeficitSuperavit(parseFloat(e.target.value) || 0)}
+                       placeholder="Ex: 500"
+                     />
+                     <div className="text-xs text-muted-foreground mt-1">
+                       Quantidade de calorias {tipoObjetivo === 'deficit' ? 'abaixo' : 'acima'} do gasto energético total
+                     </div>
+                   </div>
+                 )}
+
+                 <div>
+                   <Label htmlFor="meta-kcal">Meta de KCAL do Plano</Label>
+                   <Input
+                     id="meta-kcal"
+                     type="number"
+                     value={metaKcal || ''}
+                     onChange={(e) => setMetaKcal(parseFloat(e.target.value) || 0)}
+                     placeholder="Ex: 1800"
+                   />
+                 </div>
+               </div>
+
+               {/* Previsão de Peso */}
+               {previsaoPeso && tipoObjetivo !== 'manutencao' && (
+                 <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
+                   <h4 className="font-semibold text-lg mb-2 text-center">📊 Previsão de Peso</h4>
+                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                     <div>
+                       <div className="text-2xl font-bold text-blue-600">{previsaoPeso.dias}</div>
+                       <div className="text-sm text-muted-foreground">Dias de Plano</div>
+                     </div>
+                     <div>
+                       <div className="text-2xl font-bold text-purple-600">
+                         {tipoObjetivo === 'deficit' ? '-' : '+'}{previsaoPeso.previsaoKg.toFixed(1)} kg
+                       </div>
+                       <div className="text-sm text-muted-foreground">
+                         {tipoObjetivo === 'deficit' ? 'Perda Prevista' : 'Ganho Previsto'}
+                       </div>
+                     </div>
+                     <div>
+                       <div className="text-2xl font-bold text-green-600">{peso.toFixed(1)} kg</div>
+                       <div className="text-sm text-muted-foreground">Peso Atual</div>
+                     </div>
+                     <div>
+                       <div className="text-2xl font-bold text-orange-600">{previsaoPeso.pesoFinal.toFixed(1)} kg</div>
+                       <div className="text-sm text-muted-foreground">Peso Final Estimado</div>
+                     </div>
+                   </div>
+                   <div className="text-xs text-center text-muted-foreground mt-3">
+                     * Baseado em {tipoObjetivo === 'deficit' ? valorDeficitSuperavit : valorDeficitSuperavit} kcal/dia de {tipoObjetivo === 'deficit' ? 'déficit' : 'superávit'} por {previsaoPeso.dias} dias (1 kg = 7.700 kcal)
+                   </div>
+                 </div>
+               )}
 
               {/* Resultados dos Cálculos */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
