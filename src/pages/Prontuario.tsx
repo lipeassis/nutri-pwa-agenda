@@ -429,18 +429,18 @@ export function Prontuario() {
 
       <Tabs defaultValue="historico" className="space-y-6">
         <TabsList className="grid w-full grid-cols-12">
+          <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="historico">Consultas</TabsTrigger>
-          <TabsTrigger value="graficos">Gráficos</TabsTrigger>
-          <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
-          <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
+          <TabsTrigger value="exames">Exames</TabsTrigger>
           <TabsTrigger value="receitas">Medicamentos</TabsTrigger>
           <TabsTrigger value="formulas">Fórmulas</TabsTrigger>
-          <TabsTrigger value="fotos">Fotos</TabsTrigger>
           <TabsTrigger value="programas">Programas</TabsTrigger>
-          <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
-          <TabsTrigger value="documentos">Documentos</TabsTrigger>
+          <TabsTrigger value="graficos">Gráficos</TabsTrigger>
+          <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
           <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
+          <TabsTrigger value="fotos">Fotos</TabsTrigger>
+          <TabsTrigger value="documentos">Documentos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="historico" className="space-y-4">

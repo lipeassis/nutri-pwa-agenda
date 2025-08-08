@@ -184,8 +184,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
       deficitSuperavitTotal = -valorDeficitSuperavit * diasTotal;
     }
     
-    // 7700 kcal = 1 kg de gordura
-    const previsaoKg = deficitSuperavitTotal / 7700;
+    // 9900 kcal = 1 kg de gordura
+    const previsaoKg = deficitSuperavitTotal / 9900;
     
     return {
       dias: diasTotal,
@@ -347,8 +347,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
         <Tabs defaultValue="informacoes" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="informacoes">Informações</TabsTrigger>
-            <TabsTrigger value="calculos">Cálculos</TabsTrigger>
-            <TabsTrigger value="metas">Metas</TabsTrigger>
+            <TabsTrigger value="calculos">Cálculos Energéticos</TabsTrigger>
+            <TabsTrigger value="metas">Metas Nutricionais</TabsTrigger>
             <TabsTrigger value="refeicoes">Refeições</TabsTrigger>
           </TabsList>
 
@@ -358,8 +358,8 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                 <CardTitle>Informações do Plano</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                  <div className="col-span-4">
                     <Label htmlFor="nome-plano">Nome do Plano</Label>
                     <Input
                       id="nome-plano"
@@ -496,7 +496,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   </div>
                   
                   <div>
-                    <Label htmlFor="calorias-extras">Calorias Extras</Label>
+                    <Label htmlFor="calorias-extras">Calorias Extras (AF,Treino)</Label>
                     <Input
                       id="calorias-extras"
                       type="number"
@@ -570,7 +570,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                 </div>
 
                 {/* Resultados */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary">{tmb.toFixed(0)}</div>
                     <div className="text-sm text-muted-foreground">TMB (kcal)</div>
@@ -578,6 +578,10 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{gastoTotal.toFixed(0)}</div>
                     <div className="text-sm text-muted-foreground">Gasto Total (kcal)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-600">{metaKcal.toFixed(0)}</div>
+                    <div className="text-sm text-muted-foreground">Meta Calórica</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{((gastoTotal / peso) || 0).toFixed(1)}</div>
@@ -588,27 +592,27 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                 {/* Previsão de peso */}
                 {previsaoPeso && previsaoPeso.dias > 0 && tipoObjetivo !== 'manutencao' && (
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-2">Previsão de Peso</h4>
+                    <h4 className="font-medium text-center text-blue-900 mb-2">Previsão de Peso</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{previsaoPeso.dias}</div>
-                        <div className="text-blue-700">dias</div>
+                        <div className="text-2xl font-bold text-blue-600">{previsaoPeso.dias}</div>
+                        <div className="text-muted-foreground">dias</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{peso.toFixed(1)}kg</div>
-                        <div className="text-blue-700">peso atual</div>
+                        <div className="text-2xl font-bold text-blue-600">{peso.toFixed(1)}kg</div>
+                        <div className="text-muted-foreground">peso atual</div>
                       </div>
                       <div className="text-center">
-                        <div className={`text-lg font-bold ${tipoObjetivo === 'deficit' ? 'text-green-600' : 'text-orange-600'}`}>
-                          {tipoObjetivo === 'deficit' ? '-' : '+'}{previsaoPeso.previsaoKg.toFixed(1)}kg
+                        <div className={`text-2xl font-bold ${tipoObjetivo === 'deficit' ? 'text-green-600' : 'text-orange-600'}`}>
+                          {(previsaoPeso.previsaoKg * 1.2).toFixed(1)}~{(previsaoPeso.previsaoKg - (previsaoPeso.previsaoKg * 0.2)).toFixed(1)}kg
                         </div>
-                        <div className="text-blue-700">
+                        <div className="text-muted-foreground">
                           {tipoObjetivo === 'deficit' ? 'perda prevista' : 'ganho previsto'}
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{previsaoPeso.pesoFinal.toFixed(1)}kg</div>
-                        <div className="text-blue-700">peso estimado</div>
+                        <div className="text-2xl font-bold text-blue-600">{(peso - (previsaoPeso.previsaoKg * 1.2)).toFixed(1)}~{(peso- (previsaoPeso.previsaoKg - (previsaoPeso.previsaoKg * 0.2))).toFixed(1)}kg</div>
+                        <div className="text-muted-foreground">peso estimado</div>
                       </div>
                     </div>
                   </div>
@@ -719,6 +723,10 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
               </CardContent>
             </Card>
 
+            
+          </TabsContent>
+
+          <TabsContent value="refeicoes" className="space-y-6">
             {/* Resumo dos Totais */}
             <Card>
               <CardHeader>
@@ -730,7 +738,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
-                    <div className="text-2xl font-bold text-green-600">{totaisDia.kcal.toFixed(0)}</div>
+                    <div className="text-2xl font-bold text-green-600">{totaisDia.kcal.toFixed(0)}/{metaKcal}Kcal</div>
                     <div className="text-sm text-green-700">Calorias</div>
                     {metaKcal > 0 && (
                       <div className="text-xs mt-1">
@@ -748,7 +756,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   </div>
                   
                   <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
-                    <div className="text-2xl font-bold text-blue-600">{totaisDia.proteina.toFixed(1)}g</div>
+                    <div className="text-2xl font-bold text-blue-600">{totaisDia.proteina.toFixed(1)}g/{metaProteina * peso}g</div>
                     <div className="text-sm text-blue-700">Proteína</div>
                     {metaProteina > 0 && (
                       <div className="text-xs mt-1">
@@ -778,7 +786,11 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   </div>
                   
                   <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-                    <div className="text-2xl font-bold text-yellow-600">{totaisDia.carboidratos.toFixed(1)}g</div>
+                    <div className="text-2xl font-bold text-yellow-600">{totaisDia.carboidratos.toFixed(1)}g/{(() => {
+                      const totalProteina = metaProteina * peso * 4
+                      const totalLipideos = metaLipideos * peso * 9
+                      return (metaKcal- (totalProteina + totalLipideos)) / 4
+                    })()}g</div>
                     <div className="text-sm text-yellow-700">Carboidratos</div>
                     {metaCarboidratos > 0 && (
                       <div className="text-xs mt-1">
@@ -808,7 +820,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                   </div>
                   
                   <div className="text-center p-4 rounded-lg bg-purple-50 border border-purple-200">
-                    <div className="text-2xl font-bold text-purple-600">{totaisDia.lipideos.toFixed(1)}g</div>
+                    <div className="text-2xl font-bold text-purple-600">{totaisDia.lipideos.toFixed(1)}g/{metaLipideos * peso}g</div>
                     <div className="text-sm text-purple-700">Lipídeos</div>
                     {metaLipideos > 0 && (
                       <div className="text-xs mt-1">
@@ -839,9 +851,6 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="refeicoes" className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -859,7 +868,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                       <TabsTrigger key={refeicao.id} value={refeicao.id} className="text-xs">
                         {refeicao.nome}
                         {refeicao.alimentos.length > 0 && (
-                          <Badge variant="secondary" className="ml-1 text-xs">
+                          <Badge variant="secondary" className="ml-1 bg-green-200 text-xs">
                             {refeicao.alimentos.length}
                           </Badge>
                         )}
@@ -1008,7 +1017,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                                 return (
                                   <TableRow key={index}>
                                     <TableCell className="font-medium">{alimentoRef.alimentoNome}</TableCell>
-                                    <TableCell>{alimentoRef.quantidade} {alimentoRef.unidade}</TableCell>
+                                    <TableCell>{alimentoRef.quantidade} {alimento.unidadeMedida}</TableCell>
                                     <TableCell>{(alimento.informacaoNutricional.kcal * fator).toFixed(0)} kcal</TableCell>
                                     <TableCell>{(alimento.informacaoNutricional.proteina * fator).toFixed(1)}g</TableCell>
                                     <TableCell>{(alimento.informacaoNutricional.carboidratos * fator).toFixed(1)}g</TableCell>
