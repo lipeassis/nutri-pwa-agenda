@@ -584,7 +584,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
                     <div className="text-sm text-muted-foreground">Meta Calórica</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{((gastoTotal / peso) || 0).toFixed(1)}</div>
+                    <div className="text-2xl font-bold text-blue-600">{((metaKcal / peso) || 0).toFixed(1)}</div>
                     <div className="text-sm text-muted-foreground">Kcal/kg</div>
                   </div>
                 </div>
