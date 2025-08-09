@@ -22,6 +22,7 @@ import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQuestionario";
 import { VincularFormula } from "@/components/prontuario/VincularFormula";
 import { FotosEvolucao } from "@/components/prontuario/FotosEvolucao";
+import { CriarDocumentoTemplate } from "@/components/prontuario/CriarDocumentoTemplate";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -51,6 +52,7 @@ export function Prontuario() {
   const [receitaParaEditar, setReceitaParaEditar] = useState<ReceitaMedica | null>(null);
   const [consultaSelecionada, setConsultaSelecionada] = useState<ConsultaProntuario | null>(null);
   const [showDetalhesConsulta, setShowDetalhesConsulta] = useState(false);
+  const [showCriarDocumentoTemplate, setShowCriarDocumentoTemplate] = useState(false);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -1190,7 +1192,16 @@ export function Prontuario() {
         <TabsContent value="documentos" className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Documentos do Paciente</h3>
-            <UploadDocument clienteId={cliente.id} onUpload={(doc) => setDocumentos([...documentos, doc])} />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowCriarDocumentoTemplate(true)}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Criar de Modelo
+              </Button>
+              <UploadDocument clienteId={cliente.id} onUpload={(doc) => setDocumentos([...documentos, doc])} />
+            </div>
           </div>
           
           {documentos.filter(d => d.clienteId === cliente.id).length === 0 ? (
@@ -1466,6 +1477,17 @@ export function Prontuario() {
           <VincularPrograma
             cliente={cliente}
             onClose={() => setShowVincularPrograma(false)}
+          />
+        )}
+
+        {showCriarDocumentoTemplate && (
+          <CriarDocumentoTemplate
+            cliente={cliente}
+            onClose={() => setShowCriarDocumentoTemplate(false)}
+            onSave={(documento) => {
+              setDocumentos([...documentos, documento]);
+              setShowCriarDocumentoTemplate(false);
+            }}
           />
         )}
 
