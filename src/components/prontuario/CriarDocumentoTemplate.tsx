@@ -9,6 +9,8 @@ import { DocumentoPadrao, DocumentoCliente, Cliente } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Plus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import ReactQuill from 'react-quill';
+
 
 interface CriarDocumentoTemplateProps {
   cliente: Cliente;
@@ -239,14 +241,16 @@ export function CriarDocumentoTemplate({ cliente, onClose, onSave }: CriarDocume
 
             <div>
               <Label htmlFor="conteudoPersonalizado">Conteúdo do Documento *</Label>
-              <Textarea
+              
+                          <ReactQuill id="conteudoPersonalizado" theme="snow" value={formData.conteudoPersonalizado} onChange={(value) => handleInputChange('conteudoPersonalizado', value)} />
+              {/*<Textarea
                 id="conteudoPersonalizado"
                 value={formData.conteudoPersonalizado}
                 onChange={(e) => handleInputChange('conteudoPersonalizado', e.target.value)}
                 placeholder="Personalize o conteúdo do documento..."
                 className="min-h-[300px] font-mono text-sm"
                 required
-              />
+              />*/}
               <p className="text-sm text-muted-foreground mt-2">
                 O documento foi automaticamente preenchido com os dados do cliente. Você pode editar conforme necessário.
               </p>

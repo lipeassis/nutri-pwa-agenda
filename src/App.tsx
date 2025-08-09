@@ -30,6 +30,7 @@ import { ConfirmarConsulta } from "./pages/ConfirmarConsulta";
 import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
 import DocumentosPadrao from "./pages/DocumentosPadrao";
 import NotFound from "./pages/NotFound";
+import 'react-quill/dist/quill.snow.css'; // ou 'bubble.css'
 
 const queryClient = new QueryClient();
 

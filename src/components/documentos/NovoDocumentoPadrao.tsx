@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { DocumentoPadrao } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import ReactQuill from 'react-quill';
+
 
 interface NovoDocumentoPadraoProps {
   onClose: () => void;
@@ -87,14 +89,15 @@ export function NovoDocumentoPadrao({ onClose }: NovoDocumentoPadraoProps) {
 
           <div>
             <Label htmlFor="conteudoHtml">Conteúdo HTML *</Label>
-            <Textarea
+            <ReactQuill id="conteudoHtml" theme="snow" value={formData.conteudoHtml} onChange={(value) => handleInputChange('conteudoHtml', value)} />
+            {/*<Textarea
               id="conteudoHtml"
               value={formData.conteudoHtml}
               onChange={(e) => handleInputChange('conteudoHtml', e.target.value)}
               placeholder="Digite o conteúdo HTML do documento..."
               className="min-h-[300px] font-mono text-sm"
               required
-            />
+            />*/}
             <p className="text-sm text-muted-foreground mt-2">
               Use HTML para formatar o documento. Exemplos: &lt;h1&gt;Título&lt;/h1&gt;, &lt;p&gt;Parágrafo&lt;/p&gt;, &lt;strong&gt;Negrito&lt;/strong&gt;, &lt;em&gt;Itálico&lt;/em&gt;
             </p>
