@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical, Building2 } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical, Building2, FilePlus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -38,6 +38,7 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/servicos", icon: Wrench, label: "Serviços" },
     { href: "/locais-atendimento", icon: Building2, label: "Locais de Atendimento" },
     { href: "/exames-bioquimicos", icon: TestTube, label: "Exames Bioquímicos" },
+    { href: "/documentos-padrao", icon: FilePlus, label: "Documentos Padrão" },
     { href: "/alimentos", icon: Apple, label: "Alimentos" },
     { href: "/programas", icon: Star, label: "Programas" },
     { href: "/formulas-magistrais", icon: FlaskConical, label: "Fórmulas Magistrais" },
@@ -169,21 +170,36 @@ export function Navigation({ className }: NavigationProps) {
                                       </div>
                                     </div>
                                   </Link>
-                                  <Link to="/exames-bioquimicos">
-                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
-                                      <div className="flex items-start gap-3">
-                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                          <TestTube className="w-4 h-4 text-primary" />
-                                        </div>
-                                        <div className="space-y-1">
-                                          <div className="font-medium text-sm">Exames Bioquímicos</div>
-                                          <div className="text-xs text-muted-foreground leading-relaxed">Cadastre tipos de exames bioquímicos</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Link>
-                                </>
-                              )}
+                                   <Link to="/exames-bioquimicos">
+                                     <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                       <div className="flex items-start gap-3">
+                                         <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                           <TestTube className="w-4 h-4 text-primary" />
+                                         </div>
+                                         <div className="space-y-1">
+                                           <div className="font-medium text-sm">Exames Bioquímicos</div>
+                                           <div className="text-xs text-muted-foreground leading-relaxed">Cadastre tipos de exames bioquímicos</div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </Link>
+                                 </>
+                               )}
+                               {hasPermission(['administrador', 'profissional']) && (
+                                 <Link to="/documentos-padrao">
+                                   <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                     <div className="flex items-start gap-3">
+                                       <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                         <FilePlus className="w-4 h-4 text-primary" />
+                                       </div>
+                                       <div className="space-y-1">
+                                         <div className="font-medium text-sm">Documentos Padrão</div>
+                                         <div className="text-xs text-muted-foreground leading-relaxed">Modelos de documentos com conteúdo HTML</div>
+                                       </div>
+                                     </div>
+                                   </div>
+                                 </Link>
+                               )}
                             </div>
                             
                             <div className="space-y-3">
@@ -345,8 +361,8 @@ export function Navigation({ className }: NavigationProps) {
                     Ajustes
                   </div>
                   {adminItems.filter(item => {
-                    // Fórmulas Magistrais é acessível para administradores e profissionais
-                    if (item.href === '/formulas-magistrais') {
+                    // Fórmulas Magistrais e Documentos Padrão são acessíveis para administradores e profissionais
+                    if (item.href === '/formulas-magistrais' || item.href === '/documentos-padrao') {
                       return hasPermission(['administrador', 'profissional']);
                     }
                     // Outros itens são apenas para administradores

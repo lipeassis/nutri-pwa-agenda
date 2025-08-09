@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, MedidasAntropometricas } from "@/types";
+import { Cliente, ConsultaProntuario, MedidasAntropometricas, DobrasCutaneas, Anamnese } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
 interface NovaEvoulcaoProps {
@@ -21,8 +21,8 @@ export function NovaEvoulcao({ cliente, onClose }: NovaEvoulcaoProps) {
   const [formData, setFormData] = useState({
     data: new Date().toISOString().split('T')[0],
     medidas: {
-      peso: cliente.peso,
-      altura: cliente.altura,
+      peso: 0,
+      altura: 0,
       circunferenciaBraco: 0,
       circunferenciaAbdomen: 0,
       circunferenciaQuadril: 0,
@@ -62,6 +62,32 @@ export function NovaEvoulcao({ cliente, onClose }: NovaEvoulcaoProps) {
         clienteId: cliente.id,
         data: formData.data,
         medidas: formData.medidas,
+        dobrasCutaneas: {
+          tricipital: 0,
+          bicipital: 0,
+          subescapular: 0,
+          suprailiaca: 0,
+          abdominal: 0,
+          coxa: 0,
+          panturrilha: 0,
+        },
+        resultadosExames: [],
+        anamnese: {
+          funcaoIntestinal: '',
+          padraoAlimentar: '',
+          horariosIrregulares: false,
+          compulsoes: false,
+          consumoAgua: 0,
+          sintomasAtuais: [],
+          outros: '',
+          habitosAjustar: '',
+          manutencaoPlano: '',
+          suplementacao: '',
+          alimentosPriorizados: '',
+          alimentosEvitados: '',
+          reforcoComportamental: '',
+          estrategiasComplementares: '',
+        },
         relatoPaciente: formData.relatoPaciente,
         observacoesNutricionista: formData.observacoesNutricionista,
         criadoEm: new Date().toISOString(),

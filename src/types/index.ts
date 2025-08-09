@@ -200,6 +200,16 @@ export interface ResultadoExame {
   status: 'abaixo' | 'normal' | 'acima';
 }
 
+export interface DocumentoPadrao {
+  id: string;
+  nome: string;
+  conteudoHtml: string;
+  ativo: boolean;
+  criadoEm: string;
+  atualizadoEm: string;
+  criadoPor: string; // id do usuário
+}
+
 export interface DocumentoCliente {
   id: string;
   clienteId: string;

@@ -28,6 +28,7 @@ import { FormulasMagistrais } from "./pages/FormulasMagistrais";
 import { LocaisAtendimento } from "./pages/LocaisAtendimento";
 import { ConfirmarConsulta } from "./pages/ConfirmarConsulta";
 import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
+import DocumentosPadrao from "./pages/DocumentosPadrao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -137,12 +138,17 @@ const App = () => (
                       <EditarPerfil />
                     </ProtectedRoute>
                   } />
-                  <Route path="/trocar-senha" element={
-                    <ProtectedRoute>
-                      <TrocarSenha />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="*" element={<NotFound />} />
+                   <Route path="/documentos-padrao" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <DocumentosPadrao />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/trocar-senha" element={
+                     <ProtectedRoute>
+                       <TrocarSenha />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Layout>
             } />
