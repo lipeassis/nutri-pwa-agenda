@@ -23,6 +23,7 @@ import FinanceiroRelatorios from "./pages/FinanceiroRelatorios";
 import CadastroAlimentos from "./pages/CadastroAlimentos";
 import { EditarPerfil } from "./pages/EditarPerfil";
 import { TrocarSenha } from "./pages/TrocarSenha";
+import { Familias } from "./pages/Familias";
 import { Programas } from "./pages/Programas";
 import { FormulasMagistrais } from "./pages/FormulasMagistrais";
 import { LocaisAtendimento } from "./pages/LocaisAtendimento";
@@ -79,11 +80,16 @@ const App = () => (
                       <NovoAgendamento />
                     </ProtectedRoute>
                   } />
-                  <Route path="/usuarios" element={
-                    <ProtectedRoute requiredRole="administrador">
-                      <Usuarios />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/usuarios" element={
+                     <ProtectedRoute requiredRole="administrador">
+                       <Usuarios />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/familias" element={
+                     <ProtectedRoute requiredRole={['profissional', 'administrador']}>
+                       <Familias />
+                     </ProtectedRoute>
+                   } />
                   <Route path="/tipos-profissionais" element={
                     <ProtectedRoute requiredRole="administrador">
                       <TiposProfissionais />

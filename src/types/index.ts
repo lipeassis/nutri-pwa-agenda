@@ -436,3 +436,33 @@ export interface FormulaVinculada {
   criadoEm: string;
   criadoPor: string;
 }
+
+export interface Familia {
+  id: string;
+  nome: string;
+  descricao?: string;
+  corTag?: string; // Cor para identificar a família
+  ativo: boolean;
+  criadoEm: string;
+  criadoPor: string;
+}
+
+export interface ClienteFamilia {
+  id: string;
+  clienteId: string;
+  familiaId: string;
+  parentesco?: string; // pai, mãe, filho, etc.
+  ativo: boolean;
+  criadoEm: string;
+}
+
+export interface CopiaPlanoAlimentar {
+  id: string;
+  planoOrigemId: string;
+  clienteOrigemId: string;
+  clienteDestinoId: string;
+  familiaId?: string;
+  observacoes?: string;
+  criadoEm: string;
+  criadoPor: string;
+}

@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ClientePrograma } from "@/types";
-import { Search, Plus, User, Phone, Mail, Calendar, FileText, Star } from "lucide-react";
+import { Cliente, ConsultaProntuario, ClientePrograma, Familia, ClienteFamilia } from "@/types";
+import { Search, Plus, User, Phone, Mail, Calendar, FileText, Star, Users } from "lucide-react";
 import { VincularPrograma } from "@/components/prontuario/VincularPrograma";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -15,6 +15,8 @@ export function Clientes() {
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   const [clienteProgramas] = useLocalStorage<ClientePrograma[]>('nutriapp-cliente-programas', []);
+  const [familias] = useLocalStorage<Familia[]>('nutriapp-familias', []);
+  const [clienteFamilias] = useLocalStorage<ClienteFamilia[]>('nutriapp-cliente-familias', []);
   const [busca, setBusca] = useState("");
   const [showVincularPrograma, setShowVincularPrograma] = useState(false);
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
@@ -37,6 +39,12 @@ export function Clientes() {
       cp.ativo && 
       new Date(cp.dataFim) >= new Date()
     );
+  };
+
+  const getFamiliaCliente = (clienteId: string) => {
+    const clienteFamilia = clienteFamilias.find(cf => cf.clienteId === clienteId && cf.ativo);
+    if (!clienteFamilia) return null;
+    return familias.find(f => f.id === clienteFamilia.familiaId && f.ativo);
   };
 
   const abrirVincularPrograma = (cliente: Cliente) => {
@@ -161,6 +169,7 @@ export function Clientes() {
           {clientesFiltrados.map((cliente) => {
             const ultimaConsulta = getUltimaConsulta(cliente.id);
             const programasAtivos = getProgramasAtivos(cliente.id);
+            const familia = getFamiliaCliente(cliente.id);
             const peso = ultimaConsulta?.medidas.peso;
             const altura = ultimaConsulta?.medidas.altura;
             
@@ -169,7 +178,22 @@ export function Clientes() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">{cliente.nome}</CardTitle>
+                      <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-lg">{cliente.nome}</CardTitle>
+                        {familia && (
+                          <Badge 
+                            variant="outline" 
+                            className="text-xs"
+                            style={{ 
+                              borderColor: familia.corTag, 
+                              color: familia.corTag 
+                            }}
+                          >
+                            <Users className="w-3 h-3 mr-1" />
+                            {familia.nome}
+                          </Badge>
+                        )}
+                      </div>
                       <CardDescription>
                         Cadastrado em {format(new Date(cliente.criadoEm), "dd/MM/yyyy", { locale: ptBR })}
                       </CardDescription>
