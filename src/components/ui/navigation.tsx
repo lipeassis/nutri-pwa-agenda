@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical, Building2, FilePlus } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical, Building2, FilePlus, ChefHat } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -41,6 +41,7 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/exames-bioquimicos", icon: TestTube, label: "Exames Bioquímicos" },
     { href: "/documentos-padrao", icon: FilePlus, label: "Documentos Padrão" },
     { href: "/alimentos", icon: Apple, label: "Alimentos" },
+    { href: "/planejamentos-padrao", icon: ChefHat, label: "Planejamentos Padrão" },
     { href: "/programas", icon: Star, label: "Programas" },
     { href: "/formulas-magistrais", icon: FlaskConical, label: "Fórmulas Magistrais" },
   ];
@@ -256,22 +257,37 @@ export function Navigation({ className }: NavigationProps) {
                                     </div>
                                   </Link>
                                 </>
-                              )}
-                              {hasPermission(['administrador', 'profissional']) && (
-                                <Link to="/formulas-magistrais">
-                                  <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
-                                    <div className="flex items-start gap-3">
-                                      <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                        <FlaskConical className="w-4 h-4 text-primary" />
-                                      </div>
-                                      <div className="space-y-1">
-                                        <div className="font-medium text-sm">Fórmulas Magistrais</div>
-                                        <div className="text-xs text-muted-foreground leading-relaxed">Gerencie fórmulas magistrais e composições</div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </Link>
-                              )}
+                               )}
+                               {hasPermission(['administrador', 'profissional']) && (
+                                 <>
+                                   <Link to="/planejamentos-padrao">
+                                     <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                       <div className="flex items-start gap-3">
+                                         <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                           <ChefHat className="w-4 h-4 text-primary" />
+                                         </div>
+                                         <div className="space-y-1">
+                                           <div className="font-medium text-sm">Planejamentos Padrão</div>
+                                           <div className="text-xs text-muted-foreground leading-relaxed">Templates de planejamentos alimentares</div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </Link>
+                                   <Link to="/formulas-magistrais">
+                                     <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                       <div className="flex items-start gap-3">
+                                         <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                           <FlaskConical className="w-4 h-4 text-primary" />
+                                         </div>
+                                         <div className="space-y-1">
+                                           <div className="font-medium text-sm">Fórmulas Magistrais</div>
+                                           <div className="text-xs text-muted-foreground leading-relaxed">Gerencie fórmulas magistrais e composições</div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </Link>
+                                 </>
+                               )}
                             </div>
                           </div>
                         </div>
@@ -362,8 +378,8 @@ export function Navigation({ className }: NavigationProps) {
                     Ajustes
                   </div>
                   {adminItems.filter(item => {
-                    // Fórmulas Magistrais e Documentos Padrão são acessíveis para administradores e profissionais
-                    if (item.href === '/formulas-magistrais' || item.href === '/documentos-padrao') {
+                    // Fórmulas Magistrais, Documentos Padrão e Planejamentos Padrão são acessíveis para administradores e profissionais
+                    if (item.href === '/formulas-magistrais' || item.href === '/documentos-padrao' || item.href === '/planejamentos-padrao') {
                       return hasPermission(['administrador', 'profissional']);
                     }
                     // Outros itens são apenas para administradores

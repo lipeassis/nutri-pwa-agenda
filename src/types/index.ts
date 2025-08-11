@@ -466,3 +466,17 @@ export interface CopiaPlanoAlimentar {
   criadoEm: string;
   criadoPor: string;
 }
+
+export interface PlanejamentoPadrao {
+  id: string;
+  nome: string;
+  descricao: string;
+  categoria: string; // Ex: "Emagrecimento", "Ganho de massa", "Diabetes", etc.
+  refeicoes: Refeicao[];
+  kcalTotal: number; // Calculado automaticamente
+  observacoes?: string;
+  tags?: string[]; // Tags para facilitar busca
+  ativo: boolean;
+  criadoEm: string;
+  criadoPor: string;
+}
