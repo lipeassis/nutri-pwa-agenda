@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma } from "@/types";
-import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye, FlaskConical } from "lucide-react";
+import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye, FlaskConical, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
@@ -23,6 +23,7 @@ import { AtualizacoesQuestionario } from "@/components/prontuario/AtualizacoesQu
 import { VincularFormula } from "@/components/prontuario/VincularFormula";
 import { FotosEvolucao } from "@/components/prontuario/FotosEvolucao";
 import { CriarDocumentoTemplate } from "@/components/prontuario/CriarDocumentoTemplate";
+import { CopiarPlanoModal } from "@/components/prontuario/CopiarPlanoModal";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -53,6 +54,7 @@ export function Prontuario() {
   const [consultaSelecionada, setConsultaSelecionada] = useState<ConsultaProntuario | null>(null);
   const [showDetalhesConsulta, setShowDetalhesConsulta] = useState(false);
   const [showCriarDocumentoTemplate, setShowCriarDocumentoTemplate] = useState(false);
+  const [showCopiarPlano, setShowCopiarPlano] = useState(false);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -872,10 +874,20 @@ export function Prontuario() {
         <TabsContent value="planejamento" className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Planejamento Alimentar</h3>
-            <Button onClick={() => setShowNovoPlanejamento(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Planejamento
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowCopiarPlano(true)}
+                disabled={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo).length === 0}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copiar Plano
+              </Button>
+              <Button onClick={() => setShowNovoPlanejamento(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Planejamento
+              </Button>
+            </div>
           </div>
           
           {planejamentos.filter(p => p.clienteId === cliente.id && p.ativo).length === 0 ? (
@@ -1741,6 +1753,14 @@ export function Prontuario() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Modal Copiar Plano */}
+        <CopiarPlanoModal
+          open={showCopiarPlano}
+          onOpenChange={setShowCopiarPlano}
+          clienteOrigem={cliente}
+          planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
+        />
       </div>
     );
 }
