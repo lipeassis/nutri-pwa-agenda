@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma } from "@/types";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma, PlanejamentoPadrao } from "@/types";
 import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye, FlaskConical, Copy, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,6 +25,7 @@ import { FotosEvolucao } from "@/components/prontuario/FotosEvolucao";
 import { CriarDocumentoTemplate } from "@/components/prontuario/CriarDocumentoTemplate";
 import { CopiarPlanoModal } from "@/components/prontuario/CopiarPlanoModal";
 import { ReajustarPlanoModal } from "@/components/prontuario/ReajustarPlanoModal";
+import { CriarDePadraoModal } from "@/components/prontuario/CriarDePadraoModal";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -42,6 +43,7 @@ export function Prontuario() {
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   const [atualizacoes, setAtualizacoes] = useLocalStorage<AtualizacaoQuestionario[]>('nutriapp-atualizacoes', []);
   const [clienteProgramas, setClienteProgramas] = useLocalStorage<ClientePrograma[]>('nutriapp-cliente-programas', []);
+  const [planejamentosPadrao] = useLocalStorage<PlanejamentoPadrao[]>('nutriapp-planejamentos-padrao', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
   const [showEditarCliente, setShowEditarCliente] = useState(false);
@@ -57,6 +59,7 @@ export function Prontuario() {
   const [showCriarDocumentoTemplate, setShowCriarDocumentoTemplate] = useState(false);
   const [showCopiarPlano, setShowCopiarPlano] = useState(false);
   const [showReajustarPlano, setShowReajustarPlano] = useState(false);
+  const [showCriarDePadrao, setShowCriarDePadrao] = useState(false);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -892,6 +895,14 @@ export function Prontuario() {
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Copiar Plano
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowCriarDePadrao(true)}
+                disabled={planejamentosPadrao.filter(p => p.ativo).length === 0}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Criar de Padrão
               </Button>
               <Button onClick={() => setShowNovoPlanejamento(true)}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -1779,6 +1790,13 @@ export function Prontuario() {
           clienteId={cliente.id}
           clienteNome={cliente.nome}
           planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
+        />
+
+        {/* Modal Criar de Padrão */}
+        <CriarDePadraoModal
+          open={showCriarDePadrao}
+          onOpenChange={setShowCriarDePadrao}
+          cliente={cliente}
         />
       </div>
     );
