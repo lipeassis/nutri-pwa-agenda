@@ -33,6 +33,19 @@ export function PlanejamentosPadrao() {
     refeicoes: [] as Refeicao[]
   });
 
+  const [showMealForm, setShowMealForm] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<{ refeicao: Refeicao; index: number } | null>(null);
+  const [mealForm, setMealForm] = useState({
+    nome: "",
+    horario: "",
+    alimentos: [] as AlimentoRefeicao[]
+  });
+
+  const [showFoodSelection, setShowFoodSelection] = useState(false);
+  const [searchFood, setSearchFood] = useState("");
+  const [selectedFood, setSelectedFood] = useState<Alimento | null>(null);
+  const [foodQuantity, setFoodQuantity] = useState("");
+
   const categorias = [
     "Emagrecimento",
     "Ganho de Massa",
@@ -205,6 +218,96 @@ export function PlanejamentosPadrao() {
       description: "O planejamento foi duplicado com sucesso.",
     });
   };
+
+  const handleAddMeal = () => {
+    setMealForm({
+      nome: "",
+      horario: "",
+      alimentos: []
+    });
+    setEditingMeal(null);
+    setShowMealForm(true);
+  };
+
+  const handleEditMeal = (refeicao: Refeicao, index: number) => {
+    setMealForm({
+      nome: refeicao.nome,
+      horario: refeicao.horario,
+      alimentos: [...refeicao.alimentos]
+    });
+    setEditingMeal({ refeicao, index });
+    setShowMealForm(true);
+  };
+
+  const handleRemoveMeal = (index: number) => {
+    const novasRefeicoes = formData.refeicoes.filter((_, i) => i !== index);
+    setFormData({ ...formData, refeicoes: novasRefeicoes });
+  };
+
+  const handleSaveMeal = () => {
+    if (!mealForm.nome.trim() || !mealForm.horario.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha o nome e horário da refeição.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const novaRefeicao: Refeicao = {
+      id: editingMeal ? editingMeal.refeicao.id : Date.now().toString(),
+      nome: mealForm.nome,
+      horario: mealForm.horario,
+      alimentos: mealForm.alimentos
+    };
+
+    if (editingMeal) {
+      const novasRefeicoes = [...formData.refeicoes];
+      novasRefeicoes[editingMeal.index] = novaRefeicao;
+      setFormData({ ...formData, refeicoes: novasRefeicoes });
+    } else {
+      setFormData({ ...formData, refeicoes: [...formData.refeicoes, novaRefeicao] });
+    }
+
+    setShowMealForm(false);
+    setEditingMeal(null);
+  };
+
+  const handleAddFoodToMeal = () => {
+    if (!selectedFood || !foodQuantity) {
+      toast({
+        title: "Seleção incompleta",
+        description: "Selecione um alimento e informe a quantidade.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const novoAlimento: AlimentoRefeicao = {
+      alimentoId: selectedFood.id,
+      alimentoNome: selectedFood.nome,
+      quantidade: parseFloat(foodQuantity),
+      unidade: selectedFood.unidadeMedida
+    };
+
+    setMealForm({
+      ...mealForm,
+      alimentos: [...mealForm.alimentos, novoAlimento]
+    });
+
+    setSelectedFood(null);
+    setFoodQuantity("");
+    setShowFoodSelection(false);
+  };
+
+  const handleRemoveFoodFromMeal = (index: number) => {
+    const novosAlimentos = mealForm.alimentos.filter((_, i) => i !== index);
+    setMealForm({ ...mealForm, alimentos: novosAlimentos });
+  };
+
+  const filteredFoods = alimentos.filter(alimento =>
+    alimento.nome.toLowerCase().includes(searchFood.toLowerCase())
+  );
 
   const planejamentosFiltrados = planejamentosPadrao.filter(p => {
     const matchesSearch = p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -534,7 +637,7 @@ export function PlanejamentosPadrao() {
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-4">
                 <Label className="text-base font-medium">Refeições</Label>
-                <Button type="button" variant="outline" size="sm">
+                <Button type="button" variant="outline" size="sm" onClick={handleAddMeal}>
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Refeição
                 </Button>
@@ -548,27 +651,43 @@ export function PlanejamentosPadrao() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {formData.refeicoes.map((refeicao, index) => (
-                    <div key={refeicao.id} className="p-3 border rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-medium">{refeicao.nome}</span>
-                          <span className="text-muted-foreground ml-2">{refeicao.horario}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {refeicao.alimentos.length} alimentos
-                          </span>
-                          <Button type="button" variant="ghost" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button type="button" variant="ghost" size="sm">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                  {formData.refeicoes.map((refeicao, index) => {
+                    const totais = calcularTotaisRefeicao(refeicao);
+                    return (
+                      <div key={refeicao.id} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium">{refeicao.nome}</span>
+                            <span className="text-muted-foreground ml-2">{refeicao.horario}</span>
+                            <span className="text-sm text-muted-foreground ml-2">
+                              - {totais.kcal.toFixed(0)} kcal
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">
+                              {refeicao.alimentos.length} alimentos
+                            </span>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditMeal(refeicao, index)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleRemoveMeal(index)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -582,6 +701,181 @@ export function PlanejamentosPadrao() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Refeição */}
+      <Dialog open={showMealForm} onOpenChange={(open) => !open && setShowMealForm(false)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingMeal ? 'Editar Refeição' : 'Nova Refeição'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="nomeRefeicao">Nome da Refeição *</Label>
+                <Input
+                  id="nomeRefeicao"
+                  value={mealForm.nome}
+                  onChange={(e) => setMealForm({ ...mealForm, nome: e.target.value })}
+                  placeholder="Ex: Café da manhã"
+                />
+              </div>
+              <div>
+                <Label htmlFor="horarioRefeicao">Horário *</Label>
+                <Input
+                  id="horarioRefeicao"
+                  type="time"
+                  value={mealForm.horario}
+                  onChange={(e) => setMealForm({ ...mealForm, horario: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-4">
+                <Label className="text-base font-medium">Alimentos</Label>
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowFoodSelection(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Alimento
+                </Button>
+              </div>
+
+              {mealForm.alimentos.length === 0 ? (
+                <div className="text-center text-muted-foreground py-6">
+                  <Apple className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                  <p>Nenhum alimento adicionado</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {mealForm.alimentos.map((alimentoRef, index) => {
+                    const alimento = alimentos.find(a => a.id === alimentoRef.alimentoId);
+                    if (!alimento) return null;
+
+                    const fator = alimentoRef.quantidade / alimento.porcaoReferencia;
+                    const kcal = alimento.informacaoNutricional.kcal * fator;
+
+                    return (
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div>
+                          <span className="font-medium">{alimentoRef.alimentoNome}</span>
+                          <div className="text-sm text-muted-foreground">
+                            {alimentoRef.quantidade} {alimentoRef.unidade} - {kcal.toFixed(0)} kcal
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveFoodFromMeal(index)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowMealForm(false)}>
+                Cancelar
+              </Button>
+              <Button type="button" onClick={handleSaveMeal}>
+                {editingMeal ? 'Atualizar' : 'Adicionar'} Refeição
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Seleção de Alimentos */}
+      <Dialog open={showFoodSelection} onOpenChange={setShowFoodSelection}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Adicionar Alimento</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="searchAlimento">Buscar Alimento</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="searchAlimento"
+                  placeholder="Digite o nome do alimento..."
+                  value={searchFood}
+                  onChange={(e) => setSearchFood(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {searchFood && (
+              <div className="max-h-48 overflow-y-auto border rounded-lg">
+                {filteredFoods.slice(0, 10).map((alimento) => (
+                  <button
+                    key={alimento.id}
+                    type="button"
+                    className={`w-full text-left p-3 hover:bg-muted transition-colors ${
+                      selectedFood?.id === alimento.id ? 'bg-primary/10' : ''
+                    }`}
+                    onClick={() => setSelectedFood(alimento)}
+                  >
+                    <div className="font-medium">{alimento.nome}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {alimento.informacaoNutricional.kcal} kcal por {alimento.porcaoReferencia} {alimento.unidadeMedida}
+                    </div>
+                  </button>
+                ))}
+                {filteredFoods.length === 0 && (
+                  <div className="p-3 text-center text-muted-foreground">
+                    Nenhum alimento encontrado
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedFood && (
+              <div className="space-y-3 p-3 border rounded-lg bg-muted/50">
+                <div>
+                    <div className="font-medium">{selectedFood.nome}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {selectedFood.informacaoNutricional.kcal} kcal por {selectedFood.porcaoReferencia} {selectedFood.unidadeMedida}
+                    </div>
+                </div>
+                <div>
+                  <Label htmlFor="quantidade">Quantidade ({selectedFood.unidadeMedida})</Label>
+                  <Input
+                    id="quantidade"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={foodQuantity}
+                    onChange={(e) => setFoodQuantity(e.target.value)}
+                    placeholder="Ex: 100"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowFoodSelection(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleAddFoodToMeal}
+                disabled={!selectedFood || !foodQuantity}
+              >
+                Adicionar
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
