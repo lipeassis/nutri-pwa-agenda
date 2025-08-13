@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ interface ReajustarPlanoModalProps {
   clienteId: string;
   clienteNome: string;
   planejamentosCliente: PlanejamentoAlimentar[];
+  planejamentoSelecionado: PlanejamentoAlimentar | null;
 }
 
 export function ReajustarPlanoModal({ 
@@ -23,18 +24,33 @@ export function ReajustarPlanoModal({
   onOpenChange, 
   clienteId,
   clienteNome,
-  planejamentosCliente 
+  planejamentosCliente,
+  planejamentoSelecionado 
 }: ReajustarPlanoModalProps) {
   const { toast } = useToast();
   const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
   const [planejamentos, setPlanejamentos] = useLocalStorage<PlanejamentoAlimentar[]>('nutriapp-planejamentos', []);
   
-  const [planoSelecionado, setPlanoSelecionado] = useState<PlanejamentoAlimentar | null>(null);
   const [tipoAjuste, setTipoAjuste] = useState<'percentual' | 'absoluto'>('percentual');
   const [valorAjuste, setValorAjuste] = useState<string>('');
   const [operacao, setOperacao] = useState<'aumentar' | 'diminuir'>('aumentar');
   const [nomeNovoPlano, setNomeNovoPlano] = useState<string>('');
   const [processando, setProcessando] = useState(false);
+
+  // Reset form when modal opens/closes or plan changes
+  useEffect(() => {
+    if (!open) {
+      setValorAjuste('');
+      setNomeNovoPlano('');
+      setProcessando(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (planejamentoSelecionado) {
+      setNomeNovoPlano(`${planejamentoSelecionado.nome} - Reajustado`);
+    }
+  }, [planejamentoSelecionado]);
 
   const calcularTotaisPlano = (plano: PlanejamentoAlimentar) => {
     return plano.refeicoes.reduce((totalPlano, refeicao) => {
@@ -60,8 +76,17 @@ export function ReajustarPlanoModal({
     }, { kcal: 0, proteina: 0, carboidratos: 0, lipideos: 0 });
   };
 
-  const aplicarReajuste = () => {
-    if (!planoSelecionado || !valorAjuste || !nomeNovoPlano.trim()) {
+  const handleReajustarPlano = async () => {
+    if (!planejamentoSelecionado) {
+      toast({
+        title: "Nenhum plano selecionado",
+        description: "Selecione um plano alimentar para reajustar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!valorAjuste || !nomeNovoPlano.trim()) {
       toast({
         title: "Dados incompletos",
         description: "Preencha todos os campos obrigatórios.",
@@ -83,7 +108,7 @@ export function ReajustarPlanoModal({
     setProcessando(true);
 
     try {
-      const totaisOriginais = calcularTotaisPlano(planoSelecionado);
+      const totaisOriginais = calcularTotaisPlano(planejamentoSelecionado);
       
       // Calcular fator de ajuste
       let fatorAjuste: number;
@@ -110,13 +135,14 @@ export function ReajustarPlanoModal({
 
       // Criar novo plano com quantidades ajustadas
       const novoPlano: PlanejamentoAlimentar = {
-        ...planoSelecionado,
+        ...planejamentoSelecionado,
         id: Date.now().toString(),
         nome: nomeNovoPlano.trim(),
-        descricao: `${planoSelecionado.descricao} - Reajustado (${operacao === 'aumentar' ? '+' : '-'}${valor}${tipoAjuste === 'percentual' ? '%' : ' kcal'})`,
+        descricao: `${planejamentoSelecionado.descricao} - Reajustado (${operacao === 'aumentar' ? '+' : '-'}${valor}${tipoAjuste === 'percentual' ? '%' : ' kcal'})`,
         criadoEm: new Date().toISOString(),
         criadoPor: 'user',
-        refeicoes: planoSelecionado.refeicoes.map(refeicao => ({
+        // Aplicar ajuste em todas as refeições
+        refeicoes: planejamentoSelecionado.refeicoes.map(refeicao => ({
           ...refeicao,
           alimentos: refeicao.alimentos.map(alimentoRef => ({
             ...alimentoRef,
@@ -128,15 +154,12 @@ export function ReajustarPlanoModal({
       // Adicionar o novo plano
       setPlanejamentos([...planejamentos, novoPlano]);
 
-      const totaisNovos = calcularTotaisPlano(novoPlano);
-
       toast({
         title: "Plano reajustado com sucesso!",
-        description: `${nomeNovoPlano} criado com ${totaisNovos.kcal.toFixed(0)} kcal (${operacao === 'aumentar' ? '+' : '-'}${Math.abs(totaisNovos.kcal - totaisOriginais.kcal).toFixed(0)} kcal).`,
+        description: `O plano "${planejamentoSelecionado.nome}" foi reajustado para "${nomeNovoPlano}".`,
       });
 
-      // Reset
-      setPlanoSelecionado(null);
+      // Reset form
       setValorAjuste('');
       setNomeNovoPlano('');
       onOpenChange(false);
@@ -152,11 +175,11 @@ export function ReajustarPlanoModal({
     }
   };
 
-  const totaisPlanoSelecionado = planoSelecionado ? calcularTotaisPlano(planoSelecionado) : null;
+  const totaisPlanoSelecionado = planejamentoSelecionado ? calcularTotaisPlano(planejamentoSelecionado) : null;
   
   // Calcular preview dos novos valores
   const previewTotais = (() => {
-    if (!planoSelecionado || !valorAjuste || !totaisPlanoSelecionado) return null;
+    if (!planejamentoSelecionado || !valorAjuste || !totaisPlanoSelecionado) return null;
     
     const valor = parseFloat(valorAjuste);
     if (isNaN(valor) || valor <= 0) return null;
@@ -190,49 +213,44 @@ export function ReajustarPlanoModal({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Seleção do Plano */}
-          <div>
-            <Label className="text-base font-medium">Selecione o plano a ser reajustado:</Label>
-            <div className="mt-2 space-y-2">
-              {planejamentosCliente.map((plano) => {
-                const totais = calcularTotaisPlano(plano);
-                const isSelected = planoSelecionado?.id === plano.id;
-                
-                return (
-                  <Card
-                    key={plano.id}
-                    className={`cursor-pointer transition-colors ${
-                      isSelected ? 'ring-2 ring-primary' : 'hover:bg-muted/50'
-                    }`}
-                    onClick={() => setPlanoSelecionado(plano)}
-                  >
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{plano.nome}</CardTitle>
-                      <CardDescription>{plano.descricao}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">{totais.kcal.toFixed(0)} kcal</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{totais.proteina.toFixed(1)}g Proteína</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{totais.carboidratos.toFixed(1)}g Carboidratos</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{totais.lipideos.toFixed(1)}g Lipídeos</span>
-                        </div>
+          {/* Mostrar Plano Selecionado */}
+          {planejamentoSelecionado && (
+            <div>
+              <Label className="text-base font-medium">Plano a ser reajustado:</Label>
+              <div className="mt-2">
+                <Card className="border-primary bg-primary/10">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{planejamentoSelecionado.nome}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {planejamentoSelecionado.descricao}
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      <div className="ml-4 text-right">
+                        {totaisPlanoSelecionado && (
+                          <>
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <Calculator className="w-4 h-4 text-primary" />
+                              {totaisPlanoSelecionado.kcal.toFixed(0)} kcal
+                            </div>
+                            <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
+                              <div>{totaisPlanoSelecionado.proteina.toFixed(1)}g Proteína</div>
+                              <div>{totaisPlanoSelecionado.carboidratos.toFixed(1)}g Carboidratos</div>
+                              <div>{totaisPlanoSelecionado.lipideos.toFixed(1)}g Lipídeos</div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
+          )}
 
-          {planoSelecionado && (
+          {/* Configuração do Reajuste */}
+          {planejamentoSelecionado && (
             <>
               {/* Tipo de Operação */}
               <div>
@@ -322,7 +340,7 @@ export function ReajustarPlanoModal({
                 <Input
                   value={nomeNovoPlano}
                   onChange={(e) => setNomeNovoPlano(e.target.value)}
-                  placeholder="Ex: Plano Reajustado +10%"
+                  placeholder={`${planejamentoSelecionado.nome} - Reajustado`}
                   className="mt-2"
                 />
               </div>
@@ -334,7 +352,6 @@ export function ReajustarPlanoModal({
             <Button
               variant="outline"
               onClick={() => {
-                setPlanoSelecionado(null);
                 setValorAjuste('');
                 setNomeNovoPlano('');
                 onOpenChange(false);
@@ -343,10 +360,11 @@ export function ReajustarPlanoModal({
               Cancelar
             </Button>
             <Button
-              onClick={aplicarReajuste}
-              disabled={!planoSelecionado || !valorAjuste || !nomeNovoPlano.trim() || processando}
+              onClick={handleReajustarPlano}
+              disabled={!planejamentoSelecionado || !valorAjuste || !nomeNovoPlano.trim() || processando}
+              className="w-full"
             >
-              {processando ? 'Processando...' : 'Criar Plano Reajustado'}
+              {processando ? 'Processando...' : 'Reajustar Plano'}
             </Button>
           </div>
         </div>

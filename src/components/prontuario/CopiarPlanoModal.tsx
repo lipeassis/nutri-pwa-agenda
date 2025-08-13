@@ -14,20 +14,21 @@ interface CopiarPlanoModalProps {
   onOpenChange: (open: boolean) => void;
   clienteOrigem: Cliente;
   planejamentosCliente: PlanejamentoAlimentar[];
+  planejamentoSelecionado: PlanejamentoAlimentar | null;
 }
 
 export function CopiarPlanoModal({ 
   open, 
   onOpenChange, 
   clienteOrigem, 
-  planejamentosCliente 
+  planejamentosCliente,
+  planejamentoSelecionado 
 }: CopiarPlanoModalProps) {
   const { toast } = useToast();
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [planejamentos, setPlanejamentos] = useLocalStorage<PlanejamentoAlimentar[]>('nutriapp-planejamentos', []);
   const [searchTerm, setSearchTerm] = useState("");
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
-  const [planoSelecionado, setPlanoSelecionado] = useState<PlanejamentoAlimentar | null>(null);
   const [copying, setCopying] = useState(false);
 
   // Filtrar clientes (excluir o próprio cliente)
@@ -39,17 +40,17 @@ export function CopiarPlanoModal({
     );
 
   const handleCopiarPlano = async () => {
-    if (!clienteSelecionado || !planoSelecionado) return;
+    if (!clienteSelecionado || !planejamentoSelecionado) return;
 
     setCopying(true);
     
     try {
       // Criar novo planejamento com os dados copiados
       const novoPlano: PlanejamentoAlimentar = {
-        ...planoSelecionado,
+        ...planejamentoSelecionado,
         id: Date.now().toString(),
         clienteId: clienteSelecionado.id,
-        nome: `${planoSelecionado.nome} (Copiado de ${clienteOrigem.nome})`,
+        nome: `${planejamentoSelecionado.nome} (Copiado de ${clienteOrigem.nome})`,
         criadoEm: new Date().toISOString(),
         criadoPor: 'user', // Substituir pelo ID do usuário logado
       };
@@ -59,12 +60,11 @@ export function CopiarPlanoModal({
 
       toast({
         title: "Plano copiado com sucesso!",
-        description: `O planejamento "${planoSelecionado.nome}" foi copiado para ${clienteSelecionado.nome}.`,
+        description: `O planejamento "${planejamentoSelecionado.nome}" foi copiado para ${clienteSelecionado.nome}.`,
       });
 
       // Reset e fechar modal
       setClienteSelecionado(null);
-      setPlanoSelecionado(null);
       setSearchTerm("");
       onOpenChange(false);
 
@@ -93,36 +93,26 @@ export function CopiarPlanoModal({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Seleção do Plano */}
-          <div>
-            <Label className="text-base font-medium">Plano a ser copiado:</Label>
-            <div className="mt-2 space-y-2">
-              {planejamentosCliente.map((plano) => (
-                <div
-                  key={plano.id}
-                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                    planoSelecionado?.id === plano.id
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setPlanoSelecionado(plano)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">{plano.nome}</h4>
-                      <p className="text-sm text-muted-foreground">{plano.descricao}</p>
-                    </div>
-                    <div className="text-right text-sm text-muted-foreground">
-                      <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
-                      {plano.dataFim && (
-                        <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
-                      )}
-                    </div>
+          {/* Mostrar Plano Selecionado */}
+          {planejamentoSelecionado && (
+            <div>
+              <Label className="text-base font-medium">Plano a ser copiado:</Label>
+              <div className="mt-2 p-3 border rounded-lg bg-primary/10 border-primary">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">{planejamentoSelecionado.nome}</h4>
+                    <p className="text-sm text-muted-foreground">{planejamentoSelecionado.descricao}</p>
+                  </div>
+                  <div className="text-right text-sm text-muted-foreground">
+                    <div>Início: {new Date(planejamentoSelecionado.dataInicio).toLocaleDateString('pt-BR')}</div>
+                    {planejamentoSelecionado.dataFim && (
+                      <div>Fim: {new Date(planejamentoSelecionado.dataFim).toLocaleDateString('pt-BR')}</div>
+                    )}
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Busca de Clientes */}
           <div>
@@ -180,7 +170,6 @@ export function CopiarPlanoModal({
               variant="outline"
               onClick={() => {
                 setClienteSelecionado(null);
-                setPlanoSelecionado(null);
                 setSearchTerm("");
                 onOpenChange(false);
               }}
@@ -189,7 +178,7 @@ export function CopiarPlanoModal({
             </Button>
             <Button
               onClick={handleCopiarPlano}
-              disabled={!clienteSelecionado || !planoSelecionado || copying}
+              disabled={!clienteSelecionado || !planejamentoSelecionado || copying}
             >
               {copying ? 'Copiando...' : 'Copiar Plano'}
             </Button>

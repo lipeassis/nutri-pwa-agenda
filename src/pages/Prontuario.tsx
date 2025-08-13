@@ -60,6 +60,7 @@ export function Prontuario() {
   const [showCopiarPlano, setShowCopiarPlano] = useState(false);
   const [showReajustarPlano, setShowReajustarPlano] = useState(false);
   const [showCriarDePadrao, setShowCriarDePadrao] = useState(false);
+  const [planejamentoSelecionado, setPlanejamentoSelecionado] = useState<PlanejamentoAlimentar | null>(null);
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -882,22 +883,6 @@ export function Prontuario() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => setShowReajustarPlano(true)}
-                disabled={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo).length === 0}
-              >
-                <Calculator className="w-4 h-4 mr-2" />
-                Reajustar Plano
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowCopiarPlano(true)}
-                disabled={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo).length === 0}
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                Copiar Plano
-              </Button>
-              <Button
-                variant="outline"
                 onClick={() => setShowCriarDePadrao(true)}
                 disabled={planejamentosPadrao.filter(p => p.ativo).length === 0}
               >
@@ -938,22 +923,46 @@ export function Prontuario() {
                              {plano.descricao}
                            </CardDescription>
                          </div>
-                         <div className="flex items-center gap-3">
-                           <Button 
-                             variant="outline" 
-                             size="sm" 
-                             onClick={() => setPlanejamentoParaEditar(plano)}
-                           >
-                             <Edit className="w-4 h-4 mr-2" />
-                             Editar
-                           </Button>
-                           <div className="text-right text-sm text-muted-foreground">
-                             <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
-                             {plano.dataFim && (
-                               <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
-                             )}
-                           </div>
-                         </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => {
+                                  setPlanejamentoSelecionado(plano);
+                                  setShowReajustarPlano(true);
+                                }}
+                              >
+                                <Calculator className="w-4 h-4 mr-2" />
+                                Reajustar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => {
+                                  setPlanejamentoSelecionado(plano);
+                                  setShowCopiarPlano(true);
+                                }}
+                              >
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copiar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setPlanejamentoParaEditar(plano)}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </Button>
+                            </div>
+                            <div className="text-right text-sm text-muted-foreground">
+                              <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
+                              {plano.dataFim && (
+                                <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
+                              )}
+                            </div>
+                          </div>
                        </div>
                      </CardHeader>
                     <CardContent>
@@ -1781,6 +1790,7 @@ export function Prontuario() {
           onOpenChange={setShowCopiarPlano}
           clienteOrigem={cliente}
           planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
+          planejamentoSelecionado={planejamentoSelecionado}
         />
 
         {/* Modal Reajustar Plano */}
@@ -1790,6 +1800,7 @@ export function Prontuario() {
           clienteId={cliente.id}
           clienteNome={cliente.nome}
           planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
+          planejamentoSelecionado={planejamentoSelecionado}
         />
 
         {/* Modal Criar de Padrão */}
