@@ -34,6 +34,7 @@ export function ReajustarPlanoModal({
   const [tipoAjuste, setTipoAjuste] = useState<'percentual' | 'absoluto'>('percentual');
   const [valorAjuste, setValorAjuste] = useState<string>('');
   const [operacao, setOperacao] = useState<'aumentar' | 'diminuir'>('aumentar');
+  const [tipoReajuste, setTipoReajuste] = useState<'novo' | 'existente'>('novo');
   const [nomeNovoPlano, setNomeNovoPlano] = useState<string>('');
   const [processando, setProcessando] = useState(false);
 
@@ -86,7 +87,7 @@ export function ReajustarPlanoModal({
       return;
     }
 
-    if (!valorAjuste || !nomeNovoPlano.trim()) {
+    if (!valorAjuste || (tipoReajuste === 'novo' && !nomeNovoPlano.trim())) {
       toast({
         title: "Dados incompletos",
         description: "Preencha todos os campos obrigatórios.",
@@ -133,31 +134,58 @@ export function ReajustarPlanoModal({
         return;
       }
 
-      // Criar novo plano com quantidades ajustadas
-      const novoPlano: PlanejamentoAlimentar = {
-        ...planejamentoSelecionado,
-        id: Date.now().toString(),
-        nome: nomeNovoPlano.trim(),
-        descricao: `${planejamentoSelecionado.descricao} - Reajustado (${operacao === 'aumentar' ? '+' : '-'}${valor}${tipoAjuste === 'percentual' ? '%' : ' kcal'})`,
-        criadoEm: new Date().toISOString(),
-        criadoPor: 'user',
-        // Aplicar ajuste em todas as refeições
-        refeicoes: planejamentoSelecionado.refeicoes.map(refeicao => ({
-          ...refeicao,
-          alimentos: refeicao.alimentos.map(alimentoRef => ({
-            ...alimentoRef,
-            quantidade: Math.round(alimentoRef.quantidade * fatorAjuste * 100) / 100 // Arredondar para 2 casas decimais
+      if (tipoReajuste === 'novo') {
+        // Criar novo plano com quantidades ajustadas
+        const novoPlano: PlanejamentoAlimentar = {
+          ...planejamentoSelecionado,
+          id: Date.now().toString(),
+          nome: nomeNovoPlano.trim(),
+          descricao: `${planejamentoSelecionado.descricao} - Reajustado (${operacao === 'aumentar' ? '+' : '-'}${valor}${tipoAjuste === 'percentual' ? '%' : ' kcal'})`,
+          criadoEm: new Date().toISOString(),
+          criadoPor: 'user',
+          // Aplicar ajuste em todas as refeições
+          refeicoes: planejamentoSelecionado.refeicoes.map(refeicao => ({
+            ...refeicao,
+            alimentos: refeicao.alimentos.map(alimentoRef => ({
+              ...alimentoRef,
+              quantidade: Math.round(alimentoRef.quantidade * fatorAjuste * 100) / 100
+            }))
           }))
-        }))
-      };
+        };
 
-      // Adicionar o novo plano
-      setPlanejamentos([...planejamentos, novoPlano]);
+        // Adicionar o novo plano
+        setPlanejamentos([...planejamentos, novoPlano]);
 
-      toast({
-        title: "Plano reajustado com sucesso!",
-        description: `O plano "${planejamentoSelecionado.nome}" foi reajustado para "${nomeNovoPlano}".`,
-      });
+        toast({
+          title: "Novo plano criado com sucesso!",
+          description: `O plano "${nomeNovoPlano}" foi criado com base no plano "${planejamentoSelecionado.nome}".`,
+        });
+      } else {
+        // Reajustar plano existente
+        const planejamentosAtualizados = planejamentos.map(plano => {
+          if (plano.id === planejamentoSelecionado.id) {
+            return {
+              ...plano,
+              descricao: `${plano.descricao} - Reajustado (${operacao === 'aumentar' ? '+' : '-'}${valor}${tipoAjuste === 'percentual' ? '%' : ' kcal'})`,
+              refeicoes: plano.refeicoes.map(refeicao => ({
+                ...refeicao,
+                alimentos: refeicao.alimentos.map(alimentoRef => ({
+                  ...alimentoRef,
+                  quantidade: Math.round(alimentoRef.quantidade * fatorAjuste * 100) / 100
+                }))
+              }))
+            };
+          }
+          return plano;
+        });
+
+        setPlanejamentos(planejamentosAtualizados);
+
+        toast({
+          title: "Plano reajustado com sucesso!",
+          description: `O plano "${planejamentoSelecionado.nome}" foi reajustado.`,
+        });
+      }
 
       // Reset form
       setValorAjuste('');
@@ -252,6 +280,25 @@ export function ReajustarPlanoModal({
           {/* Configuração do Reajuste */}
           {planejamentoSelecionado && (
             <>
+              {/* Tipo de Reajuste */}
+              <div>
+                <Label className="text-base font-medium">Como deseja reajustar?</Label>
+                <RadioGroup value={tipoReajuste} onValueChange={(value: 'novo' | 'existente') => setTipoReajuste(value)} className="mt-2">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="novo" id="novo" />
+                    <Label htmlFor="novo">
+                      Criar novo plano (mantém o original)
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="existente" id="existente" />
+                    <Label htmlFor="existente">
+                      Reajustar plano existente (substitui o original)
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {/* Tipo de Operação */}
               <div>
                 <Label className="text-base font-medium">Operação:</Label>
@@ -334,16 +381,18 @@ export function ReajustarPlanoModal({
                 </Card>
               )}
 
-              {/* Nome do Novo Plano */}
-              <div>
-                <Label className="text-base font-medium">Nome do novo plano:</Label>
-                <Input
-                  value={nomeNovoPlano}
-                  onChange={(e) => setNomeNovoPlano(e.target.value)}
-                  placeholder={`${planejamentoSelecionado.nome} - Reajustado`}
-                  className="mt-2"
-                />
-              </div>
+              {/* Nome do Novo Plano - só mostra se for criar novo */}
+              {tipoReajuste === 'novo' && (
+                <div>
+                  <Label className="text-base font-medium">Nome do novo plano:</Label>
+                  <Input
+                    value={nomeNovoPlano}
+                    onChange={(e) => setNomeNovoPlano(e.target.value)}
+                    placeholder={`${planejamentoSelecionado.nome} - Reajustado`}
+                    className="mt-2"
+                  />
+                </div>
+              )}
             </>
           )}
 
@@ -361,10 +410,10 @@ export function ReajustarPlanoModal({
             </Button>
             <Button
               onClick={handleReajustarPlano}
-              disabled={!planejamentoSelecionado || !valorAjuste || !nomeNovoPlano.trim() || processando}
+              disabled={!planejamentoSelecionado || !valorAjuste || (tipoReajuste === 'novo' && !nomeNovoPlano.trim()) || processando}
               className="w-full"
             >
-              {processando ? 'Processando...' : 'Reajustar Plano'}
+              {processando ? 'Processando...' : (tipoReajuste === 'novo' ? 'Criar Novo Plano' : 'Reajustar Plano')}
             </Button>
           </div>
         </div>
