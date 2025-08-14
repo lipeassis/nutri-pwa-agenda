@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -32,7 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export function Prontuario() {
   const { toast } = useToast();
   const { clienteId } = useParams<{ clienteId: string }>();
-  const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
+  const [clientes, setClientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [consultas, setConsultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
   const [objetivos] = useLocalStorage<ObjetivosCliente[]>('nutriapp-objetivos', []);
   const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
@@ -61,6 +62,8 @@ export function Prontuario() {
   const [showReajustarPlano, setShowReajustarPlano] = useState(false);
   const [showCriarDePadrao, setShowCriarDePadrao] = useState(false);
   const [planejamentoSelecionado, setPlanejamentoSelecionado] = useState<PlanejamentoAlimentar | null>(null);
+  const [editandoAnotacoes, setEditandoAnotacoes] = useState(false);
+  const [anotacoesTemp, setAnotacoesTemp] = useState('');
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -302,6 +305,28 @@ export function Prontuario() {
     }
   };
 
+  const handleSalvarAnotacoes = () => {
+    const clientesAtualizados = clientes.map(c => 
+      c.id === cliente.id ? { ...c, observacoes: anotacoesTemp } : c
+    );
+    setClientes(clientesAtualizados);
+    setEditandoAnotacoes(false);
+    toast({
+      title: "Anotações salvas",
+      description: "As anotações foram atualizadas com sucesso.",
+    });
+  };
+
+  const handleCancelarEdicaoAnotacoes = () => {
+    setAnotacoesTemp(cliente.observacoes || '');
+    setEditandoAnotacoes(false);
+  };
+
+  const iniciarEdicaoAnotacoes = () => {
+    setAnotacoesTemp(cliente.observacoes || '');
+    setEditandoAnotacoes(true);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -363,6 +388,56 @@ export function Prontuario() {
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Anotações do Cliente */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center">
+              <FileText className="w-5 h-5 mr-2" />
+              Anotações Gerais
+            </CardTitle>
+            {!editandoAnotacoes ? (
+              <Button variant="outline" size="sm" onClick={iniciarEdicaoAnotacoes}>
+                <Edit className="w-4 h-4 mr-2" />
+                {cliente.observacoes ? 'Editar' : 'Adicionar'}
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleCancelarEdicaoAnotacoes}>
+                  Cancelar
+                </Button>
+                <Button size="sm" onClick={handleSalvarAnotacoes}>
+                  Salvar
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {editandoAnotacoes ? (
+            <Textarea
+              value={anotacoesTemp}
+              onChange={(e) => setAnotacoesTemp(e.target.value)}
+              placeholder="Adicione suas anotações sobre o cliente..."
+              rows={6}
+              className="resize-none"
+            />
+          ) : (
+            <div className="min-h-[150px] p-4 bg-muted/50 rounded-lg">
+              {cliente.observacoes ? (
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {cliente.observacoes}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Nenhuma anotação registrada. Clique em "Adicionar" para incluir observações sobre este cliente.
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
