@@ -49,6 +49,12 @@ export interface Servico {
   criadoEm: string;
 }
 
+export interface AnotacaoCliente {
+  id: string;
+  texto: string;
+  criadoEm: string;
+}
+
 export interface Cliente {
   id: string;
   nome: string;
@@ -56,7 +62,8 @@ export interface Cliente {
   telefone: string;
   dataNascimento: string;
   objetivos: string;
-  observacoes?: string;
+  observacoes?: string; // Mantido para compatibilidade
+  anotacoes: AnotacaoCliente[];
   doencasIds: string[];
   alergiasIds: string[];
   criadoEm: string;

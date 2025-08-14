@@ -55,6 +55,7 @@ export function NovoCliente() {
       dataNascimento: formData.dataNascimento,
       objetivos: formData.objetivos,
       observacoes: formData.observacoes,
+      anotacoes: [],
       doencasIds: selectedDoencas,
       alergiasIds: selectedAlergias,
       criadoEm: new Date().toISOString()

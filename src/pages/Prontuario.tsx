@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma, PlanejamentoPadrao } from "@/types";
+import { Cliente, ConsultaProntuario, ObjetivosCliente, Doenca, Alergia, DocumentoCliente, PlanejamentoAlimentar, Alimento, AtualizacaoQuestionario, ReceitaMedica, ClientePrograma, PlanejamentoPadrao, AnotacaoCliente } from "@/types";
 import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Activity, FileText, Link as LinkIcon, Edit, Settings, TestTube, Upload, Download, Trash2, File, Image, Apple, ChefHat, Clock, Pill, Star, CheckCircle, XCircle, Eye, FlaskConical, Copy, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -63,7 +63,9 @@ export function Prontuario() {
   const [showCriarDePadrao, setShowCriarDePadrao] = useState(false);
   const [planejamentoSelecionado, setPlanejamentoSelecionado] = useState<PlanejamentoAlimentar | null>(null);
   const [editandoAnotacoes, setEditandoAnotacoes] = useState(false);
-  const [anotacoesTemp, setAnotacoesTemp] = useState('');
+  const [novaAnotacao, setNovaAnotacao] = useState('');
+  const [editandoAnotacao, setEditandoAnotacao] = useState<string | null>(null);
+  const [textoEditandoAnotacao, setTextoEditandoAnotacao] = useState('');
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -305,26 +307,70 @@ export function Prontuario() {
     }
   };
 
-  const handleSalvarAnotacoes = () => {
+  const handleAdicionarAnotacao = () => {
+    if (!novaAnotacao.trim()) return;
+    
+    const novaAnotacaoObj: AnotacaoCliente = {
+      id: Date.now().toString(),
+      texto: novaAnotacao.trim(),
+      criadoEm: new Date().toISOString()
+    };
+
     const clientesAtualizados = clientes.map(c => 
-      c.id === cliente.id ? { ...c, observacoes: anotacoesTemp } : c
+      c.id === cliente.id 
+        ? { ...c, anotacoes: [...(c.anotacoes || []), novaAnotacaoObj] }
+        : c
     );
     setClientes(clientesAtualizados);
+    setNovaAnotacao('');
     setEditandoAnotacoes(false);
     toast({
-      title: "Anotações salvas",
-      description: "As anotações foram atualizadas com sucesso.",
+      title: "Anotação adicionada",
+      description: "Nova anotação foi registrada com sucesso.",
     });
   };
 
-  const handleCancelarEdicaoAnotacoes = () => {
-    setAnotacoesTemp(cliente.observacoes || '');
-    setEditandoAnotacoes(false);
+  const handleEditarAnotacao = (id: string, novoTexto: string) => {
+    const clientesAtualizados = clientes.map(c => 
+      c.id === cliente.id 
+        ? { 
+            ...c, 
+            anotacoes: c.anotacoes?.map(a => 
+              a.id === id ? { ...a, texto: novoTexto.trim() } : a
+            ) || []
+          }
+        : c
+    );
+    setClientes(clientesAtualizados);
+    setEditandoAnotacao(null);
+    setTextoEditandoAnotacao('');
+    toast({
+      title: "Anotação editada",
+      description: "Anotação atualizada com sucesso.",
+    });
   };
 
-  const iniciarEdicaoAnotacoes = () => {
-    setAnotacoesTemp(cliente.observacoes || '');
-    setEditandoAnotacoes(true);
+  const handleExcluirAnotacao = (id: string) => {
+    const clientesAtualizados = clientes.map(c => 
+      c.id === cliente.id 
+        ? { ...c, anotacoes: c.anotacoes?.filter(a => a.id !== id) || [] }
+        : c
+    );
+    setClientes(clientesAtualizados);
+    toast({
+      title: "Anotação excluída",
+      description: "Anotação removida com sucesso.",
+    });
+  };
+
+  const iniciarEdicaoAnotacao = (anotacao: AnotacaoCliente) => {
+    setEditandoAnotacao(anotacao.id);
+    setTextoEditandoAnotacao(anotacao.texto);
+  };
+
+  const cancelarEdicaoAnotacao = () => {
+    setEditandoAnotacao(null);
+    setTextoEditandoAnotacao('');
   };
 
   return (
@@ -399,45 +445,118 @@ export function Prontuario() {
               <FileText className="w-5 h-5 mr-2" />
               Anotações Gerais
             </CardTitle>
-            {!editandoAnotacoes ? (
-              <Button variant="outline" size="sm" onClick={iniciarEdicaoAnotacoes}>
-                <Edit className="w-4 h-4 mr-2" />
-                {cliente.observacoes ? 'Editar' : 'Adicionar'}
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleCancelarEdicaoAnotacoes}>
-                  Cancelar
-                </Button>
-                <Button size="sm" onClick={handleSalvarAnotacoes}>
-                  Salvar
-                </Button>
-              </div>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setEditandoAnotacoes(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Anotação
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {editandoAnotacoes ? (
-            <Textarea
-              value={anotacoesTemp}
-              onChange={(e) => setAnotacoesTemp(e.target.value)}
-              placeholder="Adicione suas anotações sobre o cliente..."
-              rows={6}
-              className="resize-none"
-            />
-          ) : (
-            <div className="min-h-[150px] p-4 bg-muted/50 rounded-lg">
-              {cliente.observacoes ? (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {cliente.observacoes}
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">
-                  Nenhuma anotação registrada. Clique em "Adicionar" para incluir observações sobre este cliente.
-                </p>
-              )}
+          {editandoAnotacoes && (
+            <div className="mb-4 p-4 bg-muted/50 rounded-lg space-y-3">
+              <Textarea
+                value={novaAnotacao}
+                onChange={(e) => setNovaAnotacao(e.target.value)}
+                placeholder="Digite sua nova anotação..."
+                rows={3}
+                className="resize-none"
+              />
+              <div className="flex gap-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setEditandoAnotacoes(false);
+                    setNovaAnotacao('');
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={handleAdicionarAnotacao}
+                  disabled={!novaAnotacao.trim()}
+                >
+                  Adicionar
+                </Button>
+              </div>
             </div>
           )}
+
+          <div className="space-y-3">
+            {cliente.anotacoes && cliente.anotacoes.length > 0 ? (
+              cliente.anotacoes.map((anotacao, index) => (
+                <div key={anotacao.id} className="p-4 bg-muted/30 rounded-lg border">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs text-muted-foreground">
+                      Anotação #{index + 1} • {format(new Date(anotacao.criadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </span>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => iniciarEdicaoAnotacao(anotacao)}
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleExcluirAnotacao(anotacao.id)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {editandoAnotacao === anotacao.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={textoEditandoAnotacao}
+                        onChange={(e) => setTextoEditandoAnotacao(e.target.value)}
+                        rows={3}
+                        className="resize-none"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={cancelarEdicaoAnotacao}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleEditarAnotacao(anotacao.id, textoEditandoAnotacao)}
+                          disabled={!textoEditandoAnotacao.trim()}
+                        >
+                          Salvar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
+                      {anotacao.texto}
+                    </p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center">
+                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma anotação registrada ainda.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Clique em "Nova Anotação" para adicionar observações sobre este cliente.
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
