@@ -394,169 +394,285 @@ export function Prontuario() {
         </div>
       </div>
 
-      {/* Informações do Cliente */}
+      {/* Informações do Cliente - Tabs */}
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Informações Básicas</CardTitle>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowEditarCliente(true)}>
-                <Edit className="w-4 h-4 mr-2" />
-                Editar Dados
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowAdicionarDoencasAlergias(true)}>
-                <Settings className="w-4 h-4 mr-2" />
-                Doenças/Alergias
-              </Button>
+        <CardContent className="p-0">
+          <Tabs defaultValue="basicas" className="w-full">
+            <div className="border-b">
+              <TabsList className="grid w-full grid-cols-3 h-12 bg-transparent rounded-none">
+                <TabsTrigger value="basicas" className="rounded-none">Informações Básicas</TabsTrigger>
+                <TabsTrigger value="anotacoes" className="rounded-none">Anotações Gerais</TabsTrigger>
+                <TabsTrigger value="doencas" className="rounded-none">Doenças e Alergias</TabsTrigger>
+              </TabsList>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Email</p>
-              <p className="text-base">{cliente.email}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Telefone</p>
-              <p className="text-base">{cliente.telefone}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
-              <p className="text-base">
-                {cliente.dataNascimento ? format(new Date(cliente.dataNascimento), "dd/MM/yyyy", { locale: ptBR }) : "Não informado"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Cadastrado em</p>
-              <p className="text-base">
-                {format(new Date(cliente.criadoEm), "dd/MM/yyyy", { locale: ptBR })}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            
+            <TabsContent value="basicas" className="p-6 mt-0">
+              <div className="flex justify-end mb-4">
+                <Button variant="outline" size="sm" onClick={() => setShowEditarCliente(true)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Dados
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Email</p>
+                  <p className="text-base">{cliente.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Telefone</p>
+                  <p className="text-base">{cliente.telefone || "Não informado"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
+                  <p className="text-base">
+                    {cliente.dataNascimento 
+                      ? format(new Date(cliente.dataNascimento), "dd/MM/yyyy", { locale: ptBR })
+                      : "Não informada"
+                    }
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Objetivos</p>
+                  <p className="text-base">{cliente.objetivos || "Não informados"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Cadastro</p>
+                  <p className="text-base">
+                    {format(new Date(cliente.criadoEm), "dd/MM/yyyy", { locale: ptBR })}
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
 
-      {/* Anotações do Cliente */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
-              Anotações Gerais
-            </CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setEditandoAnotacoes(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Anotação
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {editandoAnotacoes && (
-            <div className="mb-4 p-4 bg-muted/50 rounded-lg space-y-3">
-              <Textarea
-                value={novaAnotacao}
-                onChange={(e) => setNovaAnotacao(e.target.value)}
-                placeholder="Digite sua nova anotação..."
-                rows={3}
-                className="resize-none"
-              />
-              <div className="flex gap-2 justify-end">
+            <TabsContent value="anotacoes" className="p-6 mt-0">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Registre observações importantes sobre o cliente
+                </p>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => {
-                    setEditandoAnotacoes(false);
-                    setNovaAnotacao('');
-                  }}
+                  onClick={() => setEditandoAnotacoes(true)}
                 >
-                  Cancelar
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={handleAdicionarAnotacao}
-                  disabled={!novaAnotacao.trim()}
-                >
-                  Adicionar
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Anotação
                 </Button>
               </div>
-            </div>
-          )}
 
-          <div className="space-y-3">
-            {cliente.anotacoes && cliente.anotacoes.length > 0 ? (
-              cliente.anotacoes.map((anotacao, index) => (
-                <div key={anotacao.id} className="p-4 bg-muted/30 rounded-lg border">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs text-muted-foreground">
-                      Anotação #{index + 1} • {format(new Date(anotacao.criadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                    </span>
-                    <div className="flex gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => iniciarEdicaoAnotacao(anotacao)}
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleExcluirAnotacao(anotacao.id)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
+              {editandoAnotacoes && (
+                <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
+                  <h4 className="text-sm font-medium mb-3">Nova Anotação</h4>
+                  <Textarea
+                    placeholder="Digite sua anotação aqui..."
+                    value={novaAnotacao}
+                    onChange={(e) => setNovaAnotacao(e.target.value)}
+                    rows={4}
+                    className="resize-none"
+                  />
+                  <div className="flex gap-2 justify-end mt-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setEditandoAnotacoes(false);
+                        setNovaAnotacao('');
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={handleAdicionarAnotacao}
+                      disabled={!novaAnotacao.trim()}
+                    >
+                      Adicionar
+                    </Button>
                   </div>
-                  
-                  {editandoAnotacao === anotacao.id ? (
-                    <div className="space-y-2">
-                      <Textarea
-                        value={textoEditandoAnotacao}
-                        onChange={(e) => setTextoEditandoAnotacao(e.target.value)}
-                        rows={3}
-                        className="resize-none"
-                      />
-                      <div className="flex gap-2 justify-end">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={cancelarEdicaoAnotacao}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleEditarAnotacao(anotacao.id, textoEditandoAnotacao)}
-                          disabled={!textoEditandoAnotacao.trim()}
-                        >
-                          Salvar
-                        </Button>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {cliente.anotacoes && cliente.anotacoes.length > 0 ? (
+                  cliente.anotacoes.map((anotacao, index) => (
+                    <div key={anotacao.id} className="p-4 bg-muted/30 rounded-lg border">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs text-muted-foreground">
+                          Anotação #{index + 1} • {format(new Date(anotacao.criadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </span>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => iniciarEdicaoAnotacao(anotacao)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleExcluirAnotacao(anotacao.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
+                      
+                      {editandoAnotacao === anotacao.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={textoEditandoAnotacao}
+                            onChange={(e) => setTextoEditandoAnotacao(e.target.value)}
+                            rows={3}
+                            className="resize-none"
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={cancelarEdicaoAnotacao}
+                            >
+                              Cancelar
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => handleEditarAnotacao(anotacao.id, textoEditandoAnotacao)}
+                              disabled={!textoEditandoAnotacao.trim()}
+                            >
+                              Salvar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-foreground whitespace-pre-wrap">
+                          {anotacao.texto}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center">
+                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma anotação registrada ainda.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Clique em "Nova Anotação" para adicionar observações sobre este cliente.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="doencas" className="p-6 mt-0">
+              <div className="flex justify-end mb-4">
+                <Button variant="outline" size="sm" onClick={() => setShowAdicionarDoencasAlergias(true)}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Gerenciar Doenças/Alergias
+                </Button>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Doenças */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Doenças
+                  </h3>
+                  {doencasCliente.length === 0 ? (
+                    <div className="p-8 text-center border rounded-lg">
+                      <p className="text-muted-foreground">Nenhuma doença registrada</p>
                     </div>
                   ) : (
-                    <p className="text-sm text-foreground whitespace-pre-wrap">
-                      {anotacao.texto}
-                    </p>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome da Doença</TableHead>
+                          <TableHead>Resumo</TableHead>
+                          <TableHead>Protocolo Nutricional</TableHead>
+                          <TableHead>Referência</TableHead>
+                          <TableHead>Links Úteis</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {doencasCliente.map((doenca) => (
+                          <TableRow key={doenca.id}>
+                            <TableCell className="font-medium">{doenca.nome}</TableCell>
+                            <TableCell className="max-w-xs">
+                              <div className="text-sm">{doenca.resumo}</div>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <div className="text-sm whitespace-pre-wrap">
+                                {doenca.protocoloNutricional || "-"}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">{doenca.referencia || "-"}</div>
+                            </TableCell>
+                            <TableCell>
+                              {doenca.linksUteis && doenca.linksUteis.length > 0 ? (
+                                <div className="space-y-1">
+                                  {doenca.linksUteis.map((link, index) => (
+                                    <a
+                                      key={index}
+                                      href={link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center text-sm text-primary hover:underline"
+                                    >
+                                      <LinkIcon className="w-3 h-3 mr-1" />
+                                      Link {index + 1}
+                                    </a>
+                                  ))}
+                                </div>
+                              ) : (
+                                "-"
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   )}
                 </div>
-              ))
-            ) : (
-              <div className="p-8 text-center">
-                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  Nenhuma anotação registrada ainda.
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Clique em "Nova Anotação" para adicionar observações sobre este cliente.
-                </p>
+
+                {/* Alergias */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Alergias</h3>
+                  {alergiasCliente.length === 0 ? (
+                    <div className="p-8 text-center border rounded-lg">
+                      <p className="text-muted-foreground">Nenhuma alergia registrada</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {alergiasCliente.map((alergia) => (
+                        <Card key={alergia.id}>
+                          <CardContent className="pt-6">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-medium">{alergia.nome}</h4>
+                                <Badge variant={
+                                  alergia.severidade === 'grave' ? 'destructive' :
+                                  alergia.severidade === 'moderada' ? 'default' : 'secondary'
+                                }>
+                                  {alergia.severidade}
+                                </Badge>
+                              </div>
+                              {alergia.descricao && (
+                                <div>
+                                  <p className="text-sm font-medium text-muted-foreground">Descrição:</p>
+                                  <p className="text-sm">{alergia.descricao}</p>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
