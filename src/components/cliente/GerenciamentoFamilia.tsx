@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Familia, Cliente, ClienteFamilia, PlanejamentoAlimentar } from "@/types";
-import { Plus, Users, UserPlus, Copy, Trash2, UserMinus } from "lucide-react";
+import { Plus, Users, UserPlus, Copy, Trash2, UserMinus, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 interface GerenciamentoFamiliaProps {
@@ -32,7 +33,8 @@ export function GerenciamentoFamilia({ cliente }: GerenciamentoFamiliaProps) {
   const [novaFamilia, setNovaFamilia] = useState({
     nome: '',
     descricao: '',
-    corTag: '#3b82f6'
+    corTag: '#3b82f6',
+    membrosIds: [cliente.id] // Já inclui o cliente atual por padrão
   });
   const [novoMembro, setNovoMembro] = useState({
     clienteId: '',
@@ -71,9 +73,37 @@ export function GerenciamentoFamilia({ cliente }: GerenciamentoFamiliaProps) {
     return planosAlimentares.filter(p => p.clienteId === clienteId && p.ativo);
   };
 
+  const getClientesDisponiveisParaFamilia = () => {
+    return clientes.filter(c => !novaFamilia.membrosIds.includes(c.id));
+  };
+
+  const handleToggleMembro = (clienteId: string, checked: boolean) => {
+    if (checked) {
+      setNovaFamilia(prev => ({
+        ...prev,
+        membrosIds: [...prev.membrosIds, clienteId]
+      }));
+    } else {
+      // Não permite remover o cliente atual
+      if (clienteId === cliente.id) {
+        toast.error("Não é possível remover o cliente atual da família");
+        return;
+      }
+      setNovaFamilia(prev => ({
+        ...prev,
+        membrosIds: prev.membrosIds.filter(id => id !== clienteId)
+      }));
+    }
+  };
+
   const criarFamilia = () => {
     if (!novaFamilia.nome.trim()) {
       toast.error("Nome da família é obrigatório");
+      return;
+    }
+
+    if (novaFamilia.membrosIds.length === 0) {
+      toast.error("Selecione pelo menos um membro para a família");
       return;
     }
 
@@ -89,21 +119,26 @@ export function GerenciamentoFamilia({ cliente }: GerenciamentoFamiliaProps) {
 
     setFamilias([...familias, familia]);
 
-    // Adicionar o cliente atual à família
-    const clienteFamilia: ClienteFamilia = {
-      id: (Date.now() + 1).toString(),
-      clienteId: cliente.id,
+    // Adicionar todos os membros selecionados à família
+    const novasVinculacoes = novaFamilia.membrosIds.map((clienteId, index) => ({
+      id: (Date.now() + index).toString(),
+      clienteId,
       familiaId: familia.id,
-      parentesco: '',
+      parentesco: '', // Pode ser editado depois
       ativo: true,
       criadoEm: new Date().toISOString()
-    };
+    }));
 
-    setClienteFamilias([...clienteFamilias, clienteFamilia]);
+    setClienteFamilias([...clienteFamilias, ...novasVinculacoes]);
     
-    setNovaFamilia({ nome: '', descricao: '', corTag: '#3b82f6' });
+    setNovaFamilia({ 
+      nome: '', 
+      descricao: '', 
+      corTag: '#3b82f6',
+      membrosIds: [cliente.id] 
+    });
     setShowNovaFamilia(false);
-    toast.success("Família criada e cliente vinculado!");
+    toast.success(`Família criada com ${novaFamilia.membrosIds.length} membros!`);
   };
 
   const adicionarMembro = () => {
@@ -332,6 +367,42 @@ export function GerenciamentoFamilia({ cliente }: GerenciamentoFamiliaProps) {
                 value={novaFamilia.corTag}
                 onChange={(e) => setNovaFamilia({...novaFamilia, corTag: e.target.value})}
               />
+            </div>
+            <div>
+              <Label>Membros da Família</Label>
+              <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Selecione os clientes que farão parte desta família:
+                </p>
+                <div className="space-y-2">
+                  {clientes.map((clienteOp) => (
+                    <div key={clienteOp.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`membro-${clienteOp.id}`}
+                        checked={novaFamilia.membrosIds.includes(clienteOp.id)}
+                        onCheckedChange={(checked) => 
+                          handleToggleMembro(clienteOp.id, checked as boolean)
+                        }
+                        disabled={clienteOp.id === cliente.id} // Cliente atual sempre selecionado
+                      />
+                      <Label 
+                        htmlFor={`membro-${clienteOp.id}`} 
+                        className={`text-sm flex-1 ${clienteOp.id === cliente.id ? 'font-medium' : ''}`}
+                      >
+                        {clienteOp.nome}
+                        {clienteOp.id === cliente.id && (
+                          <span className="text-primary text-xs ml-2">(Cliente atual)</span>
+                        )}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    {novaFamilia.membrosIds.length} membro(s) selecionado(s)
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="flex gap-2 pt-4">
               <Button onClick={criarFamilia} className="flex-1">Criar Família</Button>
