@@ -12,6 +12,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { PlanejamentoPadrao, Alimento, Refeicao, AlimentoRefeicao } from "@/types";
 import { Plus, Edit, Trash2, ChefHat, Clock, Apple, Search, Tag, Copy, Eye, Calculator, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function PlanejamentosPadrao() {
   const { toast } = useToast();
@@ -105,7 +106,7 @@ export function PlanejamentosPadrao() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.nome.trim() || !formData.categoria || formData.refeicoes.length === 0) {
       toast({
         title: "Campos obrigatórios",
@@ -116,16 +117,16 @@ export function PlanejamentosPadrao() {
     }
 
     const tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-    
+
     // Calcular kcal total do plano
-    const totais = calcularTotaisPlano({ 
-      ...formData, 
-      id: '', 
-      kcalTotal: 0, 
+    const totais = calcularTotaisPlano({
+      ...formData,
+      id: '',
+      kcalTotal: 0,
       tags,
-      ativo: true, 
-      criadoEm: '', 
-      criadoPor: '' 
+      ativo: true,
+      criadoEm: '',
+      criadoPor: ''
     } as PlanejamentoPadrao);
 
     if (editando) {
@@ -136,7 +137,7 @@ export function PlanejamentosPadrao() {
         kcalTotal: Math.round(totais.kcal),
       };
 
-      setPlanejamentosPadrao(planejamentosPadrao.map(p => 
+      setPlanejamentosPadrao(planejamentosPadrao.map(p =>
         p.id === editando.id ? planejamentoAtualizado : p
       ));
 
@@ -311,11 +312,11 @@ export function PlanejamentosPadrao() {
 
   const planejamentosFiltrados = planejamentosPadrao.filter(p => {
     const matchesSearch = p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         p.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         p.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+      p.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
     const matchesCategory = filtroCategoria === "todas" || p.categoria === filtroCategoria;
-    
+
     return matchesSearch && matchesCategory && p.ativo;
   });
 
@@ -374,7 +375,7 @@ export function PlanejamentosPadrao() {
             <ChefHat className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">Nenhum planejamento encontrado</h3>
             <p className="text-muted-foreground mb-4">
-              {searchTerm || filtroCategoria !== "todas" 
+              {searchTerm || filtroCategoria !== "todas"
                 ? "Nenhum planejamento corresponde aos filtros aplicados."
                 : "Crie seu primeiro planejamento padrão para começar."
               }
@@ -391,7 +392,7 @@ export function PlanejamentosPadrao() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {planejamentosFiltrados.map((plano) => {
             const totais = calcularTotaisPlano(plano);
-            
+
             return (
               <Card key={plano.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -512,7 +513,7 @@ export function PlanejamentosPadrao() {
                 <Label className="text-lg font-medium">Refeições</Label>
                 {visualizandoPlano.refeicoes.map((refeicao) => {
                   const totais = calcularTotaisRefeicao(refeicao);
-                  
+
                   return (
                     <Card key={refeicao.id}>
                       <CardHeader>
@@ -530,10 +531,10 @@ export function PlanejamentosPadrao() {
                           {refeicao.alimentos.map((alimentoRef, index) => {
                             const alimento = alimentos.find(a => a.id === alimentoRef.alimentoId);
                             if (!alimento) return null;
-                            
+
                             const fator = alimentoRef.quantidade / alimento.porcaoReferencia;
                             const kcalAlimento = alimento.informacaoNutricional.kcal * fator;
-                            
+
                             return (
                               <div key={index} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
                                 <span className="font-medium">{alimentoRef.alimentoNome}</span>
@@ -572,134 +573,136 @@ export function PlanejamentosPadrao() {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <ScrollArea className="h-80 mb-4 flex gap-2 p-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="nome">Nome *</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    placeholder="Ex: Plano Emagrecimento 1800 kcal"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="categoria">Categoria *</Label>
+                  <Select
+                    value={formData.categoria}
+                    onValueChange={(value) => setFormData({ ...formData, categoria: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categorias.map((categoria) => (
+                        <SelectItem key={categoria} value={categoria}>
+                          {categoria}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div>
-                <Label htmlFor="nome">Nome *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  placeholder="Ex: Plano Emagrecimento 1800 kcal"
-                  required
+                <Label htmlFor="descricao">Descrição</Label>
+                <Textarea
+                  id="descricao"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                  placeholder="Descreva o objetivo e características deste planejamento..."
                 />
               </div>
+
               <div>
-                <Label htmlFor="categoria">Categoria *</Label>
-                <Select 
-                  value={formData.categoria} 
-                  onValueChange={(value) => setFormData({ ...formData, categoria: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categorias.map((categoria) => (
-                      <SelectItem key={categoria} value={categoria}>
-                        {categoria}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+                <Input
+                  id="tags"
+                  value={formData.tags}
+                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  placeholder="Ex: low carb, diabético, hipertenso"
+                />
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="descricao">Descrição</Label>
-              <Textarea
-                id="descricao"
-                value={formData.descricao}
-                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                placeholder="Descreva o objetivo e características deste planejamento..."
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
-              <Input
-                id="tags"
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                placeholder="Ex: low carb, diabético, hipertenso"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="observacoes">Observações</Label>
-              <Textarea
-                id="observacoes"
-                value={formData.observacoes}
-                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                placeholder="Observações adicionais sobre o planejamento..."
-              />
-            </div>
-
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-4">
-                <Label className="text-base font-medium">Refeições</Label>
-                <Button type="button" variant="outline" size="sm" onClick={handleAddMeal}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Refeição
-                </Button>
+              <div>
+                <Label htmlFor="observacoes">Observações</Label>
+                <Textarea
+                  id="observacoes"
+                  value={formData.observacoes}
+                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                  placeholder="Observações adicionais sobre o planejamento..."
+                />
               </div>
-              
-              {formData.refeicoes.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">
-                  <ChefHat className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Nenhuma refeição adicionada</p>
-                  <p className="text-sm">Clique em "Adicionar Refeição" para começar</p>
+
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="text-base font-medium">Refeições</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={handleAddMeal}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Refeição
+                  </Button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {formData.refeicoes.map((refeicao, index) => {
-                    const totais = calcularTotaisRefeicao(refeicao);
-                    return (
-                      <div key={refeicao.id} className="p-3 border rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium">{refeicao.nome}</span>
-                            <span className="text-muted-foreground ml-2">{refeicao.horario}</span>
-                            <span className="text-sm text-muted-foreground ml-2">
-                              - {totais.kcal.toFixed(0)} kcal
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">
-                              {refeicao.alimentos.length} alimentos
-                            </span>
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleEditMeal(refeicao, index)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleRemoveMeal(index)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+
+                {formData.refeicoes.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <ChefHat className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Nenhuma refeição adicionada</p>
+                    <p className="text-sm">Clique em "Adicionar Refeição" para começar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {formData.refeicoes.map((refeicao, index) => {
+                      const totais = calcularTotaisRefeicao(refeicao);
+                      return (
+                        <div key={refeicao.id} className="p-3 border rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-medium">{refeicao.nome}</span>
+                              <span className="text-muted-foreground ml-2">{refeicao.horario}</span>
+                              <span className="text-sm text-muted-foreground ml-2">
+                                - {totais.kcal.toFixed(0)} kcal
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                {refeicao.alimentos.length} alimentos
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditMeal(refeicao, index)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveMeal(index)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={resetForm}>
-                Cancelar
-              </Button>
-              <Button type="submit">
-                {editando ? 'Atualizar' : 'Criar'} Planejamento
-              </Button>
-            </div>
+            </ScrollArea>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancelar
+                </Button>
+                <Button type="submit">
+                  {editando ? 'Atualizar' : 'Criar'} Planejamento
+                </Button>
+              </div>
           </form>
         </DialogContent>
       </Dialog>
@@ -821,9 +824,8 @@ export function PlanejamentosPadrao() {
                   <button
                     key={alimento.id}
                     type="button"
-                    className={`w-full text-left p-3 hover:bg-muted transition-colors ${
-                      selectedFood?.id === alimento.id ? 'bg-primary/10' : ''
-                    }`}
+                    className={`w-full text-left p-3 hover:bg-muted transition-colors ${selectedFood?.id === alimento.id ? 'bg-primary/10' : ''
+                      }`}
                     onClick={() => setSelectedFood(alimento)}
                   >
                     <div className="font-medium">{alimento.nome}</div>
@@ -843,10 +845,10 @@ export function PlanejamentosPadrao() {
             {selectedFood && (
               <div className="space-y-3 p-3 border rounded-lg bg-muted/50">
                 <div>
-                    <div className="font-medium">{selectedFood.nome}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {selectedFood.informacaoNutricional.kcal} kcal por {selectedFood.porcaoReferencia} {selectedFood.unidadeMedida}
-                    </div>
+                  <div className="font-medium">{selectedFood.nome}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {selectedFood.informacaoNutricional.kcal} kcal por {selectedFood.porcaoReferencia} {selectedFood.unidadeMedida}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="quantidade">Quantidade ({selectedFood.unidadeMedida})</Label>
@@ -867,8 +869,8 @@ export function PlanejamentosPadrao() {
               <Button type="button" variant="outline" onClick={() => setShowFoodSelection(false)}>
                 Cancelar
               </Button>
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={handleAddFoodToMeal}
                 disabled={!selectedFood || !foodQuantity}
               >

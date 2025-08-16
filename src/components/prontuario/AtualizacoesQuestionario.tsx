@@ -96,15 +96,15 @@ export function AtualizacoesQuestionario({ clienteId, atualizacoes, onAddSampleD
               <TableRow>
                 <TableHead className="min-w-[100px]">Data</TableHead>
                 <TableHead className="text-center">Adesão Alimentar</TableHead>
-                <TableHead className="text-center">Fome/Saciedade</TableHead>
+                <TableHead className="text-center">Fome e Saciedade</TableHead>
                 <TableHead className="text-center">Energia</TableHead>
                 <TableHead className="text-center">Sono</TableHead>
                 <TableHead className="text-center">Atividade Física</TableHead>
                 <TableHead className="text-center">Hidratação</TableHead>
                 <TableHead className="text-center">Comportamento Emocional</TableHead>
-                <TableHead className="text-center">Motivação/Progresso</TableHead>
+                <TableHead className="text-center">Motivação e Progresso</TableHead>
                 <TableHead className="text-center">Alerta</TableHead>
-                <TableHead className="text-center">Score</TableHead>
+                <TableHead className="text-center">Score Final</TableHead>
                 <TableHead className="text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -173,8 +173,8 @@ export function AtualizacoesQuestionario({ clienteId, atualizacoes, onAddSampleD
                       </Badge>
                     </TableCell>
                     
-                    <TableCell className="text-center">
-                      <div className="font-bold">
+                    <TableCell className={`text-center ${alerta.cor}`}>
+                      <div className="font-bold" >
                         <div>{total}/40</div>
                         <div className="text-sm text-muted-foreground">
                           {percentual.toFixed(1)}%

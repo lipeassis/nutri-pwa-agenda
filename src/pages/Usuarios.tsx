@@ -55,11 +55,11 @@ export function Usuarios() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingUser) {
       // Editar usuário
-      const updatedUsers = usuarios.map(user => 
-        user.id === editingUser.id 
+      const updatedUsers = usuarios.map(user =>
+        user.id === editingUser.id
           ? { ...user, ...formData }
           : user
       );
@@ -88,7 +88,7 @@ export function Usuarios() {
         ativo: true,
         criadoEm: new Date().toISOString()
       };
-      
+
       const updatedUsers = [...usuarios, newUser];
       saveUsers(updatedUsers);
       toast({
@@ -142,7 +142,7 @@ export function Usuarios() {
             <p className="text-muted-foreground">Gerencie os usuários e suas permissões</p>
           </div>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNewUserDialog} className="gap-2">
@@ -156,101 +156,101 @@ export function Usuarios() {
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
               </DialogTitle>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <ScrollArea className="h-80 mb-4 flex gap-2">
                 <div className="space-y-2">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="senha">Senha</Label>
-                <Input
-                  id="senha"
-                  type="password"
-                  value={formData.senha}
-                  onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Tipo de Usuário</Label>
-                <Select 
-                  value={formData.role} 
-                  onValueChange={(value: UserRole) => {
-                    setFormData({ 
-                      ...formData, 
-                      role: value,
-                      tipoProfissionalId: value !== 'profissional' ? '' : formData.tipoProfissionalId,
-                      disponibilidade: value !== 'profissional' ? undefined : formData.disponibilidade
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="secretaria">Secretária</SelectItem>
-                    <SelectItem value="profissional">Profissional</SelectItem>
-                    <SelectItem value="administrador">Administrador</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {formData.role === 'profissional' && (
-                <>
                   <div className="space-y-2">
-                    <Label htmlFor="tipoProfissionalId">Tipo de Profissional</Label>
-                    <Select 
-                      value={formData.tipoProfissionalId} 
-                      onValueChange={(value) => setFormData({ ...formData, tipoProfissionalId: value })}
+                    <Label htmlFor="nome">Nome</Label>
+                    <Input
+                      id="nome"
+                      value={formData.nome}
+                      onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="senha">Senha</Label>
+                    <Input
+                      id="senha"
+                      type="password"
+                      value={formData.senha}
+                      onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Tipo de Usuário</Label>
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value: UserRole) => {
+                        setFormData({
+                          ...formData,
+                          role: value,
+                          tipoProfissionalId: value !== 'profissional' ? '' : formData.tipoProfissionalId,
+                          disponibilidade: value !== 'profissional' ? undefined : formData.disponibilidade
+                        });
+                      }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {tiposProfissionais.filter(tipo => tipo.ativo).map((tipo) => (
-                          <SelectItem key={tipo.id} value={tipo.id}>
-                            {tipo.nome}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="secretaria">Secretária</SelectItem>
+                        <SelectItem value="profissional">Profissional</SelectItem>
+                        <SelectItem value="administrador">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <ConfiguracaoAgenda
-                    disponibilidade={formData.disponibilidade}
-                    onDisponibilidadeChange={(disponibilidade) => 
-                      setFormData({ ...formData, disponibilidade })
-                    }
-                  />
-                </>
-              )}
-              </div>
-            </ScrollArea>
+
+                  {formData.role === 'profissional' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="tipoProfissionalId">Tipo de Profissional</Label>
+                        <Select
+                          value={formData.tipoProfissionalId}
+                          onValueChange={(value) => setFormData({ ...formData, tipoProfissionalId: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tiposProfissionais.filter(tipo => tipo.ativo).map((tipo) => (
+                              <SelectItem key={tipo.id} value={tipo.id}>
+                                {tipo.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <ConfiguracaoAgenda
+                        disponibilidade={formData.disponibilidade}
+                        onDisponibilidadeChange={(disponibilidade) =>
+                          setFormData({ ...formData, disponibilidade })
+                        }
+                      />
+                    </>
+                  )}
+                </div>
+              </ScrollArea>
               <div className="flex gap-2 pt-4">
                 <Button type="submit" className="flex-1">
                   {editingUser ? 'Atualizar' : 'Criar'} Usuário
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   Cancelar
@@ -279,10 +279,10 @@ export function Usuarios() {
             </TableHeader>
             <TableBody>
               {usuarios.map((usuario) => {
-                const tipoProfissional = usuario.tipoProfissionalId 
+                const tipoProfissional = usuario.tipoProfissionalId
                   ? tiposProfissionais.find(tipo => tipo.id === usuario.tipoProfissionalId)
                   : null;
-                
+
                 return (
                   <TableRow key={usuario.id}>
                     <TableCell className="font-medium">{usuario.nome}</TableCell>
@@ -304,42 +304,42 @@ export function Usuarios() {
                         {usuario.ativo ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(usuario)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      {usuario.email !== 'admin@admin.com' && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tem certeza que deseja excluir o usuário {usuario.nome}? 
-                                Esta ação não pode ser desfeita.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(usuario.id)}>
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(usuario)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        {usuario.email !== 'admin@admin.com' && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o usuário {usuario.nome}?
+                                  Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(usuario.id)}>
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </TableBody>

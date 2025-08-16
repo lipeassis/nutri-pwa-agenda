@@ -71,7 +71,7 @@ export function Prontuario() {
   const consultasCliente = consultas
     .filter(c => c.clienteId === clienteId)
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  
+
   const objetivosCliente = objetivos
     .filter(o => o.clienteId === clienteId)
     .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
@@ -162,7 +162,7 @@ export function Prontuario() {
 
       setSelectedFile(file);
       setShowDialog(true);
-      
+
       // Reset form
       setTipoDocumento('outros');
       setDescricao('');
@@ -173,7 +173,7 @@ export function Prontuario() {
 
       setIsUploading(true);
       const reader = new FileReader();
-      
+
       reader.onload = (e) => {
         const documento: DocumentoCliente = {
           id: Date.now().toString(),
@@ -187,7 +187,7 @@ export function Prontuario() {
           criadoEm: new Date().toISOString(),
           criadoPor: 'user' // Substituir pelo ID do usuário logado
         };
-        
+
         onUpload(documento);
         setIsUploading(false);
         setShowDialog(false);
@@ -198,7 +198,7 @@ export function Prontuario() {
           description: "O documento foi anexado com sucesso ao prontuário.",
         });
       };
-      
+
       reader.readAsDataURL(selectedFile);
     };
 
@@ -225,7 +225,7 @@ export function Prontuario() {
             <DialogHeader>
               <DialogTitle>Anexar Documento</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
@@ -301,7 +301,7 @@ export function Prontuario() {
 
   const finalizarPrograma = (programaId: string) => {
     if (window.confirm('Tem certeza que deseja finalizar este programa?')) {
-      setClienteProgramas(clienteProgramas.map(cp => 
+      setClienteProgramas(clienteProgramas.map(cp =>
         cp.id === programaId ? { ...cp, ativo: false } : cp
       ));
     }
@@ -309,15 +309,15 @@ export function Prontuario() {
 
   const handleAdicionarAnotacao = () => {
     if (!novaAnotacao.trim()) return;
-    
+
     const novaAnotacaoObj: AnotacaoCliente = {
       id: Date.now().toString(),
       texto: novaAnotacao.trim(),
       criadoEm: new Date().toISOString()
     };
 
-    const clientesAtualizados = clientes.map(c => 
-      c.id === cliente.id 
+    const clientesAtualizados = clientes.map(c =>
+      c.id === cliente.id
         ? { ...c, anotacoes: [...(c.anotacoes || []), novaAnotacaoObj] }
         : c
     );
@@ -331,14 +331,14 @@ export function Prontuario() {
   };
 
   const handleEditarAnotacao = (id: string, novoTexto: string) => {
-    const clientesAtualizados = clientes.map(c => 
-      c.id === cliente.id 
-        ? { 
-            ...c, 
-            anotacoes: c.anotacoes?.map(a => 
-              a.id === id ? { ...a, texto: novoTexto.trim() } : a
-            ) || []
-          }
+    const clientesAtualizados = clientes.map(c =>
+      c.id === cliente.id
+        ? {
+          ...c,
+          anotacoes: c.anotacoes?.map(a =>
+            a.id === id ? { ...a, texto: novoTexto.trim() } : a
+          ) || []
+        }
         : c
     );
     setClientes(clientesAtualizados);
@@ -351,8 +351,8 @@ export function Prontuario() {
   };
 
   const handleExcluirAnotacao = (id: string) => {
-    const clientesAtualizados = clientes.map(c => 
-      c.id === cliente.id 
+    const clientesAtualizados = clientes.map(c =>
+      c.id === cliente.id
         ? { ...c, anotacoes: c.anotacoes?.filter(a => a.id !== id) || [] }
         : c
     );
@@ -405,43 +405,107 @@ export function Prontuario() {
                 <TabsTrigger value="doencas" className="rounded-none">Doenças e Alergias</TabsTrigger>
               </TabsList>
             </div>
-            
+
             <TabsContent value="basicas" className="p-6 mt-0">
-              <div className="flex justify-end mb-4">
-                <Button variant="outline" size="sm" onClick={() => setShowEditarCliente(true)}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Editar Dados
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Email</p>
-                  <p className="text-base">{cliente.email}</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="col-span-3">
+                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Informações Básicas
+                  </h3>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Telefone</p>
-                  <p className="text-base">{cliente.telefone || "Não informado"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
-                  <p className="text-base">
-                    {cliente.dataNascimento 
-                      ? format(new Date(cliente.dataNascimento), "dd/MM/yyyy", { locale: ptBR })
-                      : "Não informada"
-                    }
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Objetivos</p>
-                  <p className="text-base">{cliente.objetivos || "Não informados"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Cadastro</p>
-                  <p className="text-base">
-                    {format(new Date(cliente.criadoEm), "dd/MM/yyyy", { locale: ptBR })}
-                  </p>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" size="sm" onClick={() => setShowEditarCliente(true)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar Dados
+                  </Button>
                 </div>
               </div>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Email</p>
+                      <p className="text-base">{cliente.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Telefone</p>
+                      <p className="text-base">{cliente.telefone || "Não informado"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
+                      <p className="text-base">
+                        {cliente.dataNascimento
+                          ? format(new Date(cliente.dataNascimento), "dd/MM/yyyy", { locale: ptBR })
+                          : "Não informada"
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Objetivos</p>
+                      <p className="text-base">{cliente.objetivos || "Não informados"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Cadastro</p>
+                      <p className="text-base">
+                        {format(new Date(cliente.criadoEm), "dd/MM/yyyy", { locale: ptBR })}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Stats atuais */}
+              {ultimaConsulta && (
+                <div className="grid gap-4 md:grid-cols-4 mt-6">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center space-x-2">
+                        <Weight className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="text-2xl font-bold">{ultimaConsulta.medidas.peso}kg</p>
+                          <p className="text-sm text-muted-foreground">Peso atual</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center space-x-2">
+                        <Activity className="w-5 h-5 text-success" />
+                        <div>
+                          <p className="text-2xl font-bold">
+                            {calcularIMC(ultimaConsulta.medidas.peso, ultimaConsulta.medidas.altura)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">IMC atual</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center space-x-2">
+                        <Target className="w-5 h-5 text-info" />
+                        <div>
+                          <p className="text-2xl font-bold">{ultimaConsulta.medidas.percentualGordura}%</p>
+                          <p className="text-sm text-muted-foreground">Gordura corporal</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp className="w-5 h-5 text-warning" />
+                        <div>
+                          <p className="text-2xl font-bold">{ultimaConsulta.medidas.massaMuscular}kg</p>
+                          <p className="text-sm text-muted-foreground">Massa muscular</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="anotacoes" className="p-6 mt-0">
@@ -449,9 +513,9 @@ export function Prontuario() {
                 <p className="text-sm text-muted-foreground">
                   Registre observações importantes sobre o cliente
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setEditandoAnotacoes(true)}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -470,9 +534,9 @@ export function Prontuario() {
                     className="resize-none"
                   />
                   <div className="flex gap-2 justify-end mt-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
                         setEditandoAnotacoes(false);
                         setNovaAnotacao('');
@@ -480,8 +544,8 @@ export function Prontuario() {
                     >
                       Cancelar
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       onClick={handleAdicionarAnotacao}
                       disabled={!novaAnotacao.trim()}
                     >
@@ -500,15 +564,15 @@ export function Prontuario() {
                           Anotação #{index + 1} • {format(new Date(anotacao.criadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                         </span>
                         <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => iniciarEdicaoAnotacao(anotacao)}
                           >
                             <Edit className="w-3 h-3" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => handleExcluirAnotacao(anotacao.id)}
                           >
@@ -516,7 +580,7 @@ export function Prontuario() {
                           </Button>
                         </div>
                       </div>
-                      
+
                       {editandoAnotacao === anotacao.id ? (
                         <div className="space-y-2">
                           <Textarea
@@ -526,14 +590,14 @@ export function Prontuario() {
                             className="resize-none"
                           />
                           <div className="flex gap-2 justify-end">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={cancelarEdicaoAnotacao}
                             >
                               Cancelar
                             </Button>
-                            <Button 
+                            <Button
                               size="sm"
                               onClick={() => handleEditarAnotacao(anotacao.id, textoEditandoAnotacao)}
                               disabled={!textoEditandoAnotacao.trim()}
@@ -564,20 +628,28 @@ export function Prontuario() {
             </TabsContent>
 
             <TabsContent value="doencas" className="p-6 mt-0">
-              <div className="flex justify-end mb-4">
-                <Button variant="outline" size="sm" onClick={() => setShowAdicionarDoencasAlergias(true)}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Gerenciar Doenças/Alergias
-                </Button>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="col-span-3">
+                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Doenças pré-existentes
+                  </h3>
+
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" size="sm" onClick={() => setShowAdicionarDoencasAlergias(true)}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Gerenciar Doenças/Alergias
+                  </Button>
+                </div>
               </div>
-              
+
+
+
               <div className="space-y-6">
                 {/* Doenças */}
                 <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-primary" />
-                    Doenças
-                  </h3>
+
                   {doencasCliente.length === 0 ? (
                     <div className="p-8 text-center border rounded-lg">
                       <p className="text-muted-foreground">Nenhuma doença registrada</p>
@@ -637,7 +709,11 @@ export function Prontuario() {
 
                 {/* Alergias */}
                 <div>
-                  <h3 className="text-lg font-medium mb-4">Alergias</h3>
+                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Alergias
+                  </h3>
+
                   {alergiasCliente.length === 0 ? (
                     <div className="p-8 text-center border rounded-lg">
                       <p className="text-muted-foreground">Nenhuma alergia registrada</p>
@@ -652,7 +728,7 @@ export function Prontuario() {
                                 <h4 className="font-medium">{alergia.nome}</h4>
                                 <Badge variant={
                                   alergia.severidade === 'grave' ? 'destructive' :
-                                  alergia.severidade === 'moderada' ? 'default' : 'secondary'
+                                    alergia.severidade === 'moderada' ? 'default' : 'secondary'
                                 }>
                                   {alergia.severidade}
                                 </Badge>
@@ -676,57 +752,7 @@ export function Prontuario() {
         </CardContent>
       </Card>
 
-      {/* Stats atuais */}
-      {ultimaConsulta && (
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Weight className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{ultimaConsulta.medidas.peso}kg</p>
-                  <p className="text-sm text-muted-foreground">Peso atual</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Activity className="w-5 h-5 text-success" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {calcularIMC(ultimaConsulta.medidas.peso, ultimaConsulta.medidas.altura)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">IMC atual</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Target className="w-5 h-5 text-info" />
-                <div>
-                  <p className="text-2xl font-bold">{ultimaConsulta.medidas.percentualGordura}%</p>
-                  <p className="text-sm text-muted-foreground">Gordura corporal</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-warning" />
-                <div>
-                  <p className="text-2xl font-bold">{ultimaConsulta.medidas.massaMuscular}kg</p>
-                  <p className="text-sm text-muted-foreground">Massa muscular</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+
 
       {/* Sinais de Alerta */}
       {ultimaConsulta?.sinaisAlerta && (
@@ -747,8 +773,8 @@ export function Prontuario() {
         </Card>
       )}
 
-      <Tabs defaultValue="historico" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-12">
+      <Tabs defaultValue="atualizacoes" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-11">
           <TabsTrigger value="atualizacoes">Atualizações</TabsTrigger>
           <TabsTrigger value="historico">Consultas</TabsTrigger>
           <TabsTrigger value="planejamento">Planejamento</TabsTrigger>
@@ -758,7 +784,7 @@ export function Prontuario() {
           <TabsTrigger value="programas">Programas</TabsTrigger>
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
-          <TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>
+          {/*<TabsTrigger value="doencas">Doenças/Alergias</TabsTrigger>*/}
           <TabsTrigger value="fotos">Fotos</TabsTrigger>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
         </TabsList>
@@ -901,14 +927,14 @@ export function Prontuario() {
                               <span className="text-sm capitalize">{consulta.anamnese.funcaoIntestinal}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.padraoAlimentar && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Padrão Alimentar:</span>
                               <span className="text-sm">{consulta.anamnese.padraoAlimentar}</span>
                             </div>
                           )}
-                          
+
                           <div className="grid grid-cols-2 gap-4">
                             <div className="flex gap-2">
                               <span className="font-medium text-sm">Horários Irregulares:</span>
@@ -919,14 +945,14 @@ export function Prontuario() {
                               <span className="text-sm">{consulta.anamnese.compulsoes ? 'Sim' : 'Não'}</span>
                             </div>
                           </div>
-                          
+
                           {consulta.anamnese.consumoAgua > 0 && (
                             <div className="flex gap-2">
                               <span className="font-medium text-sm">Consumo de Água:</span>
                               <span className="text-sm">{consulta.anamnese.consumoAgua}L/dia</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.sintomasAtuais && consulta.anamnese.sintomasAtuais.length > 0 && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Sintomas Atuais:</span>
@@ -939,56 +965,56 @@ export function Prontuario() {
                               </div>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.outros && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Outros:</span>
                               <span className="text-sm">{consulta.anamnese.outros}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.habitosAjustar && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Hábitos a Ajustar:</span>
                               <span className="text-sm">{consulta.anamnese.habitosAjustar}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.manutencaoPlano && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Manutenção do Plano:</span>
                               <span className="text-sm">{consulta.anamnese.manutencaoPlano}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.suplementacao && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Suplementação:</span>
                               <span className="text-sm">{consulta.anamnese.suplementacao}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.alimentosPriorizados && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Alimentos Priorizados:</span>
                               <span className="text-sm">{consulta.anamnese.alimentosPriorizados}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.alimentosEvitados && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Alimentos Evitados:</span>
                               <span className="text-sm">{consulta.anamnese.alimentosEvitados}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.reforcoComportamental && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Reforço Comportamental:</span>
                               <span className="text-sm">{consulta.anamnese.reforcoComportamental}</span>
                             </div>
                           )}
-                          
+
                           {consulta.anamnese.estrategiasComplementares && (
                             <div>
                               <span className="font-medium text-sm block mb-1">Estratégias Complementares:</span>
@@ -1110,7 +1136,7 @@ export function Prontuario() {
                         </div>
                       )}
                     </div>
-                    
+
                     {objetivo.observacoes && (
                       <div>
                         <p className="text-sm font-medium text-muted-foreground mb-1">Observações</p>
@@ -1132,7 +1158,7 @@ export function Prontuario() {
               Adicionar Exames
             </Button>
           </div>
-          
+
           {consultas.filter(c => c.resultadosExames && c.resultadosExames.length > 0).length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
@@ -1162,15 +1188,15 @@ export function Prontuario() {
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <h4 className="font-medium">{resultado.exameNome}</h4>
-                                <Badge 
+                                <Badge
                                   variant={
-                                    resultado.status === 'normal' ? 'default' : 
-                                    resultado.status === 'abaixo' ? 'destructive' : 
-                                    'destructive'
+                                    resultado.status === 'normal' ? 'default' :
+                                      resultado.status === 'abaixo' ? 'destructive' :
+                                        'destructive'
                                   }
                                 >
-                                  {resultado.status === 'normal' ? 'Normal' : 
-                                   resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
+                                  {resultado.status === 'normal' ? 'Normal' :
+                                    resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
                                 </Badge>
                               </div>
                               <div className="text-lg font-semibold">
@@ -1205,7 +1231,7 @@ export function Prontuario() {
               </Button>
             </div>
           </div>
-          
+
           {planejamentos.filter(p => p.clienteId === cliente.id && p.ativo).length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
@@ -1222,64 +1248,64 @@ export function Prontuario() {
                 .filter(p => p.clienteId === cliente.id && p.ativo)
                 .map((plano) => (
                   <Card key={plano.id}>
-                     <CardHeader>
-                       <div className="flex items-center justify-between">
-                         <div>
-                           <CardTitle className="flex items-center gap-2">
-                             <ChefHat className="w-5 h-5 text-primary" />
-                             {plano.nome}
-                           </CardTitle>
-                           <CardDescription>
-                             {plano.descricao}
-                           </CardDescription>
-                         </div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => {
-                                  setPlanejamentoSelecionado(plano);
-                                  setShowReajustarPlano(true);
-                                }}
-                              >
-                                <Calculator className="w-4 h-4 mr-2" />
-                                Reajustar
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => {
-                                  setPlanejamentoSelecionado(plano);
-                                  setShowCopiarPlano(true);
-                                }}
-                              >
-                                <Copy className="w-4 h-4 mr-2" />
-                                Copiar
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => setPlanejamentoParaEditar(plano)}
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
-                              </Button>
-                            </div>
-                            <div className="text-right text-sm text-muted-foreground">
-                              <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
-                              {plano.dataFim && (
-                                <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
-                              )}
-                            </div>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <ChefHat className="w-5 h-5 text-primary" />
+                            {plano.nome}
+                          </CardTitle>
+                          <CardDescription>
+                            {plano.descricao}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setPlanejamentoSelecionado(plano);
+                                setShowReajustarPlano(true);
+                              }}
+                            >
+                              <Calculator className="w-4 h-4 mr-2" />
+                              Reajustar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setPlanejamentoSelecionado(plano);
+                                setShowCopiarPlano(true);
+                              }}
+                            >
+                              <Copy className="w-4 h-4 mr-2" />
+                              Copiar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPlanejamentoParaEditar(plano)}
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Editar
+                            </Button>
                           </div>
-                       </div>
-                     </CardHeader>
+                          <div className="text-right text-sm text-muted-foreground">
+                            <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>
+                            {plano.dataFim && (
+                              <div>Fim: {new Date(plano.dataFim).toLocaleDateString('pt-BR')}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {plano.refeicoes.map((refeicao) => {
                           const totais = calcularTotaisRefeicao(refeicao);
-                          
+
                           return (
                             <div key={refeicao.id} className="border rounded-lg p-4">
                               <div className="flex items-center justify-between mb-3">
@@ -1291,14 +1317,14 @@ export function Prontuario() {
                                   {totais.kcal.toFixed(0)} kcal | {totais.proteina.toFixed(1)}g P | {totais.carboidratos.toFixed(1)}g C | {totais.lipideos.toFixed(1)}g L
                                 </div>
                               </div>
-                              
+
                               <div className="grid gap-2">
                                 {refeicao.alimentos.map((alimentoRef, index) => {
                                   const alimento = alimentos.find(a => a.id === alimentoRef.alimentoId);
                                   if (!alimento) return null;
-                                  
+
                                   const fator = alimentoRef.quantidade / alimento.porcaoReferencia;
-                                  
+
                                   return (
                                     <div key={index} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
                                       <span className="font-medium">{alimentoRef.alimentoNome}</span>
@@ -1329,7 +1355,7 @@ export function Prontuario() {
               Nova Receita
             </Button>
           </div>
-          
+
           {receitas.filter(r => r.clienteId === cliente.id && r.ativo).length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
@@ -1362,9 +1388,9 @@ export function Prontuario() {
                           </CardDescription>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => setReceitaParaEditar(receita)}
                           >
                             <Edit className="w-4 h-4 mr-2" />
@@ -1393,14 +1419,14 @@ export function Prontuario() {
                           </div>
                         )}
                       </div>
-                      
+
                       {receita.instrucoes && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground mb-1">Instruções de Uso</p>
                           <p className="text-sm bg-muted p-3 rounded-md">{receita.instrucoes}</p>
                         </div>
                       )}
-                      
+
                       {receita.observacoes && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground mb-1">Observações</p>
@@ -1415,8 +1441,8 @@ export function Prontuario() {
         </TabsContent>
 
         <TabsContent value="formulas" className="space-y-4">
-          <VincularFormula 
-            clienteId={cliente.id} 
+          <VincularFormula
+            clienteId={cliente.id}
             clienteNome={cliente.nome}
           />
         </TabsContent>
@@ -1433,7 +1459,7 @@ export function Prontuario() {
               Vincular Programa
             </Button>
           </div>
-          
+
           {programasCliente.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
@@ -1451,7 +1477,7 @@ export function Prontuario() {
                 .map((clientePrograma) => {
                   const isAtivo = clientePrograma.ativo && new Date(clientePrograma.dataFim) >= new Date();
                   const isVencido = new Date(clientePrograma.dataFim) < new Date();
-                  
+
                   return (
                     <Card key={clientePrograma.id}>
                       <CardHeader>
@@ -1483,8 +1509,8 @@ export function Prontuario() {
                           </div>
                           <div className="flex items-center gap-3">
                             {isAtivo && (
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => finalizarPrograma(clientePrograma.id)}
                               >
@@ -1514,14 +1540,14 @@ export function Prontuario() {
                             </p>
                           </div>
                         </div>
-                        
+
                         {clientePrograma.observacoes && (
                           <div>
                             <p className="text-sm font-medium text-muted-foreground mb-1">Observações</p>
                             <p className="text-sm bg-muted p-3 rounded-md">{clientePrograma.observacoes}</p>
                           </div>
                         )}
-                        
+
                         <div className="text-xs text-muted-foreground">
                           Vinculado em {format(new Date(clientePrograma.criadoEm), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                         </div>
@@ -1534,9 +1560,9 @@ export function Prontuario() {
         </TabsContent>
 
         <TabsContent value="atualizacoes" className="space-y-4">
-          <AtualizacoesQuestionario 
-            clienteId={cliente.id} 
-            atualizacoes={atualizacoes.filter(a => a.clienteId === cliente.id)} 
+          <AtualizacoesQuestionario
+            clienteId={cliente.id}
+            atualizacoes={atualizacoes.filter(a => a.clienteId === cliente.id)}
             onAddSampleData={handleAddSampleAtualizacoes}
           />
         </TabsContent>
@@ -1555,7 +1581,7 @@ export function Prontuario() {
               <UploadDocument clienteId={cliente.id} onUpload={(doc) => setDocumentos([...documentos, doc])} />
             </div>
           </div>
-          
+
           {documentos.filter(d => d.clienteId === cliente.id).length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
@@ -1596,13 +1622,13 @@ export function Prontuario() {
                               </p>
                             </div>
                           </div>
-                          
+
                           {documento.descricao && (
                             <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
                               {documento.descricao}
                             </div>
                           )}
-                          
+
                           <div className="flex items-center justify-between">
                             <Badge variant="outline">
                               {tipoLabel}
@@ -1624,7 +1650,7 @@ export function Prontuario() {
                               </Button>
                             </div>
                           </div>
-                          
+
                           <div className="text-xs text-muted-foreground">
                             {new Date(documento.criadoEm).toLocaleDateString('pt-BR')}
                           </div>
@@ -1637,106 +1663,7 @@ export function Prontuario() {
           )}
         </TabsContent>
 
-        <TabsContent value="doencas" className="space-y-4">
-          <h3 className="text-lg font-semibold">Doenças e Alergias do Paciente</h3>
-          
-          {/* Doenças */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                Doenças
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {doencasCliente.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">Nenhuma doença registrada</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome da Doença</TableHead>
-                      <TableHead>Resumo</TableHead>
-                      <TableHead>Protocolo Nutricional</TableHead>
-                      <TableHead>Referência</TableHead>
-                      <TableHead>Links Úteis</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {doencasCliente.map((doenca) => (
-                      <TableRow key={doenca.id}>
-                        <TableCell className="font-medium">{doenca.nome}</TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="text-sm">{doenca.resumo}</div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="text-sm whitespace-pre-wrap">
-                            {doenca.protocoloNutricional || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="text-sm">{doenca.referencia || "-"}</div>
-                        </TableCell>
-                        <TableCell>
-                          {doenca.linksUteis.length > 0 ? (
-                            <div className="space-y-1">
-                              {doenca.linksUteis.map((link, index) => (
-                                <div key={index}>
-                                  <a 
-                                    href={link} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-primary hover:underline flex items-center gap-1 text-sm"
-                                  >
-                                    <LinkIcon className="w-3 h-3" />
-                                    Link {index + 1}
-                                  </a>
-                                </div>
-                              ))}
-                            </div>
-                          ) : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
 
-          {/* Alergias */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Alergias</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {alergiasCliente.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">Nenhuma alergia registrada</p>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {alergiasCliente.map((alergia) => (
-                    <Card key={alergia.id}>
-                      <CardContent className="pt-6">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">{alergia.nome}</h4>
-                            <Badge variant={
-                              alergia.severidade === 'grave' ? 'destructive' :
-                              alergia.severidade === 'moderada' ? 'default' : 'secondary'
-                            }>
-                              {alergia.severidade}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{alergia.descricao}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Modais */}
@@ -1769,356 +1696,356 @@ export function Prontuario() {
           onClose={() => setShowAdicionarDoencasAlergias(false)}
         />
       )}
-        {showNovoPlanejamento && (
-          <NovoPlanejamento
-            clienteId={cliente.id}
-            cliente={cliente}
-            onClose={() => setShowNovoPlanejamento(false)}
-            onSave={(plano) => setPlanejamentos([...planejamentos, plano])}
-          />
-        )}
+      {showNovoPlanejamento && (
+        <NovoPlanejamento
+          clienteId={cliente.id}
+          cliente={cliente}
+          onClose={() => setShowNovoPlanejamento(false)}
+          onSave={(plano) => setPlanejamentos([...planejamentos, plano])}
+        />
+      )}
 
-        {planejamentoParaEditar && (
-          <NovoPlanejamento
-            clienteId={cliente.id}
-            cliente={cliente}
-            planejamentoParaEditar={planejamentoParaEditar}
-            onClose={() => setPlanejamentoParaEditar(null)}
-            onSave={(plano) => {
-              setPlanejamentos(planejamentos.map(p => 
-                p.id === plano.id ? plano : p
-              ));
-              setPlanejamentoParaEditar(null);
-            }}
-          />
-        )}
+      {planejamentoParaEditar && (
+        <NovoPlanejamento
+          clienteId={cliente.id}
+          cliente={cliente}
+          planejamentoParaEditar={planejamentoParaEditar}
+          onClose={() => setPlanejamentoParaEditar(null)}
+          onSave={(plano) => {
+            setPlanejamentos(planejamentos.map(p =>
+              p.id === plano.id ? plano : p
+            ));
+            setPlanejamentoParaEditar(null);
+          }}
+        />
+      )}
 
-        {showNovaReceita && (
-          <NovaReceita
-            clienteId={cliente.id}
-            onClose={() => setShowNovaReceita(false)}
-            onSave={(receita) => {
-              setReceitas([...receitas, receita]);
-              setShowNovaReceita(false);
-            }}
-          />
-        )}
+      {showNovaReceita && (
+        <NovaReceita
+          clienteId={cliente.id}
+          onClose={() => setShowNovaReceita(false)}
+          onSave={(receita) => {
+            setReceitas([...receitas, receita]);
+            setShowNovaReceita(false);
+          }}
+        />
+      )}
 
-        {receitaParaEditar && (
-          <NovaReceita
-            clienteId={cliente.id}
-            receitaParaEditar={receitaParaEditar}
-            onClose={() => setReceitaParaEditar(null)}
-            onSave={(receita) => {
-              setReceitas(receitas.map(r => 
-                r.id === receita.id ? receita : r
-              ));
-              setReceitaParaEditar(null);
-            }}
-          />
-        )}
+      {receitaParaEditar && (
+        <NovaReceita
+          clienteId={cliente.id}
+          receitaParaEditar={receitaParaEditar}
+          onClose={() => setReceitaParaEditar(null)}
+          onSave={(receita) => {
+            setReceitas(receitas.map(r =>
+              r.id === receita.id ? receita : r
+            ));
+            setReceitaParaEditar(null);
+          }}
+        />
+      )}
 
-        {showAdicionarExame && (
-          <AdicionarExame
-            cliente={cliente}
-            onClose={() => setShowAdicionarExame(false)}
-          />
-        )}
+      {showAdicionarExame && (
+        <AdicionarExame
+          cliente={cliente}
+          onClose={() => setShowAdicionarExame(false)}
+        />
+      )}
 
-        {showVincularPrograma && (
-          <VincularPrograma
-            cliente={cliente}
-            onClose={() => setShowVincularPrograma(false)}
-          />
-        )}
+      {showVincularPrograma && (
+        <VincularPrograma
+          cliente={cliente}
+          onClose={() => setShowVincularPrograma(false)}
+        />
+      )}
 
-        {showCriarDocumentoTemplate && (
-          <CriarDocumentoTemplate
-            cliente={cliente}
-            onClose={() => setShowCriarDocumentoTemplate(false)}
-            onSave={(documento) => {
-              setDocumentos([...documentos, documento]);
-              setShowCriarDocumentoTemplate(false);
-            }}
-          />
-        )}
+      {showCriarDocumentoTemplate && (
+        <CriarDocumentoTemplate
+          cliente={cliente}
+          onClose={() => setShowCriarDocumentoTemplate(false)}
+          onSave={(documento) => {
+            setDocumentos([...documentos, documento]);
+            setShowCriarDocumentoTemplate(false);
+          }}
+        />
+      )}
 
-        {/* Modal de detalhes da consulta */}
-        <Dialog open={showDetalhesConsulta} onOpenChange={setShowDetalhesConsulta}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Detalhes da Consulta - {consultaSelecionada && format(new Date(consultaSelecionada.data), "dd/MM/yyyy", { locale: ptBR })}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {consultaSelecionada && (
-              <div className="space-y-6">
-                {/* Medidas Antropométricas */}
+      {/* Modal de detalhes da consulta */}
+      <Dialog open={showDetalhesConsulta} onOpenChange={setShowDetalhesConsulta}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Detalhes da Consulta - {consultaSelecionada && format(new Date(consultaSelecionada.data), "dd/MM/yyyy", { locale: ptBR })}
+            </DialogTitle>
+          </DialogHeader>
+
+          {consultaSelecionada && (
+            <div className="space-y-6">
+              {/* Medidas Antropométricas */}
+              <div>
+                <h4 className="font-semibold mb-3 text-lg">Medidas Antropométricas</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+                  <div>
+                    <span className="text-muted-foreground text-sm">Peso:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.peso}kg</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">Altura:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.altura}cm</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">C. Braço:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.circunferenciaBraco}cm</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">C. Abdômen:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.circunferenciaAbdomen}cm</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">C. Quadril:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.circunferenciaQuadril}cm</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">C. Pescoço:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.circunferenciaPescoco}cm</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">% Gordura:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.percentualGordura}%</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">M. Muscular:</span>
+                    <p className="font-medium">{consultaSelecionada.medidas.massaMuscular}kg</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dobras Cutâneas */}
+              {consultaSelecionada.dobrasCutaneas && (
                 <div>
-                  <h4 className="font-semibold mb-3 text-lg">Medidas Antropométricas</h4>
+                  <h4 className="font-semibold mb-3 text-lg">Dobras Cutâneas</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
                     <div>
-                      <span className="text-muted-foreground text-sm">Peso:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.peso}kg</p>
+                      <span className="text-muted-foreground text-sm">Tricipital:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.tricipital}mm</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-sm">Altura:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.altura}cm</p>
+                      <span className="text-muted-foreground text-sm">Bicipital:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.bicipital}mm</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-sm">C. Braço:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaBraco}cm</p>
+                      <span className="text-muted-foreground text-sm">Subescapular:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.subescapular}mm</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-sm">C. Abdômen:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaAbdomen}cm</p>
+                      <span className="text-muted-foreground text-sm">Suprailíaca:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.suprailiaca}mm</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-sm">C. Quadril:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaQuadril}cm</p>
+                      <span className="text-muted-foreground text-sm">Abdominal:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.abdominal}mm</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-sm">C. Pescoço:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.circunferenciaPescoco}cm</p>
+                      <span className="text-muted-foreground text-sm">Coxa:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.coxa}mm</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground text-sm">% Gordura:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.percentualGordura}%</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground text-sm">M. Muscular:</span>
-                      <p className="font-medium">{consultaSelecionada.medidas.massaMuscular}kg</p>
+                      <span className="text-muted-foreground text-sm">Panturrilha:</span>
+                      <p className="font-medium">{consultaSelecionada.dobrasCutaneas.panturrilha}mm</p>
                     </div>
                   </div>
                 </div>
+              )}
 
-                {/* Dobras Cutâneas */}
-                {consultaSelecionada.dobrasCutaneas && (
-                  <div>
-                    <h4 className="font-semibold mb-3 text-lg">Dobras Cutâneas</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+              {/* Anamnese completa */}
+              {consultaSelecionada.anamnese && (
+                <div>
+                  <h4 className="font-semibold mb-3 text-lg">Anamnese Completa</h4>
+                  <div className="space-y-4 p-4 bg-muted rounded-lg">
+                    {consultaSelecionada.anamnese.funcaoIntestinal && (
                       <div>
-                        <span className="text-muted-foreground text-sm">Tricipital:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.tricipital}mm</p>
+                        <span className="font-medium text-sm">Função Intestinal:</span>
+                        <p className="mt-1 capitalize">{consultaSelecionada.anamnese.funcaoIntestinal}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.padraoAlimentar && (
+                      <div>
+                        <span className="font-medium text-sm">Padrão Alimentar:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.padraoAlimentar}</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="font-medium text-sm">Horários Irregulares:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.horariosIrregulares ? 'Sim' : 'Não'}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground text-sm">Bicipital:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.bicipital}mm</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground text-sm">Subescapular:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.subescapular}mm</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground text-sm">Suprailíaca:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.suprailiaca}mm</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground text-sm">Abdominal:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.abdominal}mm</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground text-sm">Coxa:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.coxa}mm</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground text-sm">Panturrilha:</span>
-                        <p className="font-medium">{consultaSelecionada.dobrasCutaneas.panturrilha}mm</p>
+                        <span className="font-medium text-sm">Compulsões:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.compulsoes ? 'Sim' : 'Não'}</p>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Anamnese completa */}
-                {consultaSelecionada.anamnese && (
-                  <div>
-                    <h4 className="font-semibold mb-3 text-lg">Anamnese Completa</h4>
-                    <div className="space-y-4 p-4 bg-muted rounded-lg">
-                      {consultaSelecionada.anamnese.funcaoIntestinal && (
-                        <div>
-                          <span className="font-medium text-sm">Função Intestinal:</span>
-                          <p className="mt-1 capitalize">{consultaSelecionada.anamnese.funcaoIntestinal}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.padraoAlimentar && (
-                        <div>
-                          <span className="font-medium text-sm">Padrão Alimentar:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.padraoAlimentar}</p>
-                        </div>
-                      )}
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <span className="font-medium text-sm">Horários Irregulares:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.horariosIrregulares ? 'Sim' : 'Não'}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium text-sm">Compulsões:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.compulsoes ? 'Sim' : 'Não'}</p>
+                    {consultaSelecionada.anamnese.consumoAgua > 0 && (
+                      <div>
+                        <span className="font-medium text-sm">Consumo de Água:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.consumoAgua}L/dia</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.sintomasAtuais && consultaSelecionada.anamnese.sintomasAtuais.length > 0 && (
+                      <div>
+                        <span className="font-medium text-sm">Sintomas Atuais:</span>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {consultaSelecionada.anamnese.sintomasAtuais.map((sintoma, index) => (
+                            <Badge key={index} variant="outline">
+                              {sintoma}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
-                      
-                      {consultaSelecionada.anamnese.consumoAgua > 0 && (
-                        <div>
-                          <span className="font-medium text-sm">Consumo de Água:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.consumoAgua}L/dia</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.sintomasAtuais && consultaSelecionada.anamnese.sintomasAtuais.length > 0 && (
-                        <div>
-                          <span className="font-medium text-sm">Sintomas Atuais:</span>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {consultaSelecionada.anamnese.sintomasAtuais.map((sintoma, index) => (
-                              <Badge key={index} variant="outline">
-                                {sintoma}
-                              </Badge>
-                            ))}
+                    )}
+
+                    {consultaSelecionada.anamnese.outros && (
+                      <div>
+                        <span className="font-medium text-sm">Outros:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.outros}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.habitosAjustar && (
+                      <div>
+                        <span className="font-medium text-sm">Hábitos a Ajustar:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.habitosAjustar}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.manutencaoPlano && (
+                      <div>
+                        <span className="font-medium text-sm">Manutenção do Plano:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.manutencaoPlano}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.suplementacao && (
+                      <div>
+                        <span className="font-medium text-sm">Suplementação:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.suplementacao}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.alimentosPriorizados && (
+                      <div>
+                        <span className="font-medium text-sm">Alimentos Priorizados:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.alimentosPriorizados}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.alimentosEvitados && (
+                      <div>
+                        <span className="font-medium text-sm">Alimentos Evitados:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.alimentosEvitados}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.reforcoComportamental && (
+                      <div>
+                        <span className="font-medium text-sm">Reforço Comportamental:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.reforcoComportamental}</p>
+                      </div>
+                    )}
+
+                    {consultaSelecionada.anamnese.estrategiasComplementares && (
+                      <div>
+                        <span className="font-medium text-sm">Estratégias Complementares:</span>
+                        <p className="mt-1">{consultaSelecionada.anamnese.estrategiasComplementares}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Relato do paciente */}
+              {consultaSelecionada.relatoPaciente && (
+                <div>
+                  <h4 className="font-semibold mb-3 text-lg">Relato do Paciente</h4>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p>{consultaSelecionada.relatoPaciente}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Observações do nutricionista */}
+              {consultaSelecionada.observacoesNutricionista && (
+                <div>
+                  <h4 className="font-semibold mb-3 text-lg">Observações do Nutricionista</h4>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p>{consultaSelecionada.observacoesNutricionista}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Exames */}
+              {consultaSelecionada.resultadosExames && consultaSelecionada.resultadosExames.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3 text-lg">Resultados de Exames</h4>
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {consultaSelecionada.resultadosExames.map((resultado, index) => (
+                      <div key={index} className="p-4 border rounded-lg">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h5 className="font-medium">{resultado.exameNome}</h5>
+                            <Badge
+                              variant={
+                                resultado.status === 'normal' ? 'default' :
+                                  resultado.status === 'abaixo' ? 'destructive' :
+                                    'destructive'
+                              }
+                            >
+                              {resultado.status === 'normal' ? 'Normal' :
+                                resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
+                            </Badge>
+                          </div>
+                          <div className="text-lg font-semibold">
+                            {resultado.valor} {resultado.unidade}
                           </div>
                         </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.outros && (
-                        <div>
-                          <span className="font-medium text-sm">Outros:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.outros}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.habitosAjustar && (
-                        <div>
-                          <span className="font-medium text-sm">Hábitos a Ajustar:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.habitosAjustar}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.manutencaoPlano && (
-                        <div>
-                          <span className="font-medium text-sm">Manutenção do Plano:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.manutencaoPlano}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.suplementacao && (
-                        <div>
-                          <span className="font-medium text-sm">Suplementação:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.suplementacao}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.alimentosPriorizados && (
-                        <div>
-                          <span className="font-medium text-sm">Alimentos Priorizados:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.alimentosPriorizados}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.alimentosEvitados && (
-                        <div>
-                          <span className="font-medium text-sm">Alimentos Evitados:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.alimentosEvitados}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.reforcoComportamental && (
-                        <div>
-                          <span className="font-medium text-sm">Reforço Comportamental:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.reforcoComportamental}</p>
-                        </div>
-                      )}
-                      
-                      {consultaSelecionada.anamnese.estrategiasComplementares && (
-                        <div>
-                          <span className="font-medium text-sm">Estratégias Complementares:</span>
-                          <p className="mt-1">{consultaSelecionada.anamnese.estrategiasComplementares}</p>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
-                {/* Relato do paciente */}
-                {consultaSelecionada.relatoPaciente && (
-                  <div>
-                    <h4 className="font-semibold mb-3 text-lg">Relato do Paciente</h4>
-                    <div className="p-4 bg-muted rounded-lg">
-                      <p>{consultaSelecionada.relatoPaciente}</p>
-                    </div>
-                  </div>
-                )}
+      {/* Modal Copiar Plano */}
+      <CopiarPlanoModal
+        open={showCopiarPlano}
+        onOpenChange={setShowCopiarPlano}
+        clienteOrigem={cliente}
+        planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
+        planejamentoSelecionado={planejamentoSelecionado}
+      />
 
-                {/* Observações do nutricionista */}
-                {consultaSelecionada.observacoesNutricionista && (
-                  <div>
-                    <h4 className="font-semibold mb-3 text-lg">Observações do Nutricionista</h4>
-                    <div className="p-4 bg-muted rounded-lg">
-                      <p>{consultaSelecionada.observacoesNutricionista}</p>
-                    </div>
-                  </div>
-                )}
+      {/* Modal Reajustar Plano */}
+      <ReajustarPlanoModal
+        open={showReajustarPlano}
+        onOpenChange={setShowReajustarPlano}
+        clienteId={cliente.id}
+        clienteNome={cliente.nome}
+        planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
+        planejamentoSelecionado={planejamentoSelecionado}
+      />
 
-                {/* Exames */}
-                {consultaSelecionada.resultadosExames && consultaSelecionada.resultadosExames.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-3 text-lg">Resultados de Exames</h4>
-                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                      {consultaSelecionada.resultadosExames.map((resultado, index) => (
-                        <div key={index} className="p-4 border rounded-lg">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h5 className="font-medium">{resultado.exameNome}</h5>
-                              <Badge 
-                                variant={
-                                  resultado.status === 'normal' ? 'default' : 
-                                  resultado.status === 'abaixo' ? 'destructive' : 
-                                  'destructive'
-                                }
-                              >
-                                {resultado.status === 'normal' ? 'Normal' : 
-                                 resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
-                              </Badge>
-                            </div>
-                            <div className="text-lg font-semibold">
-                              {resultado.valor} {resultado.unidade}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal Copiar Plano */}
-        <CopiarPlanoModal
-          open={showCopiarPlano}
-          onOpenChange={setShowCopiarPlano}
-          clienteOrigem={cliente}
-          planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
-          planejamentoSelecionado={planejamentoSelecionado}
-        />
-
-        {/* Modal Reajustar Plano */}
-        <ReajustarPlanoModal
-          open={showReajustarPlano}
-          onOpenChange={setShowReajustarPlano}
-          clienteId={cliente.id}
-          clienteNome={cliente.nome}
-          planejamentosCliente={planejamentos.filter(p => p.clienteId === cliente.id && p.ativo)}
-          planejamentoSelecionado={planejamentoSelecionado}
-        />
-
-        {/* Modal Criar de Padrão */}
-        <CriarDePadraoModal
-          open={showCriarDePadrao}
-          onOpenChange={setShowCriarDePadrao}
-          cliente={cliente}
-        />
-      </div>
-    );
+      {/* Modal Criar de Padrão */}
+      <CriarDePadraoModal
+        open={showCriarDePadrao}
+        onOpenChange={setShowCriarDePadrao}
+        cliente={cliente}
+      />
+    </div>
+  );
 }
