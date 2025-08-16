@@ -5,19 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Familia, Cliente, ClienteFamilia, PlanejamentoAlimentar } from "@/types";
-import { Search, Plus, Users, UserPlus, Copy, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Users, UserPlus, Copy, Trash2, UserMinus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-export function Familias() {
+interface GerenciamentoFamiliaProps {
+  cliente: Cliente;
+}
+
+export function GerenciamentoFamilia({ cliente }: GerenciamentoFamiliaProps) {
   const [familias, setFamilias] = useLocalStorage<Familia[]>('nutriapp-familias', []);
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [clienteFamilias, setClienteFamilias] = useLocalStorage<ClienteFamilia[]>('nutriapp-cliente-familias', []);
   const [planosAlimentares] = useLocalStorage<PlanejamentoAlimentar[]>('nutriapp-planejamentos', []);
-  const [busca, setBusca] = useState("");
   
   // Estados dos modais
   const [showNovaFamilia, setShowNovaFamilia] = useState(false);
@@ -41,15 +44,20 @@ export function Familias() {
     observacoes: ''
   });
 
-  const familiasFiltradas = familias.filter(familia =>
-    familia.ativo && familia.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+  // Buscar famílias do cliente atual
+  const familiasDoCliente = clienteFamilias
+    .filter(cf => cf.clienteId === cliente.id && cf.ativo)
+    .map(cf => {
+      const familia = familias.find(f => f.id === cf.familiaId && f.ativo);
+      return familia ? { ...cf, familia } : null;
+    })
+    .filter(Boolean);
 
   const getMembros = (familiaId: string) => {
     const membros = clienteFamilias.filter(cf => cf.familiaId === familiaId && cf.ativo);
     return membros.map(cf => {
-      const cliente = clientes.find(c => c.id === cf.clienteId);
-      return { ...cf, cliente };
+      const clienteMembro = clientes.find(c => c.id === cf.clienteId);
+      return { ...cf, cliente: clienteMembro };
     }).filter(m => m.cliente);
   };
 
@@ -80,9 +88,22 @@ export function Familias() {
     };
 
     setFamilias([...familias, familia]);
+
+    // Adicionar o cliente atual à família
+    const clienteFamilia: ClienteFamilia = {
+      id: (Date.now() + 1).toString(),
+      clienteId: cliente.id,
+      familiaId: familia.id,
+      parentesco: '',
+      ativo: true,
+      criadoEm: new Date().toISOString()
+    };
+
+    setClienteFamilias([...clienteFamilias, clienteFamilia]);
+    
     setNovaFamilia({ nome: '', descricao: '', corTag: '#3b82f6' });
     setShowNovaFamilia(false);
-    toast.success("Família criada com sucesso!");
+    toast.success("Família criada e cliente vinculado!");
   };
 
   const adicionarMembro = () => {
@@ -113,6 +134,13 @@ export function Familias() {
     toast.success("Membro removido da família");
   };
 
+  const sairDaFamilia = (familiaId: string) => {
+    setClienteFamilias(clienteFamilias.map(cf => 
+      cf.clienteId === cliente.id && cf.familiaId === familiaId ? { ...cf, ativo: false } : cf
+    ));
+    toast.success("Cliente removido da família");
+  };
+
   const copiarPlanoAlimentar = () => {
     if (!copiaPlano.clienteOrigemId || !copiaPlano.clienteDestinoId || !familiaSelecionada) {
       toast.error("Selecione cliente origem e destino");
@@ -125,7 +153,7 @@ export function Familias() {
       return;
     }
 
-    const planoOriginal = planosOrigem[0]; // Pega o primeiro plano ativo
+    const planoOriginal = planosOrigem[0];
     const clienteDestino = clientes.find(c => c.id === copiaPlano.clienteDestinoId);
 
     const novoPlano: PlanejamentoAlimentar = {
@@ -148,112 +176,104 @@ export function Familias() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Famílias</h1>
-          <p className="text-muted-foreground">
-            Gerencie famílias e copie planos alimentares entre membros
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            Famílias
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Gerencie as famílias deste cliente e copie planos entre membros
           </p>
         </div>
-        <Button onClick={() => setShowNovaFamilia(true)}>
+        <Button size="sm" onClick={() => setShowNovaFamilia(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nova Família
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder="Buscar famílias..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="pl-10 bg-card"
-        />
-      </div>
-
-      {/* Famílias List */}
-      {familiasFiltradas.length === 0 ? (
+      {familiasDoCliente.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-12">
-            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {familias.length === 0 ? "Nenhuma família cadastrada" : "Nenhuma família encontrada"}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {familias.length === 0 
-                ? "Comece criando sua primeira família"
-                : "Tente ajustar os termos da busca"
-              }
+          <CardContent className="text-center py-8">
+            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h4 className="font-medium mb-2">Nenhuma família</h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              Este cliente ainda não pertence a nenhuma família
             </p>
-            {familias.length === 0 && (
-              <Button onClick={() => setShowNovaFamilia(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Família
-              </Button>
-            )}
+            <Button size="sm" onClick={() => setShowNovaFamilia(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Primeira Família
+            </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6">
-          {familiasFiltradas.map((familia) => {
-            const membros = getMembros(familia.id);
+        <div className="space-y-4">
+          {familiasDoCliente.map((item: any) => {
+            const membros = getMembros(item.familia.id);
             
             return (
-              <Card key={familia.id} className="hover:shadow-medium transition-all duration-300">
+              <Card key={item.id} className="hover:shadow-medium transition-all duration-300">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-xl flex items-center gap-2">
+                      <CardTitle className="text-lg flex items-center gap-2">
                         <div 
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: familia.corTag }}
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.familia.corTag }}
                         />
-                        {familia.nome}
+                        {item.familia.nome}
                       </CardTitle>
-                      <CardDescription>{familia.descricao}</CardDescription>
+                      <CardDescription>{item.familia.descricao}</CardDescription>
                     </div>
-                    <Badge variant="secondary">{membros.length} membros</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{membros.length} membros</Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => sairDaFamilia(item.familia.id)}
+                      >
+                        <UserMinus className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Membros da família */}
                   <div>
-                    <h4 className="font-medium mb-3">Membros da família</h4>
+                    <h5 className="font-medium mb-2 text-sm">Membros da família</h5>
                     {membros.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Nenhum membro adicionado</p>
+                      <p className="text-sm text-muted-foreground">Nenhum membro</p>
                     ) : (
                       <div className="grid gap-2 sm:grid-cols-2">
                         {membros.map((membro) => (
-                          <div key={membro.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                          <div key={membro.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
                             <div>
-                              <p className="font-medium">{membro.cliente?.nome}</p>
+                              <p className="text-sm font-medium">{membro.cliente?.nome}</p>
                               {membro.parentesco && (
-                                <p className="text-sm text-muted-foreground">{membro.parentesco}</p>
+                                <p className="text-xs text-muted-foreground">{membro.parentesco}</p>
                               )}
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => removerMembro(membro.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {membro.clienteId !== cliente.id && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removerMembro(membro.id)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            )}
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Ações */}
                   <div className="flex gap-2 pt-2">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        setFamiliaSelecionada(familia);
+                        setFamiliaSelecionada(item.familia);
                         setShowAdicionarMembro(true);
                       }}
                     >
@@ -263,7 +283,7 @@ export function Familias() {
                     <Button
                       size="sm"
                       onClick={() => {
-                        setFamiliaSelecionada(familia);
+                        setFamiliaSelecionada(item.familia);
                         setShowCopiarPlano(true);
                       }}
                       disabled={membros.length < 2}
@@ -335,9 +355,9 @@ export function Familias() {
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {getClientesDisponiveis().map((cliente) => (
-                    <SelectItem key={cliente.id} value={cliente.id}>
-                      {cliente.nome}
+                  {getClientesDisponiveis().map((clienteOp) => (
+                    <SelectItem key={clienteOp.id} value={clienteOp.id}>
+                      {clienteOp.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>

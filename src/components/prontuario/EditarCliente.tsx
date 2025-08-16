@@ -8,6 +8,8 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Cliente } from "@/types";
 import { Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GerenciamentoFamilia } from "@/components/cliente/GerenciamentoFamilia";
 
 interface EditarClienteProps {
   cliente: Cliente;
@@ -81,108 +83,121 @@ export function EditarCliente({ cliente, open, onClose }: EditarClienteProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Dados do Cliente</DialogTitle>
           <DialogDescription>
-            Atualize as informações básicas do cliente
+            Atualize as informações básicas do cliente e gerencie famílias
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Informações Pessoais */}
-          <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome Completo *</Label>
-                <Input
-                  id="nome"
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleInputChange}
-                  placeholder="Digite o nome completo"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="cliente@email.com"
-                  required
-                />
-              </div>
-            </div>
+        <Tabs defaultValue="dados" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="dados">Dados Pessoais</TabsTrigger>
+            <TabsTrigger value="familias">Famílias</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="dados">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Informações Pessoais */}
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="nome">Nome Completo *</Label>
+                    <Input
+                      id="nome"
+                      name="nome"
+                      value={formData.nome}
+                      onChange={handleInputChange}
+                      placeholder="Digite o nome completo"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="cliente@email.com"
+                      required
+                    />
+                  </div>
+                </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="telefone">Telefone *</Label>
-                <Input
-                  id="telefone"
-                  name="telefone"
-                  value={formData.telefone}
-                  onChange={handleInputChange}
-                  placeholder="(11) 99999-9999"
-                  required
-                />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="telefone">Telefone *</Label>
+                    <Input
+                      id="telefone"
+                      name="telefone"
+                      value={formData.telefone}
+                      onChange={handleInputChange}
+                      placeholder="(11) 99999-9999"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+                    <Input
+                      id="dataNascimento"
+                      name="dataNascimento"
+                      type="date"
+                      value={formData.dataNascimento}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="dataNascimento">Data de Nascimento</Label>
-                <Input
-                  id="dataNascimento"
-                  name="dataNascimento"
-                  type="date"
-                  value={formData.dataNascimento}
-                  onChange={handleInputChange}
-                />
+
+              {/* Objetivos e Observações */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-semibold">Objetivos e Observações</h3>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="objetivos">Objetivos</Label>
+                  <Textarea
+                    id="objetivos"
+                    name="objetivos"
+                    value={formData.objetivos}
+                    onChange={handleInputChange}
+                    placeholder="Descreva os objetivos do cliente"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="observacoes">Observações Adicionais</Label>
+                  <Textarea
+                    id="observacoes"
+                    name="observacoes"
+                    value={formData.observacoes}
+                    onChange={handleInputChange}
+                    placeholder="Observações adicionais"
+                    rows={3}
+                  />
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Objetivos e Observações */}
-          <div className="border-t pt-6 space-y-4">
-            <h3 className="text-lg font-semibold">Objetivos e Observações</h3>
-            
-            <div className="space-y-2">
-              <Label htmlFor="objetivos">Objetivos</Label>
-              <Textarea
-                id="objetivos"
-                name="objetivos"
-                value={formData.objetivos}
-                onChange={handleInputChange}
-                placeholder="Descreva os objetivos do cliente"
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="observacoes">Observações Adicionais</Label>
-              <Textarea
-                id="observacoes"
-                name="observacoes"
-                value={formData.observacoes}
-                onChange={handleInputChange}
-                placeholder="Observações adicionais"
-                rows={3}
-              />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-6 border-t">
-            <Button type="submit" disabled={isSubmitting}>
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Salvando..." : "Salvar Alterações"}
-            </Button>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-          </div>
-        </form>
+              {/* Actions */}
+              <div className="flex gap-3 pt-6 border-t">
+                <Button type="submit" disabled={isSubmitting}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+                </Button>
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="familias">
+            <GerenciamentoFamilia cliente={cliente} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

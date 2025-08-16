@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, Doenca, Alergia } from "@/types";
-import { ArrowLeft, Save, User } from "lucide-react";
+import { Cliente, Doenca, Alergia, Familia, ClienteFamilia } from "@/types";
+import { ArrowLeft, Save, User, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +17,8 @@ export function NovoCliente() {
   const [clientes, setClientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
+  const [familias] = useLocalStorage<Familia[]>('nutriapp-familias', []);
+  const [clienteFamilias, setClienteFamilias] = useLocalStorage<ClienteFamilia[]>('nutriapp-cliente-familias', []);
   
   const [formData, setFormData] = useState({
     nome: "",
@@ -29,6 +31,7 @@ export function NovoCliente() {
 
   const [selectedDoencas, setSelectedDoencas] = useState<string[]>([]);
   const [selectedAlergias, setSelectedAlergias] = useState<string[]>([]);
+  const [selectedFamilias, setSelectedFamilias] = useState<string[]>([]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -62,6 +65,19 @@ export function NovoCliente() {
     };
 
     setClientes(prev => [...prev, novoCliente]);
+
+    // Vincular cliente às famílias selecionadas
+    if (selectedFamilias.length > 0) {
+      const novasVinculacoes = selectedFamilias.map(familiaId => ({
+        id: (Date.now() + Math.random()).toString(),
+        clienteId: novoCliente.id,
+        familiaId,
+        parentesco: '',
+        ativo: true,
+        criadoEm: new Date().toISOString()
+      }));
+      setClienteFamilias(prev => [...prev, ...novasVinculacoes]);
+    }
     
     toast({
       title: "Cliente cadastrado!",
@@ -210,6 +226,43 @@ export function NovoCliente() {
                 </div>
               )}
             </div>
+
+            {/* Famílias */}
+            {familias.filter(f => f.ativo).length > 0 && (
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Famílias
+                </h3>
+                <div className="space-y-3">
+                  <Label>Vincular a famílias existentes (opcional)</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-40 overflow-y-auto border rounded-md p-3">
+                    {familias.filter(f => f.ativo).map((familia) => (
+                      <div key={familia.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`familia-${familia.id}`}
+                          checked={selectedFamilias.includes(familia.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedFamilias(prev => [...prev, familia.id]);
+                            } else {
+                              setSelectedFamilias(prev => prev.filter(id => id !== familia.id));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`familia-${familia.id}`} className="text-sm flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: familia.corTag }}
+                          />
+                          {familia.nome}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Objetivos e Observações */}
             <div className="border-t pt-6 space-y-4">

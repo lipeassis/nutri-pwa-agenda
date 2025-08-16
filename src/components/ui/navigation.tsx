@@ -26,7 +26,6 @@ export function Navigation({ className }: NavigationProps) {
   const mainNavItems = [
     { href: "/", icon: Home, label: "Dashboard", roles: ['secretaria', 'profissional', 'administrador'] },
     { href: "/clientes", icon: Users, label: "Clientes", roles: ['secretaria', 'profissional', 'administrador'] },
-    { href: "/familias", icon: Users, label: "Famílias", roles: ['profissional', 'administrador'] },
     { href: "/agenda", icon: Calendar, label: "Agenda", roles: ['secretaria', 'profissional', 'administrador'] },
     { href: "/financeiro", icon: TrendingUp, label: "Financeiro", roles: ['profissional', 'administrador'] },
   ].filter(item => hasPermission(item.roles as any));
