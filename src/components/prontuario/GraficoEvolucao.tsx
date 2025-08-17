@@ -25,7 +25,19 @@ export function GraficoEvolucao({ consultas, objetivos }: GraficoEvolucaoProps) 
     circunferenciaAbdomen: consulta.medidas.circunferenciaAbdomen,
     circunferenciaQuadril: consulta.medidas.circunferenciaQuadril,
     imc: (consulta.medidas.peso / Math.pow(consulta.medidas.altura / 100, 2)).toFixed(1),
+    faseAngle: consulta.bioimpedancia?.faseAngle || 0,
+    aguaCorporal: consulta.bioimpedancia?.aguaCorporal || 0,
+    ecmIcw: consulta.bioimpedancia?.ecmIcw || 0,
   }));
+
+  // Verificar se há dados de bioimpedância
+  const temBioimpedancia = consultasOrdenadas.some(consulta => 
+    consulta.bioimpedancia && (
+      consulta.bioimpedancia.faseAngle > 0 || 
+      consulta.bioimpedancia.aguaCorporal > 0 || 
+      consulta.bioimpedancia.ecmIcw > 0
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -221,6 +233,137 @@ export function GraficoEvolucao({ consultas, objetivos }: GraficoEvolucaoProps) 
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      {/* Gráficos de Bioimpedância - só aparece se houver dados */}
+      {temBioimpedancia && (
+        <>
+          {/* Gráfico de Ângulo de Fase */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Evolução do Ângulo de Fase</CardTitle>
+              <CardDescription>Indicador de integridade celular e estado nutricional</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={dadosGrafico}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="data" 
+                    fontSize={12}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    fontSize={12}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    domain={[0, 10]}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="faseAngle" 
+                    stroke="hsl(var(--accent))" 
+                    strokeWidth={2}
+                    name="Ângulo de Fase (°)"
+                    dot={{ fill: 'hsl(var(--accent))', strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Gráfico de Água Corporal */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Evolução da Água Corporal</CardTitle>
+              <CardDescription>Percentual de água no corpo</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={dadosGrafico}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="data" 
+                    fontSize={12}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    fontSize={12}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    domain={[40, 80]}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="aguaCorporal" 
+                    stroke="hsl(var(--info))" 
+                    strokeWidth={2}
+                    name="Água Corporal (%)"
+                    dot={{ fill: 'hsl(var(--info))', strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Gráfico de ECM/ICW */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Evolução da Razão ECM/ICW</CardTitle>
+              <CardDescription>Relação água extracelular/intracelular</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={dadosGrafico}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="data" 
+                    fontSize={12}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    fontSize={12}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    domain={[0.5, 1.5]}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="ecmIcw" 
+                    stroke="hsl(var(--warning))" 
+                    strokeWidth={2}
+                    name="ECM/ICW"
+                    dot={{ fill: 'hsl(var(--warning))', strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
