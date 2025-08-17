@@ -13,6 +13,7 @@ import { Agenda } from "./pages/Agenda";
 import { NovoAgendamento } from "./pages/NovoAgendamento";
 import { Prontuario } from "./pages/Prontuario";
 import { Login } from "./pages/Login";
+import { RecuperarSenha } from "./pages/RecuperarSenha";
 import { Usuarios } from "./pages/Usuarios";
 import { TiposProfissionais } from "./pages/TiposProfissionais";
 import { Doencas } from "./pages/Doencas";
@@ -44,6 +45,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
             {/* Rotas públicas para confirmação de consultas */}
             <Route path="/confirmar-consulta" element={<ConfirmarConsulta />} />
             <Route path="/confirmacao-sucesso" element={<ConfirmacaoSucesso />} />

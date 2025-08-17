@@ -1,44 +1,30 @@
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Stethoscope } from "lucide-react";
+import { Mail, ArrowLeft } from "lucide-react";
 
-export function Login() {
+export function RecuperarSenha() {
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated } = useAuth();
   const { toast } = useToast();
-
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = login(email, senha);
-    
-    if (success) {
+    // Simulando envio de email de recuperação
+    setTimeout(() => {
       toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao sistema.",
+        title: "Email enviado!",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
       });
-    } else {
-      toast({
-        title: "Erro no login",
-        description: "Email ou senha incorretos.",
-        variant: "destructive",
-      });
-    }
-    
-    setIsLoading(false);
+      setIsLoading(false);
+      setEmail("");
+    }, 2000);
   };
 
   return (
@@ -46,11 +32,14 @@ export function Login() {
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
-            <Stethoscope className="w-8 h-8 text-primary-foreground" />
+            <Mail className="w-8 h-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Acesso Restrito
+            Recuperar Senha
           </CardTitle>
+          <p className="text-muted-foreground text-sm">
+            Digite seu email para receber as instruções de recuperação
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -65,32 +54,22 @@ export function Login() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="senha">Senha</Label>
-              <Input
-                id="senha"
-                type="password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                placeholder="Sua senha"
-                required
-              />
-            </div>
             <Button 
               type="submit" 
               className="w-full" 
               disabled={isLoading}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {isLoading ? "Enviando..." : "Enviar Instruções"}
             </Button>
           </form>
           
-          <div className="mt-4 pt-4 border-t border-border text-center">
+          <div className="mt-6 pt-4 border-t border-border">
             <Link 
-              to="/recuperar-senha" 
-              className="text-sm text-muted-foreground hover:text-foreground transition-smooth"
+              to="/login" 
+              className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-smooth"
             >
-              Esqueceu sua senha?
+              <ArrowLeft className="w-4 h-4" />
+              Voltar ao login
             </Link>
           </div>
         </CardContent>
