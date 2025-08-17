@@ -140,6 +140,12 @@ export function AdicionarExame({ cliente, onClose }: AdicionarExameProps) {
           coxa: 0,
           panturrilha: 0,
         },
+        bioimpedancia: {
+          faseAngle: 0,
+          aguaCorporal: 0,
+          massaMuscular: 0,
+          ecmIcw: 0,
+        },
         resultadosExames: resultadosExames,
         anamnese: {
           funcaoIntestinal: '' as const,

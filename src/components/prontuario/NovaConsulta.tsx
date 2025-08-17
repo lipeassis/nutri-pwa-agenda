@@ -9,8 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Cliente, ConsultaProntuario, MedidasAntropometricas, DobrasCutaneas, ExameBioquimico, ResultadoExame, Anamnese } from "@/types";
-import { Save, Activity, Ruler, TestTube, Plus, Trash2, FileText } from "lucide-react";
+import { Cliente, ConsultaProntuario, MedidasAntropometricas, DobrasCutaneas, Bioimpedancia, ExameBioquimico, ResultadoExame, Anamnese } from "@/types";
+import { Save, Activity, Ruler, TestTube, Plus, Trash2, FileText, Zap } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +47,12 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
       coxa: 0,
       panturrilha: 0,
     } as DobrasCutaneas,
+    bioimpedancia: {
+      faseAngle: 0,
+      aguaCorporal: 0,
+      massaMuscular: 0,
+      ecmIcw: 0,
+    } as Bioimpedancia,
     anamnese: {
       funcaoIntestinal: '' as const,
       padraoAlimentar: '',
@@ -94,6 +100,15 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
           [dobrasField]: typeof value === 'string' ? parseFloat(value) || 0 : value
         }
       }));
+    } else if (field.startsWith('bioimpedancia.')) {
+      const bioimpedanciaField = field.replace('bioimpedancia.', '');
+      setFormData(prev => ({
+        ...prev,
+        bioimpedancia: {
+          ...prev.bioimpedancia,
+          [bioimpedanciaField]: typeof value === 'string' ? parseFloat(value) || 0 : value
+        }
+      }));
     } else if (field.startsWith('anamnese.')) {
       const anamneseField = field.replace('anamnese.', '');
       setFormData(prev => ({
@@ -131,6 +146,7 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
         data: formData.data,
         medidas: formData.medidas,
         dobrasCutaneas: formData.dobrasCutaneas,
+        bioimpedancia: formData.bioimpedancia,
         resultadosExames: resultadosExames,
         anamnese: formData.anamnese,
         relatoPaciente: formData.relatoPaciente,
@@ -254,9 +270,10 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
           </div>
 
           <Tabs defaultValue="medidas" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="medidas">Medidas Antropométricas</TabsTrigger>
               <TabsTrigger value="dobras">Dobras Cutâneas</TabsTrigger>
+              <TabsTrigger value="bioimpedancia">Bioimpedância</TabsTrigger>
               <TabsTrigger value="exames">Exames Bioquímicos</TabsTrigger>
               <TabsTrigger value="anamnese">Anamnese</TabsTrigger>
               <TabsTrigger value="relatos">Relatos e Observações</TabsTrigger>
@@ -469,6 +486,68 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
                       <li>• Mantenha pressão constante por 2-3 segundos</li>
                       <li>• Paciente em posição anatômica relaxada</li>
                     </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="bioimpedancia" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" />
+                    Bioimpedância
+                  </CardTitle>
+                  <CardDescription>
+                    Registre os dados de bioimpedância do paciente
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="faseAngle">Ângulo de Fase (°)</Label>
+                      <Input
+                        id="faseAngle"
+                        type="number"
+                        step="0.1"
+                        value={formData.bioimpedancia.faseAngle || ''}
+                        onChange={(e) => handleInputChange('bioimpedancia.faseAngle', e.target.value)}
+                        placeholder="7.5"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="aguaCorporal">Água Corporal (%)</Label>
+                      <Input
+                        id="aguaCorporal"
+                        type="number"
+                        step="0.1"
+                        value={formData.bioimpedancia.aguaCorporal || ''}
+                        onChange={(e) => handleInputChange('bioimpedancia.aguaCorporal', e.target.value)}
+                        placeholder="60.5"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="massaMuscularBio">Massa Muscular (kg)</Label>
+                      <Input
+                        id="massaMuscularBio"
+                        type="number"
+                        step="0.1"
+                        value={formData.bioimpedancia.massaMuscular || ''}
+                        onChange={(e) => handleInputChange('bioimpedancia.massaMuscular', e.target.value)}
+                        placeholder="45.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ecmIcw">ECM/ICW</Label>
+                      <Input
+                        id="ecmIcw"
+                        type="number"
+                        step="0.01"
+                        value={formData.bioimpedancia.ecmIcw || ''}
+                        onChange={(e) => handleInputChange('bioimpedancia.ecmIcw', e.target.value)}
+                        placeholder="0.85"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>

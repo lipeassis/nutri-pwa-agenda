@@ -126,12 +126,20 @@ export interface Anamnese {
   estrategiasComplementares: string;
 }
 
+export interface Bioimpedancia {
+  faseAngle: number; // Ângulo de fase em graus
+  aguaCorporal: number; // Água corporal em %
+  massaMuscular: number; // Massa muscular em kg
+  ecmIcw: number; // Razão ECM/ICW (água extracelular/intracelular)
+}
+
 export interface ConsultaProntuario {
   id: string;
   clienteId: string;
   data: string;
   medidas: MedidasAntropometricas;
   dobrasCutaneas: DobrasCutaneas;
+  bioimpedancia: Bioimpedancia;
   resultadosExames: ResultadoExame[];
   anamnese: Anamnese;
   relatoPaciente: string;
