@@ -84,6 +84,7 @@ export function CriarDePadraoModal({ open, onOpenChange, cliente }: CriarDePadra
       descricao: formData.descricao,
       refeicoes: [...selectedPadrao.refeicoes], // Copia todas as refeições
       dataInicio: formData.dataInicio,
+      fechado: false,
       ativo: true,
       criadoEm: new Date().toISOString(),
       criadoPor: 'user' // Substituir pelo ID do usuário logado

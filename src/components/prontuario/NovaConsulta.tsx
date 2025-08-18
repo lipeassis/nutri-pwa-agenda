@@ -140,20 +140,21 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
     setIsSubmitting(true);
 
     try {
-      const novaConsulta: ConsultaProntuario = {
-        id: Date.now().toString(),
-        clienteId: cliente.id,
-        data: formData.data,
-        medidas: formData.medidas,
-        dobrasCutaneas: formData.dobrasCutaneas,
-        bioimpedancia: formData.bioimpedancia,
-        resultadosExames: resultadosExames,
-        anamnese: formData.anamnese,
-        relatoPaciente: formData.relatoPaciente,
-        observacoesNutricionista: formData.observacoesNutricionista,
-        sinaisAlerta: formData.sinaisAlerta,
-        criadoEm: new Date().toISOString()
-      };
+    const novaConsulta: ConsultaProntuario = {
+      id: Date.now().toString(),
+      clienteId: cliente.id,
+      data: formData.data,
+      medidas: formData.medidas,
+      dobrasCutaneas: formData.dobrasCutaneas,
+      bioimpedancia: formData.bioimpedancia,
+      resultadosExames: resultadosExames,
+      anamnese: formData.anamnese,
+      relatoPaciente: formData.relatoPaciente,
+      observacoesNutricionista: formData.observacoesNutricionista,
+      sinaisAlerta: formData.sinaisAlerta,
+      fechado: false,
+      criadoEm: new Date().toISOString()
+    };
 
       setConsultas(prev => [...prev, novaConsulta]);
 

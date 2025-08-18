@@ -823,6 +823,7 @@ export function Prontuario() {
                       </CardTitle>
                       <div className="flex items-center gap-2">
                         {index === 0 && <Badge>Mais recente</Badge>}
+                        {consulta.fechado && <Badge variant="secondary">Fechado</Badge>}
                         <Button
                           variant="outline"
                           size="sm"
@@ -834,6 +835,27 @@ export function Prontuario() {
                           <Eye className="w-4 h-4 mr-1" />
                           Ver Detalhes
                         </Button>
+                        {!consulta.fechado && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (window.confirm('Tem certeza que deseja fechar esta consulta? Após fechada, não será possível editá-la.')) {
+                                const consultasAtualizadas = consultas.map(c => 
+                                  c.id === consulta.id ? { ...c, fechado: true } : c
+                                );
+                                setConsultas(consultasAtualizadas);
+                                toast({
+                                  title: "Consulta fechada",
+                                  description: "A consulta foi fechada com sucesso e não pode mais ser editada.",
+                                });
+                              }
+                            }}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Fechar
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
@@ -1260,7 +1282,8 @@ export function Prontuario() {
                           </CardDescription>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
+                            {plano.fechado && <Badge variant="secondary">Fechado</Badge>}
                             <Button
                               variant="outline"
                               size="sm"
@@ -1268,6 +1291,7 @@ export function Prontuario() {
                                 setPlanejamentoSelecionado(plano);
                                 setShowReajustarPlano(true);
                               }}
+                              disabled={plano.fechado}
                             >
                               <Calculator className="w-4 h-4 mr-2" />
                               Reajustar
@@ -1287,10 +1311,32 @@ export function Prontuario() {
                               variant="outline"
                               size="sm"
                               onClick={() => setPlanejamentoParaEditar(plano)}
+                              disabled={plano.fechado}
                             >
                               <Edit className="w-4 h-4 mr-2" />
                               Editar
                             </Button>
+                            {!plano.fechado && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (window.confirm('Tem certeza que deseja fechar este planejamento? Após fechado, não será possível editá-lo.')) {
+                                    const planejamentosAtualizados = planejamentos.map(p => 
+                                      p.id === plano.id ? { ...p, fechado: true } : p
+                                    );
+                                    setPlanejamentos(planejamentosAtualizados);
+                                    toast({
+                                      title: "Planejamento fechado",
+                                      description: "O planejamento foi fechado com sucesso e não pode mais ser editado.",
+                                    });
+                                  }
+                                }}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Fechar
+                              </Button>
+                            )}
                           </div>
                           <div className="text-right text-sm text-muted-foreground">
                             <div>Início: {new Date(plano.dataInicio).toLocaleDateString('pt-BR')}</div>

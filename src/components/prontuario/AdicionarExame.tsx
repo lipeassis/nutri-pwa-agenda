@@ -165,6 +165,7 @@ export function AdicionarExame({ cliente, onClose }: AdicionarExameProps) {
         },
         relatoPaciente: '',
         observacoesNutricionista: `Exames adicionados em ${new Date(formData.data).toLocaleDateString('pt-BR')}`,
+        fechado: false,
         criadoEm: new Date().toISOString()
       };
 

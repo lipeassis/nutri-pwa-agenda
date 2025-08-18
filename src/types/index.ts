@@ -145,6 +145,7 @@ export interface ConsultaProntuario {
   relatoPaciente: string;
   observacoesNutricionista: string;
   sinaisAlerta?: string;
+  fechado: boolean;
   criadoEm: string;
 }
 
@@ -321,6 +322,7 @@ export interface PlanejamentoAlimentar {
   refeicoes: Refeicao[];
   dataInicio: string;
   dataFim?: string;
+  fechado: boolean;
   ativo: boolean;
   criadoEm: string;
   criadoPor: string;

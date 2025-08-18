@@ -96,6 +96,7 @@ export function NovaEvoulcao({ cliente, onClose }: NovaEvoulcaoProps) {
         },
         relatoPaciente: formData.relatoPaciente,
         observacoesNutricionista: formData.observacoesNutricionista,
+        fechado: false,
         criadoEm: new Date().toISOString(),
       };
 

@@ -226,6 +226,7 @@ export function NovoPlanejamento({ clienteId, cliente, planejamentoParaEditar, o
       refeicoes: refeicoes.filter(r => r.alimentos.length > 0),
       dataInicio: formData.dataInicio,
       dataFim: formData.dataFim || undefined,
+      fechado: planejamentoParaEditar?.fechado || false,
       ativo: true,
       criadoEm: planejamentoParaEditar?.criadoEm || new Date().toISOString(),
       criadoPor: planejamentoParaEditar?.criadoPor || user?.id || 'unknown'
