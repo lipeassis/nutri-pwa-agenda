@@ -146,6 +146,8 @@ export interface ConsultaProntuario {
   observacoesNutricionista: string;
   sinaisAlerta?: string;
   fechado: boolean;
+  cancelado?: boolean;
+  motivoCancelamento?: string;
   criadoEm: string;
 }
 
@@ -323,6 +325,8 @@ export interface PlanejamentoAlimentar {
   dataInicio: string;
   dataFim?: string;
   fechado: boolean;
+  cancelado?: boolean;
+  motivoCancelamento?: string;
   ativo: boolean;
   criadoEm: string;
   criadoPor: string;

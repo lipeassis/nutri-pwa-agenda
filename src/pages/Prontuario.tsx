@@ -29,6 +29,7 @@ import { ReajustarPlanoModal } from "@/components/prontuario/ReajustarPlanoModal
 import { CriarDePadraoModal } from "@/components/prontuario/CriarDePadraoModal";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ModalCancelamento } from "@/components/ui/ModalCancelamento";
 
 export function Prontuario() {
   const { toast } = useToast();
@@ -66,6 +67,11 @@ export function Prontuario() {
   const [novaAnotacao, setNovaAnotacao] = useState('');
   const [editandoAnotacao, setEditandoAnotacao] = useState<string | null>(null);
   const [textoEditandoAnotacao, setTextoEditandoAnotacao] = useState('');
+  const [modalCancelamento, setModalCancelamento] = useState<{
+    open: boolean;
+    tipo: 'consulta' | 'planejamento';
+    item: ConsultaProntuario | PlanejamentoAlimentar | null;
+  }>({ open: false, tipo: 'consulta', item: null });
 
   const cliente = clientes.find(c => c.id === clienteId);
   const consultasCliente = consultas
@@ -824,6 +830,7 @@ export function Prontuario() {
                       <div className="flex items-center gap-2">
                         {index === 0 && <Badge>Mais recente</Badge>}
                         {consulta.fechado && <Badge variant="secondary">Fechado</Badge>}
+                        {consulta.cancelado && <Badge variant="destructive">Cancelado</Badge>}
                         <Button
                           variant="outline"
                           size="sm"
@@ -836,47 +843,65 @@ export function Prontuario() {
                           Ver Detalhes
                         </Button>
                         {!consulta.fechado && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (window.confirm('Tem certeza que deseja fechar esta consulta? Após fechada, não será possível editá-la.')) {
+                                  const consultasAtualizadas = consultas.map(c => 
+                                    c.id === consulta.id ? { ...c, fechado: true } : c
+                                  );
+                                  setConsultas(consultasAtualizadas);
+                                  toast({
+                                    title: "Consulta fechada",
+                                    description: "A consulta foi fechada com sucesso e não pode mais ser editada.",
+                                  });
+                                }
+                              }}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Fechar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (window.confirm('Tem certeza que deseja excluir esta consulta?')) {
+                                  const consultasAtualizadas = consultas.filter(c => c.id !== consulta.id);
+                                  setConsultas(consultasAtualizadas);
+                                  toast({
+                                    title: "Consulta excluída",
+                                    description: "A consulta foi removida com sucesso.",
+                                  });
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Excluir
+                            </Button>
+                          </>
+                        )}
+                        {consulta.fechado && !consulta.cancelado && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              if (window.confirm('Tem certeza que deseja fechar esta consulta? Após fechada, não será possível editá-la.')) {
-                                const consultasAtualizadas = consultas.map(c => 
-                                  c.id === consulta.id ? { ...c, fechado: true } : c
-                                );
-                                setConsultas(consultasAtualizadas);
-                                toast({
-                                  title: "Consulta fechada",
-                                  description: "A consulta foi fechada com sucesso e não pode mais ser editada.",
-                                });
-                              }
+                              setModalCancelamento({
+                                open: true,
+                                tipo: 'consulta',
+                                item: consulta
+                              });
                             }}
                           >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Fechar
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Cancelar
                           </Button>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (window.confirm('Tem certeza que deseja excluir esta consulta?')) {
-                              const consultasAtualizadas = consultas.filter(c => c.id !== consulta.id);
-                              setConsultas(consultasAtualizadas);
-                              toast({
-                                title: "Consulta excluída",
-                                description: "A consulta foi removida com sucesso.",
-                              });
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </div>
+                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                     {/* Medidas */}
                     <div>
                       <h4 className="font-medium mb-2">Medidas Antropométricas</h4>
@@ -1284,6 +1309,7 @@ export function Prontuario() {
                         <div className="flex items-center gap-3">
                           <div className="flex gap-2 flex-wrap">
                             {plano.fechado && <Badge variant="secondary">Fechado</Badge>}
+                            {plano.cancelado && <Badge variant="destructive">Cancelado</Badge>}
                             <Button
                               variant="outline"
                               size="sm"
@@ -1291,7 +1317,7 @@ export function Prontuario() {
                                 setPlanejamentoSelecionado(plano);
                                 setShowReajustarPlano(true);
                               }}
-                              disabled={plano.fechado}
+                              disabled={plano.fechado || plano.cancelado}
                             >
                               <Calculator className="w-4 h-4 mr-2" />
                               Reajustar
@@ -1311,30 +1337,65 @@ export function Prontuario() {
                               variant="outline"
                               size="sm"
                               onClick={() => setPlanejamentoParaEditar(plano)}
-                              disabled={plano.fechado}
+                              disabled={plano.fechado || plano.cancelado}
                             >
                               <Edit className="w-4 h-4 mr-2" />
                               Editar
                             </Button>
-                            {!plano.fechado && (
+                            {!plano.fechado && !plano.cancelado && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (window.confirm('Tem certeza que deseja fechar este planejamento? Após fechado, não será possível editá-lo.')) {
+                                      const planejamentosAtualizados = planejamentos.map(p => 
+                                        p.id === plano.id ? { ...p, fechado: true } : p
+                                      );
+                                      setPlanejamentos(planejamentosAtualizados);
+                                      toast({
+                                        title: "Planejamento fechado",
+                                        description: "O planejamento foi fechado com sucesso e não pode mais ser editado.",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  Fechar
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (window.confirm('Tem certeza que deseja excluir este planejamento?')) {
+                                      const planejamentosAtualizados = planejamentos.filter(p => p.id !== plano.id);
+                                      setPlanejamentos(planejamentosAtualizados);
+                                      toast({
+                                        title: "Planejamento excluído",
+                                        description: "O planejamento foi removido com sucesso.",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Excluir
+                                </Button>
+                              </>
+                            )}
+                            {plano.fechado && !plano.cancelado && (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  if (window.confirm('Tem certeza que deseja fechar este planejamento? Após fechado, não será possível editá-lo.')) {
-                                    const planejamentosAtualizados = planejamentos.map(p => 
-                                      p.id === plano.id ? { ...p, fechado: true } : p
-                                    );
-                                    setPlanejamentos(planejamentosAtualizados);
-                                    toast({
-                                      title: "Planejamento fechado",
-                                      description: "O planejamento foi fechado com sucesso e não pode mais ser editado.",
-                                    });
-                                  }
+                                  setModalCancelamento({
+                                    open: true,
+                                    tipo: 'planejamento',
+                                    item: plano
+                                  });
                                 }}
                               >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Fechar
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Cancelar
                               </Button>
                             )}
                           </div>
@@ -2091,6 +2152,47 @@ export function Prontuario() {
         open={showCriarDePadrao}
         onOpenChange={setShowCriarDePadrao}
         cliente={cliente}
+      />
+
+      {/* Modal Cancelamento */}
+      <ModalCancelamento
+        open={modalCancelamento.open}
+        onOpenChange={(open) => setModalCancelamento({ ...modalCancelamento, open })}
+        titulo={modalCancelamento.tipo === 'consulta' ? 'Cancelar Consulta' : 'Cancelar Planejamento'}
+        descricao={
+          modalCancelamento.tipo === 'consulta' 
+            ? 'Esta consulta está fechada e será cancelada permanentemente. Informe o motivo do cancelamento.'
+            : 'Este planejamento está fechado e será cancelado permanentemente. Informe o motivo do cancelamento.'
+        }
+        onConfirmar={(motivo) => {
+          if (!modalCancelamento.item) return;
+
+          if (modalCancelamento.tipo === 'consulta') {
+            const consultasAtualizadas = consultas.map(c => 
+              c.id === modalCancelamento.item!.id 
+                ? { ...c, cancelado: true, motivoCancelamento: motivo }
+                : c
+            );
+            setConsultas(consultasAtualizadas);
+            toast({
+              title: "Consulta cancelada",
+              description: "A consulta foi cancelada com sucesso.",
+            });
+          } else {
+            const planejamentosAtualizados = planejamentos.map(p => 
+              p.id === modalCancelamento.item!.id 
+                ? { ...p, cancelado: true, motivoCancelamento: motivo }
+                : p
+            );
+            setPlanejamentos(planejamentosAtualizados);
+            toast({
+              title: "Planejamento cancelado", 
+              description: "O planejamento foi cancelado com sucesso.",
+            });
+          }
+
+          setModalCancelamento({ open: false, tipo: 'consulta', item: null });
+        }}
       />
     </div>
   );
