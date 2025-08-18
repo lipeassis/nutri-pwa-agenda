@@ -43,6 +43,7 @@ export function ReajustarPlanoModal({
     if (!open) {
       setValorAjuste('');
       setNomeNovoPlano('');
+      setTipoReajuste('novo');
       setProcessando(false);
     }
   }, [open]);
@@ -190,6 +191,7 @@ export function ReajustarPlanoModal({
       // Reset form
       setValorAjuste('');
       setNomeNovoPlano('');
+      setTipoReajuste('novo');
       onOpenChange(false);
 
     } catch (error) {
@@ -226,6 +228,7 @@ export function ReajustarPlanoModal({
     const diferenca = novoTotalKcal - totaisPlanoSelecionado.kcal;
     return { novoTotal: novoTotalKcal, diferenca };
   })();
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -291,7 +294,7 @@ export function ReajustarPlanoModal({
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="existente" id="existente" />
+                    <RadioGroupItem value="existente" id="existente" disabled={planejamentoSelecionado.fechado || planejamentoSelecionado.cancelado} />
                     <Label htmlFor="existente">
                       Reajustar plano existente (substitui o original)
                     </Label>

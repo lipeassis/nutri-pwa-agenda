@@ -1317,7 +1317,7 @@ export function Prontuario() {
                                 setPlanejamentoSelecionado(plano);
                                 setShowReajustarPlano(true);
                               }}
-                              disabled={plano.fechado || plano.cancelado}
+                              /*disabled={plano.fechado || plano.cancelado}*/
                             >
                               <Calculator className="w-4 h-4 mr-2" />
                               Reajustar

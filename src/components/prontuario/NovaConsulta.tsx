@@ -270,14 +270,14 @@ export function NovaConsulta({ cliente, onClose }: NovaConsultaProps) {
             />
           </div>
 
-          <Tabs defaultValue="medidas" className="w-full">
+          <Tabs defaultValue="anamnese" className="w-full">
             <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="medidas">Medidas Antropométricas</TabsTrigger>
-              <TabsTrigger value="dobras">Dobras Cutâneas</TabsTrigger>
-              <TabsTrigger value="bioimpedancia">Bioimpedância</TabsTrigger>
-              <TabsTrigger value="exames">Exames Bioquímicos</TabsTrigger>
               <TabsTrigger value="anamnese">Anamnese</TabsTrigger>
-              <TabsTrigger value="relatos">Relatos e Observações</TabsTrigger>
+              <TabsTrigger value="medidas">Antopometria</TabsTrigger>
+              <TabsTrigger value="dobras">Dobras Cutâneas</TabsTrigger>
+              <TabsTrigger value="exames">Exames</TabsTrigger>
+              <TabsTrigger value="bioimpedancia">Bioimpedância</TabsTrigger>
+              <TabsTrigger value="relatos">Evolução</TabsTrigger>
             </TabsList>
 
             <TabsContent value="medidas" className="space-y-4">
