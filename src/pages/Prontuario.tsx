@@ -12,6 +12,7 @@ import { ArrowLeft, Plus, TrendingUp, Target, Calendar, User, Weight, Ruler, Act
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { NovaConsulta } from "@/components/prontuario/NovaConsulta";
+import { EditarConsulta } from "@/components/prontuario/EditarConsulta";
 import { NovoObjetivo } from "@/components/prontuario/NovoObjetivo";
 import { GraficoEvolucao } from "@/components/prontuario/GraficoEvolucao";
 import { EditarCliente } from "@/components/prontuario/EditarCliente";
@@ -47,6 +48,7 @@ export function Prontuario() {
   const [clienteProgramas, setClienteProgramas] = useLocalStorage<ClientePrograma[]>('nutriapp-cliente-programas', []);
   const [planejamentosPadrao] = useLocalStorage<PlanejamentoPadrao[]>('nutriapp-planejamentos-padrao', []);
   const [showNovaConsulta, setShowNovaConsulta] = useState(false);
+  const [showEditarConsulta, setShowEditarConsulta] = useState(false);
   const [showNovoObjetivo, setShowNovoObjetivo] = useState(false);
   const [showEditarCliente, setShowEditarCliente] = useState(false);
   const [showAdicionarDoencasAlergias, setShowAdicionarDoencasAlergias] = useState(false);
@@ -844,6 +846,17 @@ export function Prontuario() {
                         </Button>
                         {!consulta.fechado && (
                           <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setConsultaSelecionada(consulta);
+                                setShowEditarConsulta(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Editar
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -1775,9 +1788,17 @@ export function Prontuario() {
 
       {/* Modais */}
       {showNovaConsulta && (
-        <NovaConsulta
-          cliente={cliente}
-          onClose={() => setShowNovaConsulta(false)}
+        <NovaConsulta 
+          cliente={cliente} 
+          onClose={() => setShowNovaConsulta(false)} 
+        />
+      )}
+
+      {showEditarConsulta && consultaSelecionada && (
+        <EditarConsulta 
+          cliente={cliente} 
+          consulta={consultaSelecionada}
+          onClose={() => setShowEditarConsulta(false)} 
         />
       )}
 
