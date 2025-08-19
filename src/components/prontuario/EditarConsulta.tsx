@@ -273,138 +273,200 @@ export function EditarConsulta({ cliente, consulta, onClose }: EditarConsultaPro
             <TabsContent value="anamnese" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Anamnese</CardTitle>
-                  <CardDescription>Informações sobre o histórico do paciente</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Anamnese
+                  </CardTitle>
+                  <CardDescription>
+                    Registre informações sobre hábitos alimentares e sintomas do paciente
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="space-y-6">
+                  {/* Função Intestinal */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Função intestinal:</Label>
+                    <RadioGroup 
+                      value={formData.anamnese.funcaoIntestinal} 
+                      onValueChange={(value) => handleInputChange('anamnese.funcaoIntestinal', value as any)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="regular" id="regular" />
+                        <Label htmlFor="regular">Regular</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="constipada" id="constipada" />
+                        <Label htmlFor="constipada">Constipada</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="diarreia" id="diarreia" />
+                        <Label htmlFor="diarreia">Diarreia</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="alternancia" id="alternancia" />
+                        <Label htmlFor="alternancia">Alternâncias</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="laxantes" id="laxantes" />
+                        <Label htmlFor="laxantes">Uso de laxantes frequente</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Hábitos Alimentares */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Hábitos Alimentares:</Label>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="funcaoIntestinal">Função Intestinal</Label>
-                      <Select
-                        onValueChange={(value) => handleInputChange('anamnese.funcaoIntestinal', value)}
-                        value={formData.anamnese.funcaoIntestinal}
-                      >
-                        <SelectTrigger id="funcaoIntestinal">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="normal">Normal</SelectItem>
-                          <SelectItem value="constipacao">Constipação</SelectItem>
-                          <SelectItem value="diarreia">Diarreia</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="padraoAlimentar">Padrão Alimentar</Label>
+                      <Label htmlFor="padraoAlimentar">Padrão alimentar predominante:</Label>
                       <Input
                         id="padraoAlimentar"
-                        type="text"
                         value={formData.anamnese.padraoAlimentar}
                         onChange={(e) => handleInputChange('anamnese.padraoAlimentar', e.target.value)}
+                        placeholder="Descreva o padrão alimentar do paciente"
                       />
                     </div>
-                    <div className="space-y-2 flex items-center gap-2">
-                      <Checkbox
-                        id="horariosIrregulares"
-                        checked={formData.anamnese.horariosIrregulares}
-                        onCheckedChange={(checked) => handleInputChange('anamnese.horariosIrregulares', checked === true)}
-                      />
-                      <Label htmlFor="horariosIrregulares">Horários Irregulares</Label>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="horariosIrregulares"
+                          checked={formData.anamnese.horariosIrregulares}
+                          onCheckedChange={(checked) => handleInputChange('anamnese.horariosIrregulares', checked as boolean)}
+                        />
+                        <Label htmlFor="horariosIrregulares">Horários irregulares / pulos de refeição?</Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="compulsoes"
+                          checked={formData.anamnese.compulsoes}
+                          onCheckedChange={(checked) => handleInputChange('anamnese.compulsoes', checked as boolean)}
+                        />
+                        <Label htmlFor="compulsoes">Presença de compulsões ou beliscos frequentes?</Label>
+                      </div>
                     </div>
-                    <div className="space-y-2 flex items-center gap-2">
-                      <Checkbox
-                        id="compulsoes"
-                        checked={formData.anamnese.compulsoes}
-                        onCheckedChange={(checked) => handleInputChange('anamnese.compulsoes', checked === true)}
-                      />
-                      <Label htmlFor="compulsoes">Compulsões Alimentares</Label>
-                    </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="consumoAgua">Consumo de Água (ml)</Label>
+                      <Label htmlFor="consumoAgua">Consumo de água (média/dia) - ml:</Label>
                       <Input
                         id="consumoAgua"
                         type="number"
                         value={formData.anamnese.consumoAgua || ''}
                         onChange={(e) => handleInputChange('anamnese.consumoAgua', e.target.value)}
+                        placeholder="2000"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Sintomas Atuais</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {['Fadiga', 'Dor de cabeça', 'Náusea', 'Tontura'].map(sintoma => (
-                          <div key={sintoma} className="flex items-center gap-2">
-                            <Checkbox
-                              id={`sintoma-${sintoma}`}
-                              checked={formData.anamnese.sintomasAtuais.includes(sintoma)}
-                              onCheckedChange={(checked) => handleSintomaChange(sintoma, checked === true)}
-                            />
-                            <Label htmlFor={`sintoma-${sintoma}`}>{sintoma}</Label>
-                          </div>
-                        ))}
-                      </div>
+                  </div>
+
+                  {/* Sinais e Sintomas Atuais */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Sinais e Sintomas Atuais:</Label>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Cansaço excessivo',
+                        'Inchaço / retenção',
+                        'Constipação',
+                        'Gases / distensão',
+                        'Azia / refluxo',
+                        'Dor de cabeça frequente',
+                        'Queda de cabelo'
+                      ].map((sintoma) => (
+                        <div key={sintoma} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={sintoma}
+                            checked={formData.anamnese.sintomasAtuais.includes(sintoma)}
+                            onCheckedChange={(checked) => handleSintomaChange(sintoma, checked as boolean)}
+                          />
+                          <Label htmlFor={sintoma}>{sintoma}</Label>
+                        </div>
+                      ))}
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="outros">Outros</Label>
-                      <Textarea
+                      <Label htmlFor="outros">Outros:</Label>
+                      <Input
                         id="outros"
                         value={formData.anamnese.outros}
                         onChange={(e) => handleInputChange('anamnese.outros', e.target.value)}
+                        placeholder="Outros sintomas não listados"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="habitosAjustar">Hábitos a Ajustar</Label>
+                      <Label htmlFor="habitosAjustar">Hábitos que precisam ser ajustados:</Label>
                       <Textarea
                         id="habitosAjustar"
                         value={formData.anamnese.habitosAjustar}
                         onChange={(e) => handleInputChange('anamnese.habitosAjustar', e.target.value)}
+                        placeholder="Descreva os hábitos que precisam ser modificados"
+                        rows={3}
                       />
                     </div>
+                  </div>
+
+                  {/* Condutas Nutricionais Adotadas */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Condutas Nutricionais Adotadas:</Label>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="manutencaoPlano">Manutenção do Plano</Label>
+                      <Label htmlFor="manutencaoPlano">Manutenção / Ajuste do plano alimentar:</Label>
                       <Textarea
                         id="manutencaoPlano"
                         value={formData.anamnese.manutencaoPlano}
                         onChange={(e) => handleInputChange('anamnese.manutencaoPlano', e.target.value)}
+                        placeholder="Descreva as orientações sobre o plano alimentar"
+                        rows={2}
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="suplementacao">Suplementação</Label>
-                      <Textarea
+                      <Label htmlFor="suplementacao">Introdução de suplementação:</Label>
+                      <Input
                         id="suplementacao"
                         value={formData.anamnese.suplementacao}
                         onChange={(e) => handleInputChange('anamnese.suplementacao', e.target.value)}
+                        placeholder="Descreva a suplementação indicada"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="alimentosPriorizados">Alimentos Priorizados</Label>
+                      <Label htmlFor="alimentosPriorizados">Alimentos a serem priorizados:</Label>
                       <Textarea
                         id="alimentosPriorizados"
                         value={formData.anamnese.alimentosPriorizados}
                         onChange={(e) => handleInputChange('anamnese.alimentosPriorizados', e.target.value)}
+                        placeholder="Alimentos que devem ser priorizados no plano"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="alimentosEvitados">Alimentos Evitados</Label>
+                      <Label htmlFor="alimentosEvitados">Alimentos a serem evitados:</Label>
                       <Textarea
                         id="alimentosEvitados"
                         value={formData.anamnese.alimentosEvitados}
                         onChange={(e) => handleInputChange('anamnese.alimentosEvitados', e.target.value)}
+                        placeholder="Alimentos que devem ser evitados"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="reforcoComportamental">Reforço Comportamental</Label>
+                      <Label htmlFor="reforcoComportamental">Reforço de comportamento:</Label>
                       <Textarea
                         id="reforcoComportamental"
                         value={formData.anamnese.reforcoComportamental}
                         onChange={(e) => handleInputChange('anamnese.reforcoComportamental', e.target.value)}
+                        placeholder="Comportamentos que devem ser reforçados"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="estrategiasComplementares">Estratégias Complementares</Label>
+                      <Label htmlFor="estrategiasComplementares">Estratégias complementares:</Label>
                       <Textarea
                         id="estrategiasComplementares"
                         value={formData.anamnese.estrategiasComplementares}
                         onChange={(e) => handleInputChange('anamnese.estrategiasComplementares', e.target.value)}
+                        placeholder="Estratégias adicionais e complementares"
                       />
                     </div>
                   </div>
@@ -521,28 +583,104 @@ export function EditarConsulta({ cliente, consulta, onClose }: EditarConsultaPro
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-primary" />
+                    <Activity className="w-5 h-5 text-primary" />
                     Dobras Cutâneas
                   </CardTitle>
                   <CardDescription>
-                    Medidas das dobras cutâneas do paciente
+                    Registre as medidas das dobras cutâneas em milímetros (mm)
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {['tricipital', 'bicipital', 'subescapular', 'suprailiaca', 'abdominal', 'coxa', 'panturrilha'].map((campo) => (
-                      <div key={campo} className="space-y-2">
-                        <Label htmlFor={campo}>{campo.charAt(0).toUpperCase() + campo.slice(1)} (mm)</Label>
-                        <Input
-                          id={campo}
-                          type="number"
-                          step="0.1"
-                          value={(formData.dobrasCutaneas as any)[campo] || ''}
-                          onChange={(e) => handleInputChange(`dobrasCutaneas.${campo}`, e.target.value)}
-                          placeholder="0.0"
-                        />
-                      </div>
-                    ))}
+                    <div className="space-y-2">
+                      <Label htmlFor="tricipital">Dobra Tricipital (mm)</Label>
+                      <Input
+                        id="tricipital"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.tricipital || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.tricipital', e.target.value)}
+                        placeholder="15.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="bicipital">Dobra Bicipital (mm)</Label>
+                      <Input
+                        id="bicipital"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.bicipital || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.bicipital', e.target.value)}
+                        placeholder="8.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="subescapular">Dobra Subescapular (mm)</Label>
+                      <Input
+                        id="subescapular"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.subescapular || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.subescapular', e.target.value)}
+                        placeholder="12.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="suprailiaca">Dobra Suprailíaca (mm)</Label>
+                      <Input
+                        id="suprailiaca"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.suprailiaca || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.suprailiaca', e.target.value)}
+                        placeholder="18.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="abdominal">Dobra Abdominal (mm)</Label>
+                      <Input
+                        id="abdominal"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.abdominal || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.abdominal', e.target.value)}
+                        placeholder="20.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="coxa">Dobra da Coxa (mm)</Label>
+                      <Input
+                        id="coxa"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.coxa || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.coxa', e.target.value)}
+                        placeholder="25.0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="panturrilha">Dobra da Panturrilha (mm)</Label>
+                      <Input
+                        id="panturrilha"
+                        type="number"
+                        step="0.1"
+                        value={formData.dobrasCutaneas.panturrilha || ''}
+                        onChange={(e) => handleInputChange('dobrasCutaneas.panturrilha', e.target.value)}
+                        placeholder="10.0"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="bg-muted/50 p-3 rounded-md">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      <strong>💡 Dicas para medição das dobras cutâneas:</strong>
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Use um adipômetro (plicômetro) calibrado</li>
+                      <li>• Realize 3 medições e registre a média</li>
+                      <li>• Mantenha pressão constante por 2-3 segundos</li>
+                      <li>• Paciente em posição anatômica relaxada</li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>
@@ -556,63 +694,99 @@ export function EditarConsulta({ cliente, consulta, onClose }: EditarConsultaPro
                     Exames Bioquímicos
                   </CardTitle>
                   <CardDescription>
-                    Adicione e visualize os resultados dos exames
+                    Registre os resultados dos exames laboratoriais do paciente
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Select
-                      onValueChange={(value) => {
-                        const exameSelecionado = exames.find(e => e.id === value);
-                         setNovoExame(prev => ({
-                           ...prev,
-                           exameId: value,
-                           unidade: ''
-                         }));
-                      }}
-                      value={novoExame.exameId}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o exame" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {exames.map(exame => (
-                          <SelectItem key={exame.id} value={exame.id}>{exame.nome}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Valor"
-                      value={novoExame.valor}
-                      onChange={(e) => setNovoExame(prev => ({ ...prev, valor: e.target.value }))}
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Unidade"
-                      value={novoExame.unidade}
-                      onChange={(e) => setNovoExame(prev => ({ ...prev, unidade: e.target.value }))}
-                    />
-                    <Button type="button" onClick={adicionarExame} className="col-span-full md:col-auto">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Exame
-                    </Button>
+                  {/* Adicionar novo exame */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Exame</Label>
+                      <Select value={novoExame.exameId} onValueChange={(value) => setNovoExame({ ...novoExame, exameId: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um exame" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {exames.filter(e => e.ativo).map((exame) => (
+                            <SelectItem key={exame.id} value={exame.id}>
+                              {exame.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Valor</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={novoExame.valor}
+                        onChange={(e) => setNovoExame({ ...novoExame, valor: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Unidade</Label>
+                      <Input
+                        value={novoExame.unidade}
+                        onChange={(e) => setNovoExame({ ...novoExame, unidade: e.target.value })}
+                        placeholder="mg/dL"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>&nbsp;</Label>
+                      <Button type="button" onClick={adicionarExame} className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar
+                      </Button>
+                    </div>
                   </div>
 
-                  <div>
-                    {resultadosExames.length === 0 && <p>Nenhum exame adicionado.</p>}
-                    {resultadosExames.map((resultado, index) => (
-                      <div key={index} className="flex items-center justify-between gap-2 border rounded p-2 mb-2">
-                        <div>
-                          <p className="font-semibold">{resultado.exameNome}</p>
-                          <p>{resultado.valor} {resultado.unidade} - <Badge variant={resultado.status === 'normal' ? 'secondary' : 'destructive'}>{resultado.status}</Badge></p>
+                  {/* Lista de exames adicionados */}
+                  {resultadosExames.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Exames Registrados:</h4>
+                      {resultadosExames.map((resultado, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <span className="font-medium">{resultado.exameNome}</span>
+                            <span>{resultado.valor} {resultado.unidade}</span>
+                            <Badge 
+                              variant={
+                                resultado.status === 'normal' ? 'default' : 
+                                resultado.status === 'abaixo' ? 'destructive' : 
+                                'destructive'
+                              }
+                            >
+                              {resultado.status === 'normal' ? 'Normal' : 
+                               resultado.status === 'abaixo' ? 'Abaixo' : 'Acima'}
+                            </Badge>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removerExame(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => removerExame(index)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="bg-muted/50 p-3 rounded-md">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      <strong>💡 Dicas para registro de exames:</strong>
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Valores são comparados automaticamente com referências por idade</li>
+                      <li>• Sempre confira a unidade de medida do exame</li>
+                      <li>• Resultados fora da normalidade são destacados</li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>
@@ -622,24 +796,24 @@ export function EditarConsulta({ cliente, consulta, onClose }: EditarConsultaPro
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-primary" />
+                    <Zap className="w-5 h-5 text-primary" />
                     Bioimpedância
                   </CardTitle>
                   <CardDescription>
-                    Dados da bioimpedância do paciente
+                    Registre os dados de bioimpedância do paciente
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="faseAngle">Ângulo de Fase</Label>
+                      <Label htmlFor="faseAngle">Ângulo de Fase (°)</Label>
                       <Input
                         id="faseAngle"
                         type="number"
                         step="0.1"
                         value={formData.bioimpedancia.faseAngle || ''}
                         onChange={(e) => handleInputChange('bioimpedancia.faseAngle', e.target.value)}
-                        placeholder="0.0"
+                        placeholder="7.5"
                       />
                     </div>
                     <div className="space-y-2">
@@ -650,18 +824,18 @@ export function EditarConsulta({ cliente, consulta, onClose }: EditarConsultaPro
                         step="0.1"
                         value={formData.bioimpedancia.aguaCorporal || ''}
                         onChange={(e) => handleInputChange('bioimpedancia.aguaCorporal', e.target.value)}
-                        placeholder="0.0"
+                        placeholder="60.5"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="massaMuscular">Massa Muscular (kg)</Label>
+                      <Label htmlFor="massaMuscularBio">Massa Muscular (kg)</Label>
                       <Input
-                        id="massaMuscular"
+                        id="massaMuscularBio"
                         type="number"
                         step="0.1"
                         value={formData.bioimpedancia.massaMuscular || ''}
                         onChange={(e) => handleInputChange('bioimpedancia.massaMuscular', e.target.value)}
-                        placeholder="0.0"
+                        placeholder="45.0"
                       />
                     </div>
                     <div className="space-y-2">
@@ -672,7 +846,7 @@ export function EditarConsulta({ cliente, consulta, onClose }: EditarConsultaPro
                         step="0.01"
                         value={formData.bioimpedancia.ecmIcw || ''}
                         onChange={(e) => handleInputChange('bioimpedancia.ecmIcw', e.target.value)}
-                        placeholder="0.0"
+                        placeholder="0.85"
                       />
                     </div>
                   </div>
