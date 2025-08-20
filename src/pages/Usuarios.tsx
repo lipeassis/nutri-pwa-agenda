@@ -143,14 +143,14 @@ export function Usuarios() {
           </div>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog  open={isDialogOpen} onOpenChange={setIsDialogOpen} >
           <DialogTrigger asChild>
             <Button onClick={openNewUserDialog} className="gap-2">
               <Plus className="w-4 h-4" />
               Novo Usuário
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent style={{ maxWidth: '80%' }}>
             <DialogHeader>
               <DialogTitle>
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
