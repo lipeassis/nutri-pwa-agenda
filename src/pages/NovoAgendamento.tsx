@@ -276,11 +276,21 @@ export function NovoAgendamento() {
                 <SelectContent>
                   {servicosAtivos.map((servico) => (
                     <SelectItem key={servico.id} value={servico.id}>
-                      {servico.nome} - {servico.tempoMinutos}min - R$ {servico.valorParticular.toFixed(2)}
+                      {servico.nome} - {servico.tempoMinutos}min
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {formData.servicoId && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-medium text-foreground">
+                    Valor: R$ {servicosAtivos.find(s => s.id === formData.servicoId)?.valorParticular.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Duração: {servicosAtivos.find(s => s.id === formData.servicoId)?.tempoMinutos} minutos
+                  </p>
+                </div>
+              )}
               {servicosAtivos.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   Nenhum serviço cadastrado. Entre em contato com o administrador.
