@@ -31,6 +31,7 @@ import { ConfirmarConsulta } from "./pages/ConfirmarConsulta";
 import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
 import DocumentosPadrao from "./pages/DocumentosPadrao";
 import { PlanejamentosPadrao } from "./pages/PlanejamentosPadrao";
+import { Clinicas } from "./pages/Clinicas";
 import NotFound from "./pages/NotFound";
 import 'react-quill/dist/quill.snow.css'; // ou 'bubble.css'
 
@@ -150,6 +151,11 @@ const App = () => (
                    <Route path="/planejamentos-padrao" element={
                      <ProtectedRoute requiredRole={['administrador', 'profissional']}>
                        <PlanejamentosPadrao />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/clinicas" element={
+                     <ProtectedRoute requiredRole="administrador">
+                       <Clinicas />
                      </ProtectedRoute>
                    } />
                    <Route path="/trocar-senha" element={

@@ -120,20 +120,33 @@ export function Navigation({ className }: NavigationProps) {
                             <div className="space-y-3">
                               <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Configurações</h4>
                               {hasPermission('administrador') && (
-                                <>
-                                  <Link to="/locais-atendimento">
-                                    <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
-                                      <div className="flex items-start gap-3">
-                                        <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                          <Building2 className="w-4 h-4 text-primary" />
-                                        </div>
-                                        <div className="space-y-1">
-                                          <div className="font-medium text-sm">Locais de Atendimento</div>
-                                          <div className="text-xs text-muted-foreground leading-relaxed">Configure os locais onde são realizados os atendimentos</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Link>
+                                 <>
+                                   <Link to="/clinicas">
+                                     <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                       <div className="flex items-start gap-3">
+                                         <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                           <Building2 className="w-4 h-4 text-primary" />
+                                         </div>
+                                         <div className="space-y-1">
+                                           <div className="font-medium text-sm">Clínicas</div>
+                                           <div className="text-xs text-muted-foreground leading-relaxed">Cadastre e gerencie as clínicas do sistema</div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </Link>
+                                   <Link to="/locais-atendimento">
+                                     <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                       <div className="flex items-start gap-3">
+                                         <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                           <Building2 className="w-4 h-4 text-primary" />
+                                         </div>
+                                         <div className="space-y-1">
+                                           <div className="font-medium text-sm">Locais de Atendimento</div>
+                                           <div className="text-xs text-muted-foreground leading-relaxed">Configure os locais onde são realizados os atendimentos</div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </Link>
                                   <Link to="/servicos">
                                     <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
                                       <div className="flex items-start gap-3">

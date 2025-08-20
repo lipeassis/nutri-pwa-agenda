@@ -18,6 +18,19 @@ export interface Alergia {
   criadoEm: string;
 }
 
+export interface Clinica {
+  id: string;
+  nome: string;
+  cnpj: string;
+  endereco: string;
+  telefone: string;
+  email: string;
+  responsavel: string;
+  observacoes: string;
+  ativo: boolean;
+  criadoEm: string;
+}
+
 export interface LocalAtendimento {
   id: string;
   nome: string;
