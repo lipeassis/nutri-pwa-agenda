@@ -262,7 +262,7 @@ export function ConfirmarConsulta() {
             <div className="flex items-center space-x-3">
               <MapPin className="w-5 h-5 text-primary" />
               <div>
-                <p className="font-semibold">{agendamento.servicoNome}</p>
+                <p className="font-semibold">{agendamento.servicosNomes.join(', ')}</p>
                 <p className="text-sm text-muted-foreground">Tipo de consulta</p>
               </div>
             </div>

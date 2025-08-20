@@ -88,8 +88,8 @@ export interface Agendamento {
   clienteNome: string;
   profissionalId: string;
   profissionalNome: string;
-  servicoId: string; // Alterado de tipo para servicoId
-  servicoNome: string; // Nome do serviço
+  servicosIds: string[]; // Array de IDs dos serviços
+  servicosNomes: string[]; // Array de nomes dos serviços
   localId: string; // ID do local de atendimento
   localNome: string; // Nome do local de atendimento
   convenioId?: string; // ID do convênio (opcional)

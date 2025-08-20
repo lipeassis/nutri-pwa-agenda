@@ -56,14 +56,21 @@ export default function FinanceiroRelatorios() {
   }
 
   const calcularValorConsulta = (agendamento: Agendamento): number => {
-    const servico = servicos.find(s => s.id === agendamento.servicoId);
-    if (!servico) return 0;
-
-    if (agendamento.convenioId) {
-      return servico.valoresConvenios[agendamento.convenioId] || 0;
-    }
+    // Calcula o valor total dos serviços
+    let valorTotal = 0;
     
-    return servico.valorParticular;
+    agendamento.servicosIds.forEach(servicoId => {
+      const servico = servicos.find(s => s.id === servicoId);
+      if (servico) {
+        if (agendamento.convenioId) {
+          valorTotal += servico.valoresConvenios[agendamento.convenioId] || 0;
+        } else {
+          valorTotal += servico.valorParticular;
+        }
+      }
+    });
+    
+    return valorTotal;
   };
 
   // Gerar transações automaticamente dos agendamentos realizados
@@ -83,12 +90,12 @@ export default function FinanceiroRelatorios() {
             id: `agendamento_${agendamento.id}`,
             tipo: 'entrada',
             categoria: 'agendamento',
-            descricao: `Consulta - ${agendamento.servicoNome} - ${agendamento.clienteNome}`,
+            descricao: `Consulta - ${agendamento.servicosNomes.join(', ')} - ${agendamento.clienteNome}`,
             valor,
             data: agendamento.data,
             usuarioId: agendamento.profissionalId,
             clienteId: agendamento.clienteId,
-            servicoId: agendamento.servicoId,
+            servicoId: agendamento.servicosIds[0], // Usar o primeiro serviço para compatibilidade
             agendamentoId: agendamento.id,
             criadoEm: agendamento.criadoEm,
             criadoPor: agendamento.profissionalId

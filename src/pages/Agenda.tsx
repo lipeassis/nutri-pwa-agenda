@@ -36,7 +36,7 @@ export function Agenda() {
                         agendamento.observacoes?.toLowerCase().includes(busca.toLowerCase());
       
       const matchStatus = filtroStatus === "todos" || agendamento.status === filtroStatus;
-      const matchTipo = filtroTipo === "todos" || agendamento.servicoNome.toLowerCase().includes(filtroTipo.toLowerCase());
+      const matchTipo = filtroTipo === "todos" || agendamento.servicosNomes.some(nome => nome.toLowerCase().includes(filtroTipo.toLowerCase()));
       
       const matchData = !filtroData || isSameDay(new Date(agendamento.data), filtroData);
       
@@ -316,7 +316,7 @@ export function Agenda() {
                             {getStatusText(agendamento.status)}
                           </Badge>
                           <Badge variant="outline">
-                            {agendamento.servicoNome}
+                            {agendamento.servicosNomes.join(', ')}
                           </Badge>
                           {isVencido && (
                             <Badge variant="destructive">Vencido</Badge>

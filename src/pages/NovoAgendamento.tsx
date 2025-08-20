@@ -36,7 +36,7 @@ export function NovoAgendamento() {
     profissionalId: user?.role === 'profissional' ? user.id : "",
     data: "",
     hora: "",
-    servicoId: "",
+    servicosIds: [] as string[],
     localId: "",
     observacoes: ""
   });
@@ -50,14 +50,25 @@ export function NovoAgendamento() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleServiceToggle = (servicoId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      servicosIds: prev.servicosIds.includes(servicoId)
+        ? prev.servicosIds.filter(id => id !== servicoId)
+        : [...prev.servicosIds, servicoId]
+    }));
+  };
+
   const getProfissionalNome = (profissionalId: string) => {
     const profissional = usuarios.find(u => u.id === profissionalId);
     return profissional?.nome || "";
   };
 
-  const getServicoNome = (servicoId: string) => {
-    const servico = servicos.find(s => s.id === servicoId);
-    return servico?.nome || "";
+  const getServicosNomes = (servicosIds: string[]) => {
+    return servicosIds.map(id => {
+      const servico = servicos.find(s => s.id === id);
+      return servico?.nome || "";
+    });
   };
 
   const getClienteNome = (clienteId: string) => {
@@ -73,7 +84,7 @@ export function NovoAgendamento() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || !formData.servicoId || !formData.localId) {
+    if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || formData.servicosIds.length === 0 || !formData.localId) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -107,8 +118,8 @@ export function NovoAgendamento() {
       profissionalNome: getProfissionalNome(formData.profissionalId),
       data: formData.data,
       hora: formData.hora,
-      servicoId: formData.servicoId,
-      servicoNome: getServicoNome(formData.servicoId),
+      servicosIds: formData.servicosIds,
+      servicosNomes: getServicosNomes(formData.servicosIds),
       localId: formData.localId,
       localNome: getLocalNome(formData.localId),
       status: 'agendado',
@@ -266,29 +277,50 @@ export function NovoAgendamento() {
               </div>
             </div>
 
-            {/* Serviço */}
+            {/* Serviços */}
             <div className="space-y-2">
-              <Label htmlFor="servicoId">Serviço *</Label>
-              <Select value={formData.servicoId} onValueChange={(value) => handleSelectChange('servicoId', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o serviço" />
-                </SelectTrigger>
-                <SelectContent>
-                  {servicosAtivos.map((servico) => (
-                    <SelectItem key={servico.id} value={servico.id}>
-                      {servico.nome} - {servico.tempoMinutos}min
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {formData.servicoId && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm font-medium text-foreground">
-                    Valor: R$ {servicosAtivos.find(s => s.id === formData.servicoId)?.valorParticular.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Duração: {servicosAtivos.find(s => s.id === formData.servicoId)?.tempoMinutos} minutos
-                  </p>
+              <Label>Serviços *</Label>
+              <div className="space-y-2">
+                {servicosAtivos.map((servico) => (
+                  <div key={servico.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+                    <input
+                      type="checkbox"
+                      id={`servico-${servico.id}`}
+                      checked={formData.servicosIds.includes(servico.id)}
+                      onChange={() => handleServiceToggle(servico.id)}
+                      className="w-4 h-4 text-primary bg-background border-gray-300 rounded focus:ring-primary"
+                    />
+                    <label htmlFor={`servico-${servico.id}`} className="flex-1 cursor-pointer">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">{servico.nome}</p>
+                          <p className="text-sm text-muted-foreground">{servico.tempoMinutos} minutos</p>
+                        </div>
+                        <p className="font-medium text-primary">R$ {servico.valorParticular.toFixed(2)}</p>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {formData.servicosIds.length > 0 && (
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm font-medium text-foreground">Total do Agendamento</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-lg font-bold text-primary">
+                      R$ {formData.servicosIds.reduce((total, id) => {
+                        const servico = servicosAtivos.find(s => s.id === id);
+                        return total + (servico?.valorParticular || 0);
+                      }, 0).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Duração total: {formData.servicosIds.reduce((total, id) => {
+                        const servico = servicosAtivos.find(s => s.id === id);
+                        return total + (servico?.tempoMinutos || 0);
+                      }, 0)} minutos
+                    </p>
+                  </div>
                 </div>
               )}
               {servicosAtivos.length === 0 && (

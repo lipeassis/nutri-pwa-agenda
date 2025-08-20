@@ -60,7 +60,7 @@ export function ReagendarModal({ agendamento, open, onOpenChange, onConfirm }: R
         <DialogHeader>
           <DialogTitle>Reagendar Consulta</DialogTitle>
           <DialogDescription>
-            Reagendar consulta de {agendamento.clienteNome} - {agendamento.servicoNome}
+            Reagendar consulta de {agendamento.clienteNome} - {agendamento.servicosNomes.join(', ')}
           </DialogDescription>
         </DialogHeader>
         

@@ -59,7 +59,7 @@ export function CancelarModal({ agendamento, open, onOpenChange, onConfirm }: Ca
             <Label>Dados do agendamento</Label>
             <div className="p-3 bg-muted rounded-lg space-y-1">
               <p className="font-medium">{agendamento.clienteNome}</p>
-              <p className="text-sm text-muted-foreground">{agendamento.servicoNome}</p>
+              <p className="text-sm text-muted-foreground">{agendamento.servicosNomes.join(', ')}</p>
               <p className="text-sm text-muted-foreground">
                 {format(new Date(agendamento.data), "dd/MM/yyyy", { locale: ptBR })} às {agendamento.hora}
               </p>
