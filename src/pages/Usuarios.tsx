@@ -11,8 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ConfiguracaoAgenda } from "@/components/usuarios/ConfiguracaoAgenda";
 import { useToast } from "@/hooks/use-toast";
 import { useDataSource } from "@/lib/apiMigration";
-import { UsuarioService } from "@/services/usuarioService";
-import { TipoProfissionalService } from "@/services/tipoProfissionalService";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -53,17 +51,23 @@ export function Usuarios() {
     try {
       if (editingUser) {
         // Editar usuário
+        const updateData = {
+          nome: formData.nome,
+          email: formData.email,
+          role: formData.role,
+          tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
+          disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
+          ...(formData.senha && { senha: formData.senha }) // Só incluir senha se foi preenchida
+        };
+
+        // Se usando localStorage
         const updatedUsers = usuarios.map(user =>
           user.id === editingUser.id
-            ? { 
-                ...user, 
-                ...formData,
-                tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
-                disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
-              }
+            ? { ...user, ...updateData }
             : user
         );
         setUsuarios(updatedUsers);
+
         toast({
           title: "Usuário atualizado",
           description: "As informações foram atualizadas com sucesso.",
@@ -80,17 +84,26 @@ export function Usuarios() {
           return;
         }
 
-        const newUser: Usuario = {
-          id: crypto.randomUUID(),
-          ...formData,
+        const createData = {
+          nome: formData.nome,
+          email: formData.email,
+          senha: formData.senha,
+          role: formData.role,
           tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
           disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
+        };
+
+        // Se usando localStorage
+        const newUser: Usuario = {
+          id: crypto.randomUUID(),
+          ...createData,
           ativo: true,
           criadoEm: new Date().toISOString()
         };
 
         const updatedUsers = [...usuarios, newUser];
         setUsuarios(updatedUsers);
+
         toast({
           title: "Usuário criado",
           description: "Novo usuário adicionado com sucesso.",
@@ -125,7 +138,7 @@ export function Usuarios() {
     setFormData({
       nome: user.nome,
       email: user.email,
-      senha: '',
+      senha: '', // Sempre vazio para edição
       role: user.role,
       tipoProfissionalId: user.tipoProfissionalId || '',
       disponibilidade: user.disponibilidade
@@ -135,8 +148,10 @@ export function Usuarios() {
 
   const handleDelete = async (userId: string) => {
     try {
+      // Se usando localStorage
       const updatedUsers = usuarios.filter(user => user.id !== userId);
       setUsuarios(updatedUsers);
+      
       toast({
         title: "Usuário removido",
         description: "O usuário foi removido do sistema.",
@@ -145,6 +160,27 @@ export function Usuarios() {
       toast({
         title: "Erro",
         description: error.message || "Erro ao excluir usuário",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleStatus = async (userId: string) => {
+    try {
+      // Se usando localStorage
+      const updatedUsers = usuarios.map(user =>
+        user.id === userId ? { ...user, ativo: !user.ativo } : user
+      );
+      setUsuarios(updatedUsers);
+      
+      toast({
+        title: "Status atualizado",
+        description: "O status do usuário foi alterado com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao alterar status",
         variant: "destructive",
       });
     }
