@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useDataSource } from "@/lib/apiMigration";
+import { ClinicaService } from "@/services/clinicaService";
 import { Building2, Plus, Edit, Trash2, MapPin, Phone, Mail } from "lucide-react";
 import { Clinica } from "@/types";
 

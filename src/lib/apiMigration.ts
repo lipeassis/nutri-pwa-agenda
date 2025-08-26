@@ -12,7 +12,16 @@ export const API_MIGRATION_CONFIG = {
     agendamentos: '/agendamentos', 
     consultas: '/consultas',
     usuarios: '/usuarios',
-    servicos: '/servicos'
+    servicos: '/servicos',
+    clinicas: '/clinicas',
+    convenios: '/convenios',
+    doencas: '/doencas',
+    alergias: '/alergias',
+    exameBioquimicos: '/exames-bioquimicos',
+    formulasMagistrais: '/formulas-magistrais',
+    alimentos: '/alimentos',
+    documentosPadrao: '/documentos-padrao',
+    dashboard: '/dashboard'
   }
 };
 

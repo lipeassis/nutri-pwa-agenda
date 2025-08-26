@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDataSource } from "@/lib/apiMigration";
+import { DocumentoPadraoService } from "@/services/documentoPadraoService";
 import { DocumentoPadrao } from "@/types";
 import { NovoDocumentoPadrao } from "@/components/documentos/NovoDocumentoPadrao";
 import { EditarDocumentoPadrao } from "@/components/documentos/EditarDocumentoPadrao";

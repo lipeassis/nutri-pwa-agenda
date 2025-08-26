@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ExameBioquimico, ValorReferencia } from '@/types';
 import { useDataSource } from "@/lib/apiMigration";
+import { ExameBioquimicoService } from "@/services/exameBioquimicoService";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

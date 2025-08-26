@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useDataSource } from "@/lib/apiMigration";
+import { DoencaService } from "@/services/doencaService";
+import { AlergiaService } from "@/services/alergiaService";
 import { Doenca, Alergia } from "@/types";
 import { Plus, Search, Edit, Trash2, FileText, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";

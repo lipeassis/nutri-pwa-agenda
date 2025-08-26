@@ -2,6 +2,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useDataSource } from "@/lib/apiMigration";
+import { DashboardService } from "@/services/dashboardService";
 import { Cliente, Agendamento } from "@/types";
 import { Users, Calendar, Clock, TrendingUp, Plus, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";

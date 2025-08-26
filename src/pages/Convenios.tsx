@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useDataSource } from "@/lib/apiMigration";
+import { ConvenioService } from "@/services/convenioService";
 import { Convenio } from "@/types";
 import { Plus, Search, Edit, Trash2, CreditCard, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";

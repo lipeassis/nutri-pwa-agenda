@@ -12,6 +12,7 @@ import { Trash2, Plus, Edit, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDataSource } from "@/lib/apiMigration";
+import { FormulaMagistralService } from "@/services/formulaMagistralService";
 import { FormulaMagistral, ComponenteFormula } from "@/types";
 
 export function FormulasMagistrais() {
