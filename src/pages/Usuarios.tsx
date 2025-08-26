@@ -33,12 +33,8 @@ const roleColors: Record<UserRole, string> = {
 };
 
 export function Usuarios() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>(() => {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-  });
-  const [tiposProfissionais, setTiposProfissionais] = useState<TipoProfissional[]>(() => {
-    return JSON.parse(localStorage.getItem(TIPOS_KEY) || '[]');
-  });
+  const { data: usuarios, setData: setUsuarios } = useDataSource<Usuario[]>(USERS_KEY, []);
+  const { data: tiposProfissionais } = useDataSource<TipoProfissional[]>(TIPOS_KEY, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [formData, setFormData] = useState({
@@ -52,7 +48,6 @@ export function Usuarios() {
   const { toast } = useToast();
 
   const saveUsers = (newUsers: Usuario[]) => {
-    localStorage.setItem(USERS_KEY, JSON.stringify(newUsers));
     setUsuarios(newUsers);
   };
 
