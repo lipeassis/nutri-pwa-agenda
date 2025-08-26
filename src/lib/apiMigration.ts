@@ -6,7 +6,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
  */
 
 export const API_MIGRATION_CONFIG = {
-  useApi: false, // Alterne para true quando estiver pronto para usar a API
+  useApi: true, // Alterne para true quando estiver pronto para usar a API
   endpoints: {
     clientes: '/clientes',
     agendamentos: '/agendamentos', 

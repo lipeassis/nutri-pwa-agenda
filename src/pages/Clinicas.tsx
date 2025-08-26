@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +14,29 @@ import { Building2, Plus, Edit, Trash2, MapPin, Phone, Mail } from "lucide-react
 import { Clinica } from "@/types";
 
 export function Clinicas() {
-  const { data: clinicas, setData: setClinicas } = useDataSource<Clinica[]>('nutriapp-clinicas', []);
+  //const { data: clinicas, setData: setClinicas } = useDataSource<Clinica[]>('nutriapp-clinicas', []);
+  //const clinicas = ClinicaService.getClinicas(); // Placeholder to avoid error, replace with actual data fetching logic
+  const [clinicas, setClinicas] = useState<Clinica[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClinica, setEditingClinica] = useState<Clinica | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Fetch clinicas from API or localStorage 
+    async function fetchClinicas() {
+      try {
+        const response = await ClinicaService.getClinicas();
+        setClinicas(response.data);
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar as clínicas",
+          variant: "destructive"
+        });
+      }
+    }
+    fetchClinicas();
+  }, []);
 
   const [formData, setFormData] = useState<Omit<Clinica, 'id' | 'criadoEm'>>({
     nome: '',
@@ -30,9 +49,9 @@ export function Clinicas() {
     ativo: true
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.nome.trim()) {
       toast({
         title: "Erro",
@@ -45,12 +64,13 @@ export function Clinicas() {
     try {
       if (editingClinica) {
         // Atualizar clínica existente
-        const updatedClinicas = clinicas.map(c => 
+        /*const updatedClinicas = clinicas.map(c => 
           c.id === editingClinica.id 
             ? { ...c, ...formData }
             : c
         );
-        setClinicas(updatedClinicas);
+        setClinicas(updatedClinicas);*/
+        await ClinicaService.updateClinica(editingClinica.id, formData); // Call API to update;
         toast({
           title: "Sucesso",
           description: "Clínica atualizada com sucesso"
@@ -62,7 +82,8 @@ export function Clinicas() {
           ...formData,
           criadoEm: new Date().toISOString()
         };
-        setClinicas([...clinicas, novaClinica]);
+        //setClinicas([...clinicas, novaClinica]);
+        await ClinicaService.createClinica(novaClinica); // Call API to create
         toast({
           title: "Sucesso",
           description: "Clínica cadastrada com sucesso"
@@ -106,13 +127,25 @@ export function Clinicas() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir esta clínica?")) {
-      setClinicas(clinicas.filter(c => c.id !== id));
-      toast({
-        title: "Sucesso",
-        description: "Clínica excluída com sucesso"
-      });
+      try {
+        //const updatedClinicas = clinicas.filter(c => c.id !== id);
+        //setClinicas(updatedClinicas);
+        await ClinicaService.deleteClinica(id); // Call API to delete
+        toast({
+          title: "Sucesso",
+          description: "Clínica excluída com sucesso"
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a clínica",
+          variant: "destructive"
+        });
+        return;
+      }
+
     }
   };
 
@@ -157,7 +190,7 @@ export function Clinicas() {
                 {editingClinica ? 'Editar Clínica' : 'Nova Clínica'}
               </DialogTitle>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
