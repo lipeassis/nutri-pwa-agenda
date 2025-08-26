@@ -164,6 +164,34 @@ export interface ConsultaProntuario {
   criadoEm: string;
 }
 
+export interface Consulta {
+  id: string;
+  clienteId: string;
+  profissionalId: string;
+  agendamentoId?: string;
+  data: string;
+  tipo: 'presencial' | 'online';
+  anamnese?: string;
+  exameFisico?: string;
+  diagnostico?: string;
+  conduta?: string;
+  observacoes?: string;
+  medidas?: {
+    peso?: number;
+    altura?: number;
+    circunferencias?: Record<string, number>;
+    pregas?: Record<string, number>;
+  };
+  exames?: Array<{
+    tipo: string;
+    resultado: string;
+    data: string;
+    arquivo?: string;
+  }>;
+  criadoEm: string;
+  atualizadoEm: string;
+}
+
 export interface ObjetivosCliente {
   id: string;
   clienteId: string;
