@@ -93,7 +93,7 @@ export default function CadastroAlimentos() {
     }
 
     const alimento: Alimento = {
-      id: editingAlimento?.id || Date.now().toString(),
+      id: editingAlimento?.id || crypto.randomUUID(),
       nome: formData.nome,
       categoria: formData.categoria,
       unidadeMedida: formData.unidadeMedida,

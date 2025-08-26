@@ -77,7 +77,7 @@ export function LocaisAtendimento() {
     } else {
       // Criar novo local
       const novoLocal: LocalAtendimento = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         nome: formData.nome.trim(),
         endereco: formData.endereco.trim(),
         telefone: formData.telefone.trim(),

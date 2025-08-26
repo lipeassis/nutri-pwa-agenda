@@ -83,7 +83,7 @@ export function Doencas() {
       toast({ title: "Doença atualizada com sucesso!" });
     } else {
       const novaDoenca: Doenca = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         nome: formDataDoenca.nome,
         resumo: formDataDoenca.resumo,
         protocoloNutricional: formDataDoenca.protocoloNutricional,
@@ -128,7 +128,7 @@ export function Doencas() {
       toast({ title: "Alergia atualizada com sucesso!" });
     } else {
       const novaAlergia: Alergia = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         nome: formDataAlergia.nome,
         descricao: formDataAlergia.descricao,
         severidade: formDataAlergia.severidade,

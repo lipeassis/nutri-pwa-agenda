@@ -58,7 +58,7 @@ export default function ExamesBioquimicos() {
     }
 
     const exame: ExameBioquimico = {
-      id: editingExame?.id || Date.now().toString(),
+      id: editingExame?.id || crypto.randomUUID(),
       nome: formData.nome,
       descricao: formData.descricao,
       valoresReferencia: formData.valoresReferencia,

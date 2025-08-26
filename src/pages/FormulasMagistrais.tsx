@@ -52,7 +52,7 @@ export function FormulasMagistrais() {
   const adicionarComponente = () => {
     if (novoComponente.nome && novoComponente.dosagem) {
       const componente: ComponenteFormula = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         nome: novoComponente.nome,
         dosagem: novoComponente.dosagem,
         unidade: novoComponente.unidade
@@ -79,7 +79,7 @@ export function FormulasMagistrais() {
     }
 
     const formula: FormulaMagistral = {
-      id: formulaEditando?.id || Date.now().toString(),
+      id: formulaEditando?.id || crypto.randomUUID(),
       nome,
       componentes,
       posologia,

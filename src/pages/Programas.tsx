@@ -83,7 +83,7 @@ export function Programas() {
     }
 
     const programa: ProgramaNutricional = {
-      id: editingPrograma?.id || Date.now().toString(),
+      id: editingPrograma?.id || crypto.randomUUID(),
       nome: formData.nome.trim(),
       descricao: formData.descricao.trim(),
       duracao: formData.duracao,

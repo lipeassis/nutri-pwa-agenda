@@ -149,7 +149,7 @@ export function PlanejamentosPadrao() {
       });
     } else {
       const novoPlanejamento: PlanejamentoPadrao = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         ...formData,
         tags,
         kcalTotal: Math.round(totais.kcal),
@@ -208,7 +208,7 @@ export function PlanejamentosPadrao() {
   const duplicarPlano = (plano: PlanejamentoPadrao) => {
     const planoDuplicado: PlanejamentoPadrao = {
       ...plano,
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       nome: `${plano.nome} (Cópia)`,
       criadoEm: new Date().toISOString(),
       criadoPor: 'user',
@@ -258,7 +258,7 @@ export function PlanejamentosPadrao() {
     }
 
     const novaRefeicao: Refeicao = {
-      id: editingMeal ? editingMeal.refeicao.id : Date.now().toString(),
+      id: editingMeal ? editingMeal.refeicao.id : crypto.randomUUID(),
       nome: mealForm.nome,
       horario: mealForm.horario,
       alimentos: mealForm.alimentos

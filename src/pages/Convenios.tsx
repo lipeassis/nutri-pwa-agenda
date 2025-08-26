@@ -83,7 +83,7 @@ export function Convenios() {
       toast({ title: "Convênio atualizado com sucesso!" });
     } else {
       const novoConvenio: Convenio = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         nome: formData.nome,
         descricao: formData.descricao,
         percentualDesconto,
