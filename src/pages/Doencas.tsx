@@ -7,15 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
 import { Doenca, Alergia } from "@/types";
 import { Plus, Search, Edit, Trash2, FileText, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function Doencas() {
   const { toast } = useToast();
-  const [doencas, setDoencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
-  const [alergias, setAlergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
+  const { data: doencas, setData: setDoencas } = useDataSource<Doenca[]>('nutriapp-doencas', []);
+  const { data: alergias, setData: setAlergias } = useDataSource<Alergia[]>('nutriapp-alergias', []);
   const [searchTerm, setSearchTerm] = useState("");
   const [showNovaDoenca, setShowNovaDoenca] = useState(false);
   const [showNovaAlergia, setShowNovaAlergia] = useState(false);
