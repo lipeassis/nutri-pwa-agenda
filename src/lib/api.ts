@@ -1,3 +1,5 @@
+import { create, ApisauceInstance, ApiResponse as ApisauceResponse } from 'apisauce';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 export interface ApiResponse<T> {
@@ -27,84 +29,91 @@ export class ApiError extends Error {
 }
 
 class ApiClient {
-  private baseURL: string;
+  private api: ApisauceInstance;
 
   constructor(baseURL: string) {
-    this.baseURL = baseURL;
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const config: RequestInit = {
+    this.api = create({
+      baseURL,
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
       },
-      ...options,
-    };
+      timeout: 10000,
+    });
 
-    // Add auth token if available
-    const token = localStorage.getItem('auth-token');
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
+    // Add auth token interceptor
+    this.api.addRequestTransform((request) => {
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        request.headers = {
+          ...request.headers,
+          Authorization: `Bearer ${token}`,
+        };
+      }
+    });
 
-    try {
-      const response = await fetch(url, config);
-      
+    // Add response transform to handle errors
+    this.api.addResponseTransform((response) => {
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = response.data as any;
         throw new ApiError(
-          errorData.message || 'Erro na requisição',
-          response.status,
-          errorData.code
+          errorData?.message || 'Erro na requisição',
+          response.status || 0,
+          errorData?.code
         );
       }
+    });
+  }
 
-      return await response.json();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError('Erro de conexão', 0);
+  private handleResponse<T>(response: ApisauceResponse<T>): T {
+    if (!response.ok) {
+      const errorData = response.data as any;
+      throw new ApiError(
+        errorData?.message || response.problem || 'Erro na requisição',
+        response.status || 0,
+        errorData?.code
+      );
     }
+
+    return response.data as T;
   }
 
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
-    const url = params ? `${endpoint}?${new URLSearchParams(params)}` : endpoint;
-    return this.request<T>(url, { method: 'GET' });
+    const response = await this.api.get<T>(endpoint, params);
+    return this.handleResponse(response);
   }
 
   async post<T>(endpoint: string, data?: any): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-    });
+    const response = await this.api.post<T>(endpoint, data);
+    return this.handleResponse(response);
   }
 
   async put<T>(endpoint: string, data?: any): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-    });
+    const response = await this.api.put<T>(endpoint, data);
+    return this.handleResponse(response);
   }
 
   async patch<T>(endpoint: string, data?: any): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
-    });
+    const response = await this.api.patch<T>(endpoint, data);
+    return this.handleResponse(response);
   }
 
   async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    const response = await this.api.delete<T>(endpoint);
+    return this.handleResponse(response);
+  }
+
+  // Método para obter a instância do apisauce (para configurações avançadas)
+  getApiInstance() {
+    return this.api;
+  }
+
+  // Método para adicionar interceptors customizados
+  addRequestTransform(transform: (request: any) => void) {
+    this.api.addRequestTransform(transform);
+  }
+
+  addResponseTransform(transform: (response: any) => void) {
+    this.api.addResponseTransform(transform);
   }
 }
 
