@@ -1,7 +1,7 @@
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
 import { Cliente, Agendamento } from "@/types";
 import { Users, Calendar, Clock, TrendingUp, Plus, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -9,8 +9,8 @@ import { format, isToday, isTomorrow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function Dashboard() {
-  const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
-  const [agendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
+  const { data: clientes } = useDataSource<Cliente[]>('nutriapp-clientes', []);
+  const { data: agendamentos } = useDataSource<Agendamento[]>('nutriapp-agendamentos', []);
 
   const hoje = new Date().toISOString().split('T')[0];
   const agendamentosHoje = agendamentos.filter(ag => ag.data === hoje);

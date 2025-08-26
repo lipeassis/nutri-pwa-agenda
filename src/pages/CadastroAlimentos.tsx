@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alimento, InformacaoNutricional } from '@/types';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useDataSource } from '@/lib/apiMigration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,7 +37,7 @@ const unidadesMedida = [
 
 export default function CadastroAlimentos() {
   const { hasPermission } = useAuth();
-  const [alimentos, setAlimentos] = useLocalStorage<Alimento[]>(STORAGE_KEY, []);
+  const { data: alimentos, setData: setAlimentos } = useDataSource<Alimento[]>(STORAGE_KEY, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAlimento, setEditingAlimento] = useState<Alimento | null>(null);
   const [formData, setFormData] = useState({

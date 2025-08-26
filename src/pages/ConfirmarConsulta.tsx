@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
 import { Agendamento } from "@/types";
 import { Calendar, Clock, User, MapPin, Phone, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
@@ -15,7 +15,7 @@ export function ConfirmarConsulta() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [agendamentos, setAgendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
+  const { data: agendamentos, setData: setAgendamentos } = useDataSource<Agendamento[]>('nutriapp-agendamentos', []);
   const [agendamento, setAgendamento] = useState<Agendamento | null>(null);
   const [loading, setLoading] = useState(true);
   const [processando, setProcessando] = useState(false);

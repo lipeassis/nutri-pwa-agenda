@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
 import { DocumentoPadrao } from "@/types";
 import { NovoDocumentoPadrao } from "@/components/documentos/NovoDocumentoPadrao";
 import { EditarDocumentoPadrao } from "@/components/documentos/EditarDocumentoPadrao";
 import { VisualizarDocumentoPadrao } from "@/components/documentos/VisualizarDocumentoPadrao";
 
 export default function DocumentosPadrao() {
-  const [documentos] = useLocalStorage<DocumentoPadrao[]>('nutriapp-documentos-padrao', []);
+  const { data: documentos } = useDataSource<DocumentoPadrao[]>('nutriapp-documentos-padrao', []);
   const [filtro, setFiltro] = useState("");
   const [showNovoModal, setShowNovoModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);

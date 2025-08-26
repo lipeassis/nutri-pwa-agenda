@@ -8,12 +8,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
 import { Building2, Plus, Edit, Trash2, MapPin, Phone, Mail } from "lucide-react";
 import { Clinica } from "@/types";
 
 export function Clinicas() {
-  const [clinicas, setClinicas] = useLocalStorage<Clinica[]>('nutriapp-clinicas', []);
+  const { data: clinicas, setData: setClinicas } = useDataSource<Clinica[]>('nutriapp-clinicas', []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClinica, setEditingClinica] = useState<Clinica | null>(null);
   const { toast } = useToast();
