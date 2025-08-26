@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
 import { Convenio } from "@/types";
 import { Plus, Search, Edit, Trash2, CreditCard, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ import { ptBR } from "date-fns/locale";
 
 export function Convenios() {
   const { toast } = useToast();
-  const [convenios, setConvenios] = useLocalStorage<Convenio[]>('nutriapp-convenios', []);
+  const { data: convenios, setData: setConvenios } = useDataSource<Convenio[]>('nutriapp-convenios', []);
   const [searchTerm, setSearchTerm] = useState("");
   const [showNovoConvenio, setShowNovoConvenio] = useState(false);
   const [editingConvenio, setEditingConvenio] = useState<Convenio | null>(null);
