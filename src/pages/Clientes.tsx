@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDataSource } from "@/lib/apiMigration";
 import { useClientes } from "@/hooks/api/useClientes";
 import { Cliente, ConsultaProntuario, ClientePrograma, Familia, ClienteFamilia } from "@/types";
@@ -14,11 +13,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function Clientes() {
-  const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
-  const [consultas] = useLocalStorage<ConsultaProntuario[]>('nutriapp-consultas', []);
-  const [clienteProgramas] = useLocalStorage<ClientePrograma[]>('nutriapp-cliente-programas', []);
-  const [familias] = useLocalStorage<Familia[]>('nutriapp-familias', []);
-  const [clienteFamilias] = useLocalStorage<ClienteFamilia[]>('nutriapp-cliente-familias', []);
+  const { data: clientes } = useDataSource<Cliente[]>('nutriapp-clientes', []);
+  const { data: consultas } = useDataSource<ConsultaProntuario[]>('nutriapp-consultas', []);
+  const { data: clienteProgramas } = useDataSource<ClientePrograma[]>('nutriapp-cliente-programas', []);
+  const { data: familias } = useDataSource<Familia[]>('nutriapp-familias', []);
+  const { data: clienteFamilias } = useDataSource<ClienteFamilia[]>('nutriapp-cliente-familias', []);
   const [busca, setBusca] = useState("");
   const [showVincularPrograma, setShowVincularPrograma] = useState(false);
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
