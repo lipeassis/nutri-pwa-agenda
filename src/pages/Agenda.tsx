@@ -8,6 +8,8 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
+import { useAgendamentos } from "@/hooks/api/useAgendamentos";
 import { Agendamento } from "@/types";
 import { Search, Plus, Calendar, Clock, User, Filter, CalendarDays, CalendarIcon, List, Edit3, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -18,7 +20,7 @@ import { ReagendarModal } from "@/components/agenda/ReagendarModal";
 import { CancelarModal } from "@/components/agenda/CancelarModal";
 
 export function Agenda() {
-  const [agendamentos, setAgendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
+  const [agendamentosLocal, setAgendamentosLocal] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
@@ -29,6 +31,9 @@ export function Agenda() {
   const [reagendarModalOpen, setReagendarModalOpen] = useState(false);
   const [cancelarModalOpen, setCancelarModalOpen] = useState(false);
   const [agendamentoSelecionado, setAgendamentoSelecionado] = useState<Agendamento | null>(null);
+
+  // Usar localStorage por enquanto (pode ser alterado para API)
+  const agendamentos = agendamentosLocal;
 
   const agendamentosFiltrados = agendamentos
     .filter(agendamento => {
@@ -99,7 +104,7 @@ export function Agenda() {
   };
 
   const reagendarAgendamento = (agendamentoId: string, novaData: string, novoHorario: string) => {
-    setAgendamentos(agendamentos.map(ag => 
+    setAgendamentosLocal(agendamentos.map(ag => 
       ag.id === agendamentoId 
         ? { ...ag, data: novaData, hora: novoHorario }
         : ag
@@ -107,7 +112,7 @@ export function Agenda() {
   };
 
   const cancelarAgendamento = (agendamentoId: string, motivo?: string) => {
-    setAgendamentos(agendamentos.map(ag => 
+    setAgendamentosLocal(agendamentos.map(ag => 
       ag.id === agendamentoId 
         ? { ...ag, status: 'cancelado', observacoes: motivo ? `Cancelado: ${motivo}` : ag.observacoes }
         : ag
@@ -115,7 +120,7 @@ export function Agenda() {
   };
 
   const marcarComoRealizado = (agendamentoId: string) => {
-    setAgendamentos(agendamentos.map(ag => 
+    setAgendamentosLocal(agendamentos.map(ag => 
       ag.id === agendamentoId 
         ? { ...ag, status: 'realizado' }
         : ag

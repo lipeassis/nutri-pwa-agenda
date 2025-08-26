@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useAgendamentos } from "@/hooks/api/useAgendamentos";
+import { useServicosAtivos } from "@/hooks/api/useServicos";
+import { useIsApiMode } from "@/lib/apiMigration";
 import { Cliente, Agendamento, Usuario, TipoProfissional, Servico, LocalAtendimento } from "@/types";
 import { ArrowLeft, Save, Calendar } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -19,6 +22,10 @@ export function NovoAgendamento() {
   const [searchParams] = useSearchParams();
   const clienteIdParam = searchParams.get('clienteId');
   
+  const isApiMode = useIsApiMode();
+  const { createAgendamento } = useAgendamentos();
+  const { servicos: servicosApi, loading: loadingServicos } = useServicosAtivos();
+  
   const [clientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [agendamentos, setAgendamentos] = useLocalStorage<Agendamento[]>('nutriapp-agendamentos', []);
   const [usuarios] = useLocalStorage<Usuario[]>('system_users', []);
@@ -26,9 +33,11 @@ export function NovoAgendamento() {
   const [servicos] = useLocalStorage<Servico[]>('nutriapp-servicos', []);
   const [locais] = useLocalStorage<LocalAtendimento[]>('nutriapp-locais', []);
   
+  // Usar API ou localStorage dependendo do modo
+  const servicosAtivos = isApiMode ? servicosApi : servicos.filter(s => s.ativo);
+  
   // Filtrar apenas profissionais ativos
   const profissionais = usuarios.filter(u => u.role === 'profissional' && u.ativo);
-  const servicosAtivos = servicos.filter(s => s.ativo);
   const locaisAtivos = locais.filter(l => l.ativo);
   
   const [formData, setFormData] = useState({
@@ -81,7 +90,7 @@ export function NovoAgendamento() {
     return local?.nome || "";
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.clienteId || !formData.profissionalId || !formData.data || !formData.hora || formData.servicosIds.length === 0 || !formData.localId) {
@@ -110,31 +119,50 @@ export function NovoAgendamento() {
       return;
     }
 
-    const novoAgendamento: Agendamento = {
-      id: Date.now().toString(),
-      clienteId: formData.clienteId,
-      clienteNome: getClienteNome(formData.clienteId),
-      profissionalId: formData.profissionalId,
-      profissionalNome: getProfissionalNome(formData.profissionalId),
-      data: formData.data,
-      hora: formData.hora,
-      servicosIds: formData.servicosIds,
-      servicosNomes: getServicosNomes(formData.servicosIds),
-      localId: formData.localId,
-      localNome: getLocalNome(formData.localId),
-      status: 'agendado',
-      observacoes: formData.observacoes,
-      criadoEm: new Date().toISOString()
-    };
+    try {
+      if (isApiMode) {
+        // Usar API
+        await createAgendamento({
+          clienteId: formData.clienteId,
+          profissionalId: formData.profissionalId,
+          servicosIds: formData.servicosIds,
+          data: formData.data,
+          horario: formData.hora,
+          tipo: 'presencial', // Ajustar conforme necessário
+          localId: formData.localId,
+          observacoes: formData.observacoes
+        });
+      } else {
+        // Usar localStorage (modo atual)
+        const novoAgendamento: Agendamento = {
+          id: Date.now().toString(),
+          clienteId: formData.clienteId,
+          clienteNome: getClienteNome(formData.clienteId),
+          profissionalId: formData.profissionalId,
+          profissionalNome: getProfissionalNome(formData.profissionalId),
+          data: formData.data,
+          hora: formData.hora,
+          servicosIds: formData.servicosIds,
+          servicosNomes: getServicosNomes(formData.servicosIds),
+          localId: formData.localId,
+          localNome: getLocalNome(formData.localId),
+          status: 'agendado',
+          observacoes: formData.observacoes,
+          criadoEm: new Date().toISOString()
+        };
 
-    setAgendamentos(prev => [...prev, novoAgendamento]);
-    
-    toast({
-      title: "Agendamento criado!",
-      description: `Agendamento para ${getClienteNome(formData.clienteId)} com ${getProfissionalNome(formData.profissionalId)} foi criado com sucesso.`,
-    });
+        setAgendamentos(prev => [...prev, novoAgendamento]);
+      }
+      
+      toast({
+        title: "Agendamento criado!",
+        description: `Agendamento para ${getClienteNome(formData.clienteId)} com ${getProfissionalNome(formData.profissionalId)} foi criado com sucesso.`,
+      });
 
-    navigate("/agenda");
+      navigate("/agenda");
+    } catch (error) {
+      // Erro já tratado pelo hook useAgendamentos
+    }
   };
 
   // Gerar horários disponíveis (8h às 18h, de 30 em 30 minutos)

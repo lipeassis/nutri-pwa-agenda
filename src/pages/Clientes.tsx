@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
+import { useClientes } from "@/hooks/api/useClientes";
 import { Cliente, ConsultaProntuario, ClientePrograma, Familia, ClienteFamilia } from "@/types";
 import { Search, Plus, User, Phone, Mail, Calendar, FileText, Star, Users } from "lucide-react";
 import { VincularPrograma } from "@/components/prontuario/VincularPrograma";

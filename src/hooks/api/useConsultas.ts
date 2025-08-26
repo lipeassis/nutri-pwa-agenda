@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { ConsultaService, ConsultaFilters, CreateConsultaData, UpdateConsultaData } from '@/services/consultaService';
 import { Consulta } from '@/types';
 import { ApiError } from '@/lib/api';

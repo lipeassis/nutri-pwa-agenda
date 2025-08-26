@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { AuthService, LoginData, RegisterData, ChangePasswordData, UpdateProfileData } from '@/services/authService';
 import { Usuario } from '@/types';
 import { ApiError } from '@/lib/api';

@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useClientes } from "@/hooks/api/useClientes";
+import { useIsApiMode } from "@/lib/apiMigration";
 import { Cliente, Doenca, Alergia, Familia, ClienteFamilia } from "@/types";
 import { ArrowLeft, Save, User, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 export function NovoCliente() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isApiMode = useIsApiMode();
+  const { createCliente } = useClientes();
   const [clientes, setClientes] = useLocalStorage<Cliente[]>('nutriapp-clientes', []);
   const [doencas] = useLocalStorage<Doenca[]>('nutriapp-doencas', []);
   const [alergias] = useLocalStorage<Alergia[]>('nutriapp-alergias', []);
@@ -38,7 +42,7 @@ export function NovoCliente() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.nome || !formData.email || !formData.telefone) {
@@ -50,41 +54,57 @@ export function NovoCliente() {
       return;
     }
 
-    const novoCliente: Cliente = {
-      id: Date.now().toString(),
-      nome: formData.nome,
-      email: formData.email,
-      telefone: formData.telefone,
-      dataNascimento: formData.dataNascimento,
-      objetivos: formData.objetivos,
-      observacoes: formData.observacoes,
-      anotacoes: [],
-      doencasIds: selectedDoencas,
-      alergiasIds: selectedAlergias,
-      criadoEm: new Date().toISOString()
-    };
+    try {
+      if (isApiMode) {
+        // Usar API
+        await createCliente({
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          dataNascimento: formData.dataNascimento,
+          observacoes: formData.observacoes
+        });
+      } else {
+        // Usar localStorage (modo atual)
+        const novoCliente: Cliente = {
+          id: Date.now().toString(),
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          dataNascimento: formData.dataNascimento,
+          objetivos: formData.objetivos,
+          observacoes: formData.observacoes,
+          anotacoes: [],
+          doencasIds: selectedDoencas,
+          alergiasIds: selectedAlergias,
+          criadoEm: new Date().toISOString()
+        };
 
-    setClientes(prev => [...prev, novoCliente]);
+        setClientes(prev => [...prev, novoCliente]);
 
-    // Vincular cliente às famílias selecionadas
-    if (selectedFamilias.length > 0) {
-      const novasVinculacoes = selectedFamilias.map(familiaId => ({
-        id: (Date.now() + Math.random()).toString(),
-        clienteId: novoCliente.id,
-        familiaId,
-        parentesco: '',
-        ativo: true,
-        criadoEm: new Date().toISOString()
-      }));
-      setClienteFamilias(prev => [...prev, ...novasVinculacoes]);
+        // Vincular cliente às famílias selecionadas
+        if (selectedFamilias.length > 0) {
+          const novasVinculacoes = selectedFamilias.map(familiaId => ({
+            id: (Date.now() + Math.random()).toString(),
+            clienteId: novoCliente.id,
+            familiaId,
+            parentesco: '',
+            ativo: true,
+            criadoEm: new Date().toISOString()
+          }));
+          setClienteFamilias(prev => [...prev, ...novasVinculacoes]);
+        }
+      }
+      
+      toast({
+        title: "Cliente cadastrado!",
+        description: `${formData.nome} foi cadastrado com sucesso.`,
+      });
+
+      navigate("/clientes");
+    } catch (error) {
+      // Erro já tratado pelo hook useClientes
     }
-    
-    toast({
-      title: "Cliente cadastrado!",
-      description: `${formData.nome} foi cadastrado com sucesso.`,
-    });
-
-    navigate("/clientes");
   };
 
   return (
