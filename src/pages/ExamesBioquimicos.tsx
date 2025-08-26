@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ExameBioquimico, ValorReferencia } from '@/types';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useDataSource } from "@/lib/apiMigration";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,7 @@ const STORAGE_KEY = 'exames_bioquimicos';
 
 export default function ExamesBioquimicos() {
   const { hasPermission } = useAuth();
-  const [exames, setExames] = useLocalStorage<ExameBioquimico[]>(STORAGE_KEY, []);
+  const { data: exames, setData: setExames } = useDataSource<ExameBioquimico[]>(STORAGE_KEY, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExame, setEditingExame] = useState<ExameBioquimico | null>(null);
   const [formData, setFormData] = useState({
