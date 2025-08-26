@@ -7,14 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
+import { LocalAtendimentoService } from "@/services/localAtendimentoService";
 import { LocalAtendimento } from "@/types";
 import { Plus, Edit, Trash2, MapPin, Phone, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function LocaisAtendimento() {
   const { toast } = useToast();
-  const [locais, setLocais] = useLocalStorage<LocalAtendimento[]>('nutriapp-locais', []);
+  const { data: locais, setData: setLocais } = useDataSource<LocalAtendimento[]>('nutriapp-locais', []);
   const [localEditando, setLocalEditando] = useState<LocalAtendimento | null>(null);
   const [showDialog, setShowDialog] = useState(false);
 

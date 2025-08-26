@@ -7,14 +7,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
+import { ProgramaService } from "@/services/programaService";
 import { useToast } from "@/hooks/use-toast";
 import { ProgramaNutricional } from "@/types";
 import { Plus, Edit, Trash2, Star, Target, Clock, DollarSign, CheckCircle, XCircle } from "lucide-react";
 
 export function Programas() {
   const { toast } = useToast();
-  const [programas, setProgramas] = useLocalStorage<ProgramaNutricional[]>('nutriapp-programas', []);
+  const { data: programas, setData: setProgramas } = useDataSource<ProgramaNutricional[]>('nutriapp-programas', []);
   const [showModal, setShowModal] = useState(false);
   const [editingPrograma, setEditingPrograma] = useState<ProgramaNutricional | null>(null);
   const [formData, setFormData] = useState({

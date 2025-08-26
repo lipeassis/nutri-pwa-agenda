@@ -21,7 +21,11 @@ export const API_MIGRATION_CONFIG = {
     formulasMagistrais: '/formulas-magistrais',
     alimentos: '/alimentos',
     documentosPadrao: '/documentos-padrao',
-    dashboard: '/dashboard'
+    dashboard: '/dashboard',
+    tiposProfissionais: '/tipos-profissionais',
+    locaisAtendimento: '/locais-atendimento',
+    programas: '/programas',
+    planejamentosPadrao: '/planejamentos-padrao'
   }
 };
 

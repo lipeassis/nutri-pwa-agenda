@@ -9,31 +9,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useDataSource } from "@/lib/apiMigration";
+import { TipoProfissionalService } from "@/services/tipoProfissionalService";
 import { Plus, Edit, Trash2, Briefcase } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const TIPOS_KEY = 'tipos_profissionais';
 
 export function TiposProfissionais() {
-  const [tipos, setTipos] = useState<TipoProfissional[]>(() => {
-    const stored = localStorage.getItem(TIPOS_KEY);
-    return stored ? JSON.parse(stored) : [
-      {
-        id: '1',
-        nome: 'Nutricionista',
-        descricao: 'Profissional especializado em nutrição e alimentação',
-        ativo: true,
-        criadoEm: new Date().toISOString()
-      },
-      {
-        id: '2',
-        nome: 'Psicólogo',
-        descricao: 'Profissional especializado em saúde mental',
-        ativo: true,
-        criadoEm: new Date().toISOString()
-      }
-    ];
-  });
+  const { data: tipos, setData: setTipos } = useDataSource<TipoProfissional[]>(TIPOS_KEY, [
+    {
+      id: '1',
+      nome: 'Nutricionista',
+      descricao: 'Profissional especializado em nutrição e alimentação',
+      ativo: true,
+      criadoEm: new Date().toISOString()
+    },
+    {
+      id: '2',
+      nome: 'Psicólogo',
+      descricao: 'Profissional especializado em saúde mental',
+      ativo: true,
+      criadoEm: new Date().toISOString()
+    }
+  ]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTipo, setEditingTipo] = useState<TipoProfissional | null>(null);
   const [formData, setFormData] = useState({

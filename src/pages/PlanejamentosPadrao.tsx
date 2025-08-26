@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDataSource } from "@/lib/apiMigration";
+import { PlanejamentoPadraoService } from "@/services/planejamentoPadraoService";
+import { AlimentoService } from "@/services/alimentoService";
 import { PlanejamentoPadrao, Alimento, Refeicao, AlimentoRefeicao } from "@/types";
 import { Plus, Edit, Trash2, ChefHat, Clock, Apple, Search, Tag, Copy, Eye, Calculator, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -16,8 +18,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function PlanejamentosPadrao() {
   const { toast } = useToast();
-  const [planejamentosPadrao, setPlanejamentosPadrao] = useLocalStorage<PlanejamentoPadrao[]>('nutriapp-planejamentos-padrao', []);
-  const [alimentos] = useLocalStorage<Alimento[]>('alimentos_cadastrados', []);
+  const { data: planejamentosPadrao, setData: setPlanejamentosPadrao } = useDataSource<PlanejamentoPadrao[]>('nutriapp-planejamentos-padrao', []);
+  const { data: alimentos } = useDataSource<Alimento[]>('alimentos_cadastrados', []);
 
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState<PlanejamentoPadrao | null>(null);
