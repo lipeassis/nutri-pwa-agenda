@@ -37,6 +37,7 @@ export function Usuarios() {
   const { data: tiposProfissionais } = useDataSource<TipoProfissional[]>(TIPOS_KEY, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -45,59 +46,78 @@ export function Usuarios() {
     tipoProfissionalId: '',
     disponibilidade: undefined as DisponibilidadePorLocal | undefined
   });
-  const { toast } = useToast();
 
-  const saveUsers = (newUsers: Usuario[]) => {
-    setUsuarios(newUsers);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editingUser) {
-      // Editar usuário
-      const updatedUsers = usuarios.map(user =>
-        user.id === editingUser.id
-          ? { ...user, ...formData }
-          : user
-      );
-      saveUsers(updatedUsers);
-      toast({
-        title: "Usuário atualizado",
-        description: "As informações foram atualizadas com sucesso.",
-      });
-    } else {
-      // Criar novo usuário
-      const emailExists = usuarios.some(user => user.email === formData.email);
-      if (emailExists) {
+    try {
+      if (editingUser) {
+        // Editar usuário
+        const updatedUsers = usuarios.map(user =>
+          user.id === editingUser.id
+            ? { 
+                ...user, 
+                ...formData,
+                tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
+                disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
+              }
+            : user
+        );
+        setUsuarios(updatedUsers);
         toast({
-          title: "Erro",
-          description: "Já existe um usuário com este email.",
-          variant: "destructive",
+          title: "Usuário atualizado",
+          description: "As informações foram atualizadas com sucesso.",
         });
-        return;
+      } else {
+        // Criar novo usuário
+        const emailExists = usuarios.some(user => user.email === formData.email);
+        if (emailExists) {
+          toast({
+            title: "Erro",
+            description: "Já existe um usuário com este email.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const newUser: Usuario = {
+          id: crypto.randomUUID(),
+          ...formData,
+          tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
+          disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
+          ativo: true,
+          criadoEm: new Date().toISOString()
+        };
+
+        const updatedUsers = [...usuarios, newUser];
+        setUsuarios(updatedUsers);
+        toast({
+          title: "Usuário criado",
+          description: "Novo usuário adicionado com sucesso.",
+        });
       }
 
-      const newUser: Usuario = {
-        id: Date.now().toString(),
-        ...formData,
-        tipoProfissionalId: formData.role === 'profissional' ? formData.tipoProfissionalId : undefined,
-        disponibilidade: formData.role === 'profissional' ? formData.disponibilidade : undefined,
-        ativo: true,
-        criadoEm: new Date().toISOString()
-      };
-
-      const updatedUsers = [...usuarios, newUser];
-      saveUsers(updatedUsers);
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error: any) {
       toast({
-        title: "Usuário criado",
-        description: "Novo usuário adicionado com sucesso.",
+        title: "Erro",
+        description: error.message || "Erro ao salvar usuário",
+        variant: "destructive",
       });
     }
+  };
 
-    setIsDialogOpen(false);
+  const resetForm = () => {
+    setFormData({ 
+      nome: '', 
+      email: '', 
+      senha: '', 
+      role: 'secretaria', 
+      tipoProfissionalId: '', 
+      disponibilidade: undefined 
+    });
     setEditingUser(null);
-    setFormData({ nome: '', email: '', senha: '', role: 'secretaria', tipoProfissionalId: '', disponibilidade: undefined });
   };
 
   const handleEdit = (user: Usuario) => {
@@ -105,7 +125,7 @@ export function Usuarios() {
     setFormData({
       nome: user.nome,
       email: user.email,
-      senha: user.senha,
+      senha: '',
       role: user.role,
       tipoProfissionalId: user.tipoProfissionalId || '',
       disponibilidade: user.disponibilidade
@@ -113,18 +133,25 @@ export function Usuarios() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (userId: string) => {
-    const updatedUsers = usuarios.filter(user => user.id !== userId);
-    saveUsers(updatedUsers);
-    toast({
-      title: "Usuário removido",
-      description: "O usuário foi removido do sistema.",
-    });
+  const handleDelete = async (userId: string) => {
+    try {
+      const updatedUsers = usuarios.filter(user => user.id !== userId);
+      setUsuarios(updatedUsers);
+      toast({
+        title: "Usuário removido",
+        description: "O usuário foi removido do sistema.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao excluir usuário",
+        variant: "destructive",
+      });
+    }
   };
 
   const openNewUserDialog = () => {
-    setEditingUser(null);
-    setFormData({ nome: '', email: '', senha: '', role: 'secretaria', tipoProfissionalId: '', disponibilidade: undefined });
+    resetForm();
     setIsDialogOpen(true);
   };
 
