@@ -10,8 +10,8 @@ import { ptBR } from 'date-fns/locale';
 
 export function RelatoriosAgendamentos() {
   const [periodoMeses, setPeriodoMeses] = useState<number>(6);
-  const [profissionalSelecionado, setProfissionalSelecionado] = useState<string>('');
-  const [localSelecionado, setLocalSelecionado] = useState<string>('');
+  const [profissionalSelecionado, setProfissionalSelecionado] = useState<string>('todos');
+  const [localSelecionado, setLocalSelecionado] = useState<string>('todos');
 
   const { data: agendamentos } = useDataSource<Agendamento[]>('nutriapp-agendamentos', []);
   const { data: usuarios } = useDataSource<Usuario[]>('nutriapp-usuarios', []);
@@ -30,11 +30,11 @@ export function RelatoriosAgendamentos() {
       return isWithinInterval(dataAgendamento, { start: dataLimite, end: agora });
     });
 
-    if (profissionalSelecionado) {
+    if (profissionalSelecionado && profissionalSelecionado !== 'todos') {
       agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.profissionalId === profissionalSelecionado);
     }
 
-    if (localSelecionado) {
+    if (localSelecionado && localSelecionado !== 'todos') {
       agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.localId === localSelecionado);
     }
 
@@ -152,7 +152,7 @@ export function RelatoriosAgendamentos() {
               <SelectValue placeholder="Todos os profissionais" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os profissionais</SelectItem>
+              <SelectItem value="todos">Todos os profissionais</SelectItem>
               {profissionais.map(prof => (
                 <SelectItem key={prof.id} value={prof.id}>{prof.nome}</SelectItem>
               ))}
@@ -164,7 +164,7 @@ export function RelatoriosAgendamentos() {
               <SelectValue placeholder="Todos os locais" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os locais</SelectItem>
+              <SelectItem value="todos">Todos os locais</SelectItem>
               {locais.map(local => (
                 <SelectItem key={local.id} value={local.id}>{local.nome}</SelectItem>
               ))}

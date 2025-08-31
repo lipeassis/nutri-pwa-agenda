@@ -10,7 +10,7 @@ import { ptBR } from 'date-fns/locale';
 
 export function RelatoriosOperacionais() {
   const [periodoMeses, setPeriodoMeses] = useState<number>(6);
-  const [localSelecionado, setLocalSelecionado] = useState<string>('');
+  const [localSelecionado, setLocalSelecionado] = useState<string>('todos');
 
   const { data: agendamentos } = useDataSource<Agendamento[]>('nutriapp-agendamentos', []);
   const { data: usuarios } = useDataSource<Usuario[]>('nutriapp-usuarios', []);
@@ -29,7 +29,7 @@ export function RelatoriosOperacionais() {
       return isWithinInterval(dataAg, { start: dataLimite, end: agora });
     });
 
-    if (localSelecionado) {
+    if (localSelecionado && localSelecionado !== 'todos') {
       agendamentosFiltrados = agendamentosFiltrados.filter(ag => ag.localId === localSelecionado);
     }
 
@@ -190,7 +190,7 @@ export function RelatoriosOperacionais() {
               <SelectValue placeholder="Todos os locais" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os locais</SelectItem>
+              <SelectItem value="todos">Todos os locais</SelectItem>
               {locais.map(local => (
                 <SelectItem key={local.id} value={local.id}>{local.nome}</SelectItem>
               ))}

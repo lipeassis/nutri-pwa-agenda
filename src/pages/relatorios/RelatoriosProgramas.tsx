@@ -10,7 +10,7 @@ import { ptBR } from 'date-fns/locale';
 
 export function RelatoriosProgramas() {
   const [periodoMeses, setPeriodoMeses] = useState<number>(12);
-  const [programaSelecionado, setProgramaSelecionado] = useState<string>('');
+  const [programaSelecionado, setProgramaSelecionado] = useState<string>('todos');
 
   const { data: programas } = useDataSource<ProgramaNutricional[]>('nutriapp-programas', []);
   const { data: clientesProgramas } = useDataSource<ClientePrograma[]>('nutriapp-cliente-programas', []);
@@ -26,7 +26,7 @@ export function RelatoriosProgramas() {
       return isWithinInterval(dataInicio, { start: dataLimite, end: agora });
     });
 
-    if (programaSelecionado) {
+    if (programaSelecionado && programaSelecionado !== 'todos') {
       clientesProgramasFiltrados = clientesProgramasFiltrados.filter(cp => cp.programaId === programaSelecionado);
     }
 
@@ -140,7 +140,7 @@ export function RelatoriosProgramas() {
               <SelectValue placeholder="Todos os programas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os programas</SelectItem>
+              <SelectItem value="todos">Todos os programas</SelectItem>
               {programas.map(programa => (
                 <SelectItem key={programa.id} value={programa.id}>{programa.nome}</SelectItem>
               ))}
