@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical, Building2, FilePlus, ChefHat } from "lucide-react";
+import { Calendar, Users, Home, Menu, LogOut, UserCog, X, TestTube, CreditCard, FileText, Settings, Wrench, TrendingUp, Apple, User, Lock, ChevronDown, Star, FlaskConical, Building2, FilePlus, ChefHat, BarChart3 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -29,6 +29,14 @@ export function Navigation({ className }: NavigationProps) {
     { href: "/agenda", icon: Calendar, label: "Agenda", roles: ['secretaria', 'profissional', 'administrador'] },
     { href: "/financeiro", icon: TrendingUp, label: "Financeiro", roles: ['profissional', 'administrador'] },
   ].filter(item => hasPermission(item.roles as any));
+
+  const relatoriosItems = [
+    { href: "/relatorios/clientes", label: "Clientes" },
+    { href: "/relatorios/agendamentos", label: "Agendamentos" },
+    { href: "/relatorios/financeiro", label: "Financeiro" },
+    { href: "/relatorios/programas", label: "Programas" },
+    { href: "/relatorios/operacionais", label: "Operacionais" },
+  ];
 
   const adminItems = [
     { href: "/tipos-profissionais", icon: UserCog, label: "Tipos de Profissionais" },
@@ -71,6 +79,36 @@ export function Navigation({ className }: NavigationProps) {
                     </Link>
                   </NavigationMenuItem>
                 ))}
+
+                {hasPermission(['administrador', 'profissional']) && (
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Relatórios
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="w-80 p-4 bg-background border border-border rounded-md shadow-lg">
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Relatórios Disponíveis</h4>
+                          {relatoriosItems.map((item) => (
+                            <Link key={item.href} to={item.href}>
+                              <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                    <BarChart3 className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <div className="font-medium text-sm">{item.label}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
                 
                 {hasPermission(['administrador', 'profissional']) && (
                   <NavigationMenuItem>

@@ -32,6 +32,11 @@ import { ConfirmacaoSucesso } from "./pages/ConfirmacaoSucesso";
 import DocumentosPadrao from "./pages/DocumentosPadrao";
 import { PlanejamentosPadrao } from "./pages/PlanejamentosPadrao";
 import { Clinicas } from "./pages/Clinicas";
+import { RelatoriosClientes } from "./pages/relatorios/RelatoriosClientes";
+import { RelatoriosAgendamentos } from "./pages/relatorios/RelatoriosAgendamentos";
+import { RelatoriosFinanceiro } from "./pages/relatorios/RelatoriosFinanceiro";
+import { RelatoriosProgramas } from "./pages/relatorios/RelatoriosProgramas";
+import { RelatoriosOperacionais } from "./pages/relatorios/RelatoriosOperacionais";
 import NotFound from "./pages/NotFound";
 import 'react-quill/dist/quill.snow.css'; // ou 'bubble.css'
 
@@ -161,6 +166,31 @@ const App = () => (
                    <Route path="/trocar-senha" element={
                      <ProtectedRoute>
                        <TrocarSenha />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/relatorios/clientes" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <RelatoriosClientes />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/relatorios/agendamentos" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <RelatoriosAgendamentos />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/relatorios/financeiro" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <RelatoriosFinanceiro />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/relatorios/programas" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <RelatoriosProgramas />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/relatorios/operacionais" element={
+                     <ProtectedRoute requiredRole={['administrador', 'profissional']}>
+                       <RelatoriosOperacionais />
                      </ProtectedRoute>
                    } />
                    <Route path="*" element={<NotFound />} />
