@@ -87,9 +87,10 @@ export function Navigation({ className }: NavigationProps) {
                       Relatórios
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="w-80 p-4 bg-background border border-border rounded-md shadow-lg">
+                      <div className="w-[600px] p-4 bg-background border border-border rounded-md shadow-lg">
                         <div className="space-y-3">
                           <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Relatórios Disponíveis</h4>
+                          <div className="grid grid-cols-3 gap-6">
                           {relatoriosItems.map((item) => (
                             <Link key={item.href} to={item.href}>
                               <div className="group block p-3 rounded-lg hover:bg-accent/50 transition-colors">
@@ -103,7 +104,9 @@ export function Navigation({ className }: NavigationProps) {
                                 </div>
                               </div>
                             </Link>
+
                           ))}
+                          </div>
                         </div>
                       </div>
                     </NavigationMenuContent>
